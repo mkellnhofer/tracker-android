@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Tracker</string>
+
+    <string name="locations_empty">No Locations.</string>
+
+    <string name="message_gps_permissions">App has no GPS permissions!</string>
+
+    <string name="title_dialog_create">Create location</string>
+
+    <string name="action_create">Create</string>
+    <string name="action_cancel">Cancel</string>
+
+    <string name="hint_name">Name</string>
+
+</resources>

@@ -1,0 +1,28 @@
+# Gradle files
+/.gradle/
+
+# IntelliJ project files
+/.idea/caches/
+/.idea/libraries/
+/.idea/gradle.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/runConfigurations.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
+*.iml
+
+# Build files
+/app/.externalNativeBuild/
+/app/build/
+/build/
+
+# Android Studio captures folder
+/captures/
+
+# Local configuration file
+/local.properties
+
+# OS-specific files
+.DS_Store
+Thumbs.db
