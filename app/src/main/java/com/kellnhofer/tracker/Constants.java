@@ -5,6 +5,7 @@ import android.Manifest;
 public interface Constants {
 
     String DATE_FORMAT_UI = "yyyy-MM-dd - HH:mm";
+    String DATE_FORMAT_API = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     String DATE_FORMAT_SERVICE = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     String DATE_FORMAT_DB = "yyyy-MM-dd HH:mm:ss";
 

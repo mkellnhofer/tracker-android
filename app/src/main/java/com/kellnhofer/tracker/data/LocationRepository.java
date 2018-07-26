@@ -58,6 +58,11 @@ public class LocationRepository {
 
     // --- Query methods ---
 
+    @Nullable
+    public Location getLocationByRemoteId(long id) {
+        return mDataSource.getLocationByRemoteId(id);
+    }
+
     public List<Location> getNotDeletedLocations() {
         return mDataSource.getNotDeletedLocations();
     }

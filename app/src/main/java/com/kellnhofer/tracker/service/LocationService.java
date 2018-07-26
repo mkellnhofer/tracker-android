@@ -11,7 +11,7 @@ import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.util.DateUtils;
 
-public class LocationService extends Service {
+public class LocationService extends Service implements LocationSync.Callback {
 
     private static final String LOG_TAG = LocationService.class.getSimpleName();
 
@@ -36,6 +36,8 @@ public class LocationService extends Service {
     private TrackerApplication mApplication;
 
     private LocationRepository mRepository;
+
+    private LocationSync mLocationSync = null;
 
     @Override
     public void onCreate() {
@@ -141,7 +143,24 @@ public class LocationService extends Service {
     }
 
     private void executeSync() {
-        // TODO!!!
+        if (mLocationSync != null) {
+            return;
+        }
+        mLocationSync = new LocationSync(mApplication);
+        mLocationSync.setCallback(this);
+        mLocationSync.execute();
+    }
+
+    // --- Sync callbacks ---
+
+    @Override
+    public void onSyncSuccess() {
+        mLocationSync = null;
+    }
+
+    @Override
+    public void onSyncError(LocationError error) {
+        mLocationSync = null;
     }
 
     // --- Helper methods ---

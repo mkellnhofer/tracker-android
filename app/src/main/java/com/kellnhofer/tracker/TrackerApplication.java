@@ -5,25 +5,105 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
 
+import java.lang.reflect.Type;
+
+import com.facebook.stetho.Stetho;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.kellnhofer.tracker.data.DbHelper;
+import com.kellnhofer.tracker.rest.LocationApi;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class TrackerApplication extends Application {
 
     private static final String LOG_TAG = TrackerApplication.class.getSimpleName();
 
+    private static final String SERVER_URL = "http://192.168.178.41:8080";
+
+    private TrackerStates mStates;
+
     private DbHelper mDbHelper;
+
+    private OkHttpClient mOkHttpClient;
+    private Gson mGson;
+    private Retrofit mRetrofit;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        mStates = new TrackerStates(this);
+
         initData();
+
+        initStetho();
+
+        initOkHttp();
+        initGson();
+        initRetrofit();
     }
 
     private void initData() {
         Log.d(LOG_TAG, "Init data.");
 
         mDbHelper = new DbHelper(this);
+    }
+
+    private void initStetho() {
+        if (BuildConfig.DEBUG) {
+            Stetho.initializeWithDefaults(this);
+        }
+    }
+
+    private void initOkHttp() {
+        Log.d(LOG_TAG, "Init OkHttp.");
+
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (BuildConfig.DEBUG) {
+            builder.addNetworkInterceptor(new StethoInterceptor());
+        }
+        mOkHttpClient = builder.build();
+    }
+
+    private void initGson() {
+        Log.d(LOG_TAG, "Init Gson.");
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Void.class, new JsonDeserializer<Void>() {
+            @Override
+            public Void deserialize(JsonElement json, Type type,
+                                    JsonDeserializationContext context)
+                    throws JsonParseException {
+                return null;
+            }
+        });
+        gsonBuilder.setDateFormat(Constants.DATE_FORMAT_API);
+        mGson = gsonBuilder.create();
+    }
+
+    private void initRetrofit() {
+        Log.d(LOG_TAG, "Init Retrofit.");
+
+        mRetrofit = new Retrofit.Builder()
+                .baseUrl(SERVER_URL)
+                .client(mOkHttpClient)
+                .addConverterFactory(GsonConverterFactory.create(mGson))
+                .build();
+    }
+
+    public TrackerStates getStates() {
+        return mStates;
+    }
+
+    public LocationApi getLocationApi() {
+        return mRetrofit.create(LocationApi.class);
     }
 
     // --- Helper methods ---

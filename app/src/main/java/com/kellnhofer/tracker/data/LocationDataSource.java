@@ -79,6 +79,22 @@ public class LocationDataSource {
 
     // --- Query methods ---
 
+    @Nullable
+    public Location getLocationByRemoteId(long id) {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(LocationEntry.TABLE, LocationEntry.PROJECTION_ALL,
+                LocationEntry.COLUMN_REMOTE_ID + " = ?", new String[]{Long.toString(id)}, null,
+                null, null);
+
+        Location location = createLocationFromCursor(cursor);
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return location;
+    }
+
     public List<Location> getNotDeletedLocations() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor = db.query(LocationEntry.TABLE,
