@@ -99,7 +99,7 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
 
     @Override
     public void onLocationClick(Location location) {
-        // TODO: Open activity to edit location
+        mPresenter.startViewActivity(location.getId());
     }
 
     // --- Presenter callback methods ---

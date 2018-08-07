@@ -15,23 +15,25 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.kellnhofer.tracker.R;
-import com.kellnhofer.tracker.presenter.CreateContract;
+import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.presenter.ViewContract;
 
-public class CreateFragment extends Fragment implements OnMapReadyCallback, CreateContract.Observer {
-
-    private static final String LOG_TAG = CreateFragment.class.getSimpleName();
+public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewContract.Observer {
 
     private static final String STATE_MAP_VIEW = "map_view";
-    private static final String STATE_MAP_VIEW_ZOOMED_IN = "map_view_zoomed_in";
+    private static final String STATE_MAP_VIEW_INITIALIZED = "map_view_initialized";
 
-    private CreateActivity mActivity;
-    private CreateContract.Presenter mPresenter;
+    public static final String BUNDLE_KEY_LOCATION_ID = "location_id";
+
+    private ViewActivity mActivity;
+    private ViewContract.Presenter mPresenter;
 
     private MapView mMapView;
-    private GoogleMap mMap;
-    private boolean mMapZoomedIn = false;
+    private boolean mMapInitialized = false;
 
-    public void setPresenter(@NonNull CreateContract.Presenter presenter) {
+    private long mLocationId;
+
+    public void setPresenter(@NonNull ViewContract.Presenter presenter) {
         mPresenter = presenter;
     }
 
@@ -40,27 +42,34 @@ public class CreateFragment extends Fragment implements OnMapReadyCallback, Crea
         super.onAttach(context);
 
         try {
-            mActivity = (CreateActivity) context;
+            mActivity = (ViewActivity) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
-                    + " must implement " + CreateActivity.class.getName());
+                    + " must implement " + ViewActivity.class.getName());
         }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle arguments = getArguments();
+        if (arguments == null || !arguments.containsKey(BUNDLE_KEY_LOCATION_ID)) {
+            throw new IllegalStateException("Extras '" + BUNDLE_KEY_LOCATION_ID
+                    + "' must be provided!");
+        }
+        mLocationId = arguments.getLong(BUNDLE_KEY_LOCATION_ID);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_create, container, false);
+        View view = inflater.inflate(R.layout.fragment_view, container, false);
 
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(STATE_MAP_VIEW);
-            mMapZoomedIn = savedInstanceState.getBoolean(STATE_MAP_VIEW_ZOOMED_IN);
+            mMapInitialized = savedInstanceState.getBoolean(STATE_MAP_VIEW_INITIALIZED);
         }
 
         mMapView = (MapView) view.findViewById(R.id.map);
@@ -92,7 +101,6 @@ public class CreateFragment extends Fragment implements OnMapReadyCallback, Crea
 
         mPresenter.removeObserver(this);
 
-        mMap = null;
         mMapView.onPause();
     }
 
@@ -108,7 +116,7 @@ public class CreateFragment extends Fragment implements OnMapReadyCallback, Crea
         mMapView.onSaveInstanceState(mapViewBundle);
 
         outState.putBundle(STATE_MAP_VIEW, mapViewBundle);
-        outState.putBoolean(STATE_MAP_VIEW_ZOOMED_IN, mMapZoomedIn);
+        outState.putBoolean(STATE_MAP_VIEW_INITIALIZED, mMapInitialized);
     }
 
     @Override
@@ -133,28 +141,18 @@ public class CreateFragment extends Fragment implements OnMapReadyCallback, Crea
 
     @Override
     public void onMapReady(GoogleMap map) {
-        mMap = map;
-    }
-
-    // --- Presenter callback methods ---
-
-    @Override
-    public void onGpsLocationChanged(android.location.Location location) {
-        if (mMap == null) {
+        if (mMapInitialized) {
             return;
         }
 
+        Location location = mPresenter.getLocation(mLocationId);
+
         LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
 
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(pos));
+        map.addMarker(new MarkerOptions().position(pos));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14));
 
-        if (!mMapZoomedIn) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14));
-            mMapZoomedIn = true;
-        }
-
-        mActivity.onLocationChanged();
+        mMapInitialized = true;
     }
 
 }

@@ -21,7 +21,7 @@ public interface LocationsContract {
         void deleteLocation(long locationId);
 
         void startCreateActivity();
-        void startViewActivity();
+        void startViewActivity(long locationId);
     }
 
     interface Observer {

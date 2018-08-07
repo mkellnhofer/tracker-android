@@ -33,6 +33,11 @@
             android:parentActivityName=".view.LocationsActivity">
         </activity>
 
+        <activity
+            android:name=".view.ViewActivity"
+            android:parentActivityName=".view.LocationsActivity">
+        </activity>
+
         <service android:name=".service.LocationService" />
 
     </application>

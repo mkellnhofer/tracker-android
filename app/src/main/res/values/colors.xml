@@ -5,8 +5,10 @@
     <color name="color_primary_dark">#357e38</color>
     <color name="color_accent">#d50000</color>
 
-    <color name="color_text">#333333</color>
-    <color name="color_icon">#8A8A8A</color>
+    <color name="color_text_dark">#333333</color>
+    <color name="color_text_light">#FFFFFF</color>
+    <color name="color_icon_dark">#8A8A8A</color>
+    <color name="color_icon_light">#FFFFFF</color>
 
     <color name="fab_bg_color_disabled">#8A8A8A</color>
 

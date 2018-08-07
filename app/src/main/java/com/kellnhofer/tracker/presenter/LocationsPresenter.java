@@ -13,6 +13,7 @@ import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.view.CreateActivity;
+import com.kellnhofer.tracker.view.ViewActivity;
 
 public class LocationsPresenter implements LocationsContract.Presenter,
         LocationServiceAdapter.Listener, LocationRepository.LocationRepositoryObserver {
@@ -96,8 +97,9 @@ public class LocationsPresenter implements LocationsContract.Presenter,
     }
 
     @Override
-    public void startViewActivity() {
-        Intent intent = new Intent(mContext, CreateActivity.class);
+    public void startViewActivity(long locationId) {
+        Intent intent = new Intent(mContext, ViewActivity.class);
+        intent.putExtra(ViewActivity.EXTRA_LOCATION_ID, locationId);
         mContext.startActivity(intent);
     }
 

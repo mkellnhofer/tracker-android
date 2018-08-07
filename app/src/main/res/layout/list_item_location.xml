@@ -17,7 +17,7 @@
         android:layout_alignParentLeft="true"
         android:text="Regensburg"
         android:textSize="18sp"
-        android:textColor="@color/color_text" />
+        android:textColor="@color/color_text_dark" />
 
     <TextView
         android:id="@+id/info"
