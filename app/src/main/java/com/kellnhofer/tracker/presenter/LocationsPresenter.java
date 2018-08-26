@@ -12,7 +12,7 @@ import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
-import com.kellnhofer.tracker.view.CreateActivity;
+import com.kellnhofer.tracker.view.CreateEditActivity;
 import com.kellnhofer.tracker.view.ViewActivity;
 
 public class LocationsPresenter implements LocationsContract.Presenter,
@@ -92,7 +92,7 @@ public class LocationsPresenter implements LocationsContract.Presenter,
 
     @Override
     public void startCreateActivity() {
-        Intent intent = new Intent(mContext, CreateActivity.class);
+        Intent intent = new Intent(mContext, CreateEditActivity.class);
         mContext.startActivity(intent);
     }
 

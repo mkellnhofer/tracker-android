@@ -12,7 +12,16 @@
         android:id="@+id/view_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:inputType="text"
         android:hint="@string/hint_name" />
+
+    <EditText
+        android:id="@+id/view_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/view_name"
+        android:inputType="datetime"
+        android:hint="@string/hint_date" />
 
 </RelativeLayout>

@@ -21,7 +21,6 @@ import com.kellnhofer.tracker.presenter.ViewContract;
 public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewContract.Observer {
 
     private static final String STATE_MAP_VIEW = "map_view";
-    private static final String STATE_MAP_VIEW_INITIALIZED = "map_view_initialized";
 
     public static final String BUNDLE_KEY_LOCATION_ID = "location_id";
 
@@ -29,7 +28,6 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
     private ViewContract.Presenter mPresenter;
 
     private MapView mMapView;
-    private boolean mMapInitialized = false;
 
     private long mLocationId;
 
@@ -69,7 +67,6 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(STATE_MAP_VIEW);
-            mMapInitialized = savedInstanceState.getBoolean(STATE_MAP_VIEW_INITIALIZED);
         }
 
         mMapView = (MapView) view.findViewById(R.id.map);
@@ -116,7 +113,6 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
         mMapView.onSaveInstanceState(mapViewBundle);
 
         outState.putBundle(STATE_MAP_VIEW, mapViewBundle);
-        outState.putBoolean(STATE_MAP_VIEW_INITIALIZED, mMapInitialized);
     }
 
     @Override
@@ -141,18 +137,13 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
 
     @Override
     public void onMapReady(GoogleMap map) {
-        if (mMapInitialized) {
-            return;
-        }
-
         Location location = mPresenter.getLocation(mLocationId);
 
         LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
 
+        map.clear();
         map.addMarker(new MarkerOptions().position(pos));
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14));
-
-        mMapInitialized = true;
     }
 
 }

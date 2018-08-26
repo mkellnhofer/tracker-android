@@ -10,28 +10,37 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.kellnhofer.tracker.R;
-import com.kellnhofer.tracker.presenter.CreateContract;
+import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.presenter.CreateEditContract;
+import com.kellnhofer.tracker.presenter.LatLng;
 
-public class CreateFragment extends Fragment implements OnMapReadyCallback, CreateContract.Observer {
+public class CreateEditFragment extends Fragment implements OnMapReadyCallback, OnMapClickListener,
+        CreateEditContract.Observer {
 
-    private static final String LOG_TAG = CreateFragment.class.getSimpleName();
+    private static final String LOG_TAG = CreateEditFragment.class.getSimpleName();
 
     private static final String STATE_MAP_VIEW = "map_view";
-    private static final String STATE_MAP_VIEW_ZOOMED_IN = "map_view_zoomed_in";
+    private static final String STATE_MAP_VIEW_INITIALIZED = "map_view_initialized";
+    private static final String STATE_MAP_VIEW_CENTERED = "map_view_centered";
 
-    private CreateActivity mActivity;
-    private CreateContract.Presenter mPresenter;
+    public static final String BUNDLE_KEY_LOCATION_ID = "location_id";
+
+    private CreateEditActivity mActivity;
+    private CreateEditContract.Presenter mPresenter;
 
     private MapView mMapView;
     private GoogleMap mMap;
-    private boolean mMapZoomedIn = false;
+    private boolean mMapInitialized = false;
+    private boolean mMapCentered = false;
 
-    public void setPresenter(@NonNull CreateContract.Presenter presenter) {
+    private long mLocationId;
+
+    public void setPresenter(@NonNull CreateEditContract.Presenter presenter) {
         mPresenter = presenter;
     }
 
@@ -40,27 +49,31 @@ public class CreateFragment extends Fragment implements OnMapReadyCallback, Crea
         super.onAttach(context);
 
         try {
-            mActivity = (CreateActivity) context;
+            mActivity = (CreateEditActivity) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
-                    + " must implement " + CreateActivity.class.getName());
+                    + " must implement " + CreateEditActivity.class.getName());
         }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle arguments = getArguments();
+        mLocationId = arguments.getLong(BUNDLE_KEY_LOCATION_ID);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_create, container, false);
+        View view = inflater.inflate(R.layout.fragment_create_edit, container, false);
 
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(STATE_MAP_VIEW);
-            mMapZoomedIn = savedInstanceState.getBoolean(STATE_MAP_VIEW_ZOOMED_IN);
+            mMapInitialized = savedInstanceState.getBoolean(STATE_MAP_VIEW_INITIALIZED);
+            mMapCentered = savedInstanceState.getBoolean(STATE_MAP_VIEW_CENTERED);
         }
 
         mMapView = (MapView) view.findViewById(R.id.map);
@@ -108,7 +121,8 @@ public class CreateFragment extends Fragment implements OnMapReadyCallback, Crea
         mMapView.onSaveInstanceState(mapViewBundle);
 
         outState.putBundle(STATE_MAP_VIEW, mapViewBundle);
-        outState.putBoolean(STATE_MAP_VIEW_ZOOMED_IN, mMapZoomedIn);
+        outState.putBoolean(STATE_MAP_VIEW_INITIALIZED, mMapInitialized);
+        outState.putBoolean(STATE_MAP_VIEW_CENTERED, mMapCentered);
     }
 
     @Override
@@ -134,27 +148,73 @@ public class CreateFragment extends Fragment implements OnMapReadyCallback, Crea
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
+
+        map.setOnMapClickListener(this);
+
+        if (mMapInitialized) {
+            return;
+        }
+
+        if (mLocationId == 0L) {
+            return;
+        }
+
+        Location location = mPresenter.getLocation(mLocationId);
+
+        com.google.android.gms.maps.model.LatLng pos = new com.google.android.gms.maps.model.LatLng(
+                location.getLatitude(), location.getLongitude());
+
+        map.addMarker(new MarkerOptions().position(pos));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14));
+
+        mMapInitialized = true;
+        mMapCentered = true;
+    }
+
+    @Override
+    public void onMapClick(com.google.android.gms.maps.model.LatLng pos) {
+        if (mMap == null) {
+            return;
+        }
+
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(pos));
+
+        mActivity.onMapLocationClicked(new LatLng(pos.latitude, pos.longitude));
+    }
+
+    // --- Activity methods ---
+
+    public void recenterMap() {
+        mMapCentered = false;
     }
 
     // --- Presenter callback methods ---
 
     @Override
-    public void onGpsLocationChanged(android.location.Location location) {
+    public void onGpsLocationChanged(LatLng latLng) {
         if (mMap == null) {
             return;
         }
 
-        LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
+        com.google.android.gms.maps.model.LatLng pos = new com.google.android.gms.maps.model.LatLng(
+                latLng.lat, latLng.lng);
 
         mMap.clear();
         mMap.addMarker(new MarkerOptions().position(pos));
 
-        if (!mMapZoomedIn) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14));
-            mMapZoomedIn = true;
+        if (mMapInitialized && mMapCentered) {
+            return;
         }
 
-        mActivity.onLocationChanged();
+        if (!mMapInitialized) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14));
+        } else {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
+        }
+
+        mMapInitialized = true;
+        mMapCentered = true;
     }
 
 }

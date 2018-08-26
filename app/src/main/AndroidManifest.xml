@@ -29,7 +29,7 @@
         </activity>
 
         <activity
-            android:name=".view.CreateActivity"
+            android:name=".view.CreateEditActivity"
             android:parentActivityName=".view.LocationsActivity">
         </activity>
 

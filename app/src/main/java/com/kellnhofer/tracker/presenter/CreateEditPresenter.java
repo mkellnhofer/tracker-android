@@ -11,42 +11,46 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.kellnhofer.tracker.TrackerApplication;
+import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 
-public class CreatePresenter implements CreateContract.Presenter,
+public class CreateEditPresenter implements CreateEditContract.Presenter,
         LocationServiceAdapter.Listener, LocationListener {
 
-    private static final String LOG_TAG = CreatePresenter.class.getSimpleName();
+    private static final String LOG_TAG = CreateEditPresenter.class.getSimpleName();
 
     private Context mContext;
     private TrackerApplication mApplication;
 
-    private List<CreateContract.Observer> mObservers = new ArrayList<>();
+    private List<CreateEditContract.Observer> mObservers = new ArrayList<>();
 
+    private LocationRepository mRepository;
     private LocationServiceAdapter mService;
 
     private LocationManager mLocationManager;
     private android.location.Location mGpsLocation;
 
-    public CreatePresenter(Context context, LocationServiceAdapter locationService) {
+    public CreateEditPresenter(Context context, LocationRepository locationRepository,
+            LocationServiceAdapter locationService) {
         mContext = context;
         mApplication = (TrackerApplication) context.getApplicationContext();
 
+        mRepository = locationRepository;
         mService = locationService;
 
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
     @Override
-    public void addObserver(CreateContract.Observer observer) {
+    public void addObserver(CreateEditContract.Observer observer) {
         if (!mObservers.contains(observer)) {
             mObservers.add(observer);
         }
     }
 
     @Override
-    public void removeObserver(CreateContract.Observer observer) {
+    public void removeObserver(CreateEditContract.Observer observer) {
         if (mObservers.contains(observer)) {
             mObservers.remove(observer);
         }
@@ -55,8 +59,6 @@ public class CreatePresenter implements CreateContract.Presenter,
     @Override
     public void onResume() {
         mService.addListener(this);
-
-        initGpsLocationManager();
     }
 
     @Override
@@ -66,12 +68,23 @@ public class CreatePresenter implements CreateContract.Presenter,
     }
 
     @Override
+    public Location getLocation(long locationId) {
+        return mRepository.getLocation(locationId);
+    }
+
+    @Override
     public void createLocation(Location location) {
         mService.createLocation(location);
     }
 
+    @Override
+    public void updateLocation(Location location) {
+        mService.createLocation(location);
+    }
+
     @SuppressLint("MissingPermission")
-    public void initGpsLocationManager() {
+    @Override
+    public void requestGpsLocationUpdates() {
         if (mApplication.hasGpsPermissions()) {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
@@ -79,8 +92,13 @@ public class CreatePresenter implements CreateContract.Presenter,
     }
 
     @Override
-    public android.location.Location getGpsLocation() {
-        return mGpsLocation;
+    public void removeGpsLocationUpdates() {
+        mLocationManager.removeUpdates(this);
+    }
+
+    @Override
+    public LatLng getGpsLocation() {
+        return new LatLng(mGpsLocation.getLatitude(), mGpsLocation.getLongitude());
     }
 
     // --- Service callback methods ---
@@ -103,8 +121,8 @@ public class CreatePresenter implements CreateContract.Presenter,
 
         mGpsLocation = location;
 
-        for (CreateContract.Observer observer : mObservers) {
-            observer.onGpsLocationChanged(location);
+        for (CreateEditContract.Observer observer : mObservers) {
+            observer.onGpsLocationChanged(new LatLng(location.getLatitude(), location.getLongitude()));
         }
     }
 

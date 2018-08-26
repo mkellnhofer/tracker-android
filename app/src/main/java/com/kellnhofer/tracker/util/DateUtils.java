@@ -22,6 +22,9 @@ public class DateUtils {
     }
 
     public static Date fromUiFormat(String date) {
+        if (!date.matches(Constants.DATE_VALIDATOR_UI)) {
+            throw new RuntimeException("Invalid UI date string!");
+        }
         try {
             DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_UI, Locale.getDefault());
             df.setTimeZone(TimeZone.getDefault());

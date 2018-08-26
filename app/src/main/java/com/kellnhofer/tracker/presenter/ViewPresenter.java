@@ -1,6 +1,7 @@
 package com.kellnhofer.tracker.presenter;
 
 import android.content.Context;
+import android.content.Intent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.view.CreateEditActivity;
 
 public class ViewPresenter implements ViewContract.Presenter {
 
@@ -56,7 +58,9 @@ public class ViewPresenter implements ViewContract.Presenter {
 
     @Override
     public void startEditActivity(long locationId) {
-
+        Intent intent = new Intent(mContext, CreateEditActivity.class);
+        intent.putExtra(CreateEditActivity.EXTRA_LOCATION_ID, locationId);
+        mContext.startActivity(intent);
     }
 
 }

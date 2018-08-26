@@ -9,6 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.Date;
+
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.TrackerApplication;
@@ -26,6 +28,8 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     private TrackerApplication mApplication;
     private ViewContract.Presenter mPresenter;
 
+    private TextView mNameTextView;
+    private TextView mDateTextView;
     private FloatingActionButton mFab;
     private ViewFragment mFragment;
 
@@ -45,18 +49,12 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         }
         mLocationId = intent.getLongExtra(EXTRA_LOCATION_ID, 0L);
 
-        Location location = mPresenter.getLocation(mLocationId);
-
         setContentView(R.layout.activity_view);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        if (savedInstanceState == null) {
-            TextView textViewName = (TextView) toolbar.findViewById(R.id.view_location_name);
-            textViewName.setText(location.getName());
-            TextView textViewDate = (TextView) toolbar.findViewById(R.id.view_location_date);
-            textViewDate.setText(DateUtils.toUiFormat(location.getDate()));
-        }
+        mNameTextView = (TextView) toolbar.findViewById(R.id.view_location_name);
+        mDateTextView = (TextView) toolbar.findViewById(R.id.view_location_date);
 
         setSupportActionBar(toolbar);
 
@@ -95,6 +93,9 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     protected void onResume() {
         super.onResume();
 
+        Location location = mPresenter.getLocation(mLocationId);
+        updateToolbar(location.getName(), location.getDate());
+
         mPresenter.addObserver(this);
         mPresenter.onResume();
     }
@@ -107,9 +108,13 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         mPresenter.removeObserver(this);
     }
 
+    private void updateToolbar(String name, Date date) {
+        mNameTextView.setText(name);
+        mDateTextView.setText(DateUtils.toUiFormat(date));
+    }
+
     private void onFabClicked() {
         mPresenter.startEditActivity(mLocationId);
-        finish();
     }
 
 }

@@ -2,7 +2,7 @@ package com.kellnhofer.tracker.presenter;
 
 import com.kellnhofer.tracker.model.Location;
 
-public interface CreateContract {
+public interface CreateEditContract {
 
     interface Presenter {
         void addObserver(Observer observer);
@@ -11,13 +11,17 @@ public interface CreateContract {
         void onResume();
         void onPause();
 
+        Location getLocation(long locationId);
         void createLocation(Location location);
+        void updateLocation(Location location);
 
-        android.location.Location getGpsLocation();
+        void requestGpsLocationUpdates();
+        void removeGpsLocationUpdates();
+        LatLng getGpsLocation();
     }
 
     interface Observer {
-        void onGpsLocationChanged(android.location.Location location);
+        void onGpsLocationChanged(LatLng latLng);
     }
 
 }
