@@ -1,27 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
-    android:paddingTop="16dp"
-    android:paddingBottom="8dp">
+    android:paddingTop="16dp">
 
-    <EditText
-        android:id="@+id/view_name"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:inputType="text"
-        android:hint="@string/hint_name" />
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/view_date"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/view_name"
-        android:inputType="datetime"
-        android:hint="@string/hint_date" />
+        <TextView
+            android:id="@+id/view_title_general"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:text="@string/category_general"
+            android:textSize="13.5sp"
+            android:textStyle="bold"
+            android:textColor="@color/color_accent" />
 
-</RelativeLayout>
+        <EditText
+            android:id="@+id/view_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:hint="@string/hint_name" />
+
+        <EditText
+            android:id="@+id/view_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="datetime"
+            android:hint="@string/hint_date" />
+
+        <TextView
+            android:id="@+id/view_title_persons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="4dp"
+            android:text="@string/category_persons"
+            android:textSize="13.5sp"
+            android:textStyle="bold"
+            android:textColor="@color/color_accent" />
+
+        <LinearLayout
+            android:id="@+id/container_persons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </LinearLayout>
+
+</ScrollView>

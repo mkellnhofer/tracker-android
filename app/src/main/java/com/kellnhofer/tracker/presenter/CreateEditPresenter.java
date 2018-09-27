@@ -12,7 +12,9 @@ import java.util.List;
 
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
+import com.kellnhofer.tracker.data.PersonRepository;
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 
 public class CreateEditPresenter implements CreateEditContract.Presenter,
@@ -25,18 +27,20 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     private List<CreateEditContract.Observer> mObservers = new ArrayList<>();
 
-    private LocationRepository mRepository;
+    private LocationRepository mLocationRepository;
+    private PersonRepository mPersonRepository;
     private LocationServiceAdapter mService;
 
     private LocationManager mLocationManager;
     private android.location.Location mGpsLocation;
 
     public CreateEditPresenter(Context context, LocationRepository locationRepository,
-            LocationServiceAdapter locationService) {
+            PersonRepository personRepository, LocationServiceAdapter locationService) {
         mContext = context;
         mApplication = (TrackerApplication) context.getApplicationContext();
 
-        mRepository = locationRepository;
+        mLocationRepository = locationRepository;
+        mPersonRepository = personRepository;
         mService = locationService;
 
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -69,17 +73,22 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     @Override
     public Location getLocation(long locationId) {
-        return mRepository.getLocation(locationId);
+        return mLocationRepository.getLocation(locationId);
     }
 
     @Override
-    public void createLocation(Location location) {
-        mService.createLocation(location);
+    public ArrayList<Person> getLocationPersons(long locationId) {
+        return mPersonRepository.getPersonsByLocationId(locationId);
     }
 
     @Override
-    public void updateLocation(Location location) {
-        mService.createLocation(location);
+    public void createLocation(Location location, ArrayList<Person> persons) {
+        mService.createLocation(location, persons);
+    }
+
+    @Override
+    public void updateLocation(Location location, ArrayList<Person> persons) {
+        mService.updateLocation(location, persons);
     }
 
     @SuppressLint("MissingPermission")

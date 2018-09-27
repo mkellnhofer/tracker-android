@@ -1,6 +1,9 @@
 package com.kellnhofer.tracker.presenter;
 
+import java.util.ArrayList;
+
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.model.Person;
 
 public interface CreateEditContract {
 
@@ -12,8 +15,9 @@ public interface CreateEditContract {
         void onPause();
 
         Location getLocation(long locationId);
-        void createLocation(Location location);
-        void updateLocation(Location location);
+        ArrayList<Person> getLocationPersons(long locationId);
+        void createLocation(Location location, ArrayList<Person> locationPersons);
+        void updateLocation(Location location, ArrayList<Person> locationPersons);
 
         void requestGpsLocationUpdates();
         void removeGpsLocationUpdates();

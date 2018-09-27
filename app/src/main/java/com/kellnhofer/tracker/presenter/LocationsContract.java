@@ -1,6 +1,6 @@
 package com.kellnhofer.tracker.presenter;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import com.kellnhofer.tracker.model.Location;
 
@@ -13,12 +13,7 @@ public interface LocationsContract {
         void onResume();
         void onPause();
 
-        List<Location> getNotDeletedLocations();
-        Location getLocation(long locationId);
-
-        void createLocation(Location location);
-        void updateLocation(Location location);
-        void deleteLocation(long locationId);
+        ArrayList<Location> getNotDeletedLocations();
 
         void startCreateActivity();
         void startViewActivity(long locationId);

@@ -17,10 +17,15 @@
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
 
+    <string name="category_general">General</string>
+    <string name="category_persons">Persons</string>
+
     <string name="hint_name">Name</string>
     <string name="hint_date">Date</string>
+    <string name="hint_person_name">Name</string>
 
     <string name="error_location_name_invalid">Invalid name</string>
     <string name="error_location_date_invalid">Invalid date</string>
+    <string name="error_location_person_name_invalid">Invalid name</string>
 
 </resources>

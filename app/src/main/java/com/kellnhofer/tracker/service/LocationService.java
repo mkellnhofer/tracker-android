@@ -4,12 +4,15 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import java.util.ArrayList;
+
 import com.kellnhofer.tracker.BuildConfig;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
+import com.kellnhofer.tracker.data.PersonRepository;
 import com.kellnhofer.tracker.model.Location;
-import com.kellnhofer.tracker.util.DateUtils;
+import com.kellnhofer.tracker.model.Person;
 
 public class LocationService extends Service implements LocationSync.Callback {
 
@@ -24,18 +27,16 @@ public class LocationService extends Service implements LocationSync.Callback {
     public static final String EVENT_ERROR = BuildConfig.APPLICATION_ID + ".event.LOCATIONS_ERROR";
 
     public static final String EXTRA_ID = "ID";
-    public static final String EXTRA_REMOTE_ID = "REMOTE_ID";
-    public static final String EXTRA_NAME = "NAME";
-    public static final String EXTRA_DATE = "DATE";
-    public static final String EXTRA_LATITUDE = "LATITUDE";
-    public static final String EXTRA_LONGITUDE = "LONGITUDE";
+    public static final String EXTRA_LOCATION = "LOCATION";
+    public static final String EXTRA_PERSONS = "PERSONS";
 
     public static final String EXTRA_ACTION = "ACTION";
     public static final String EXTRA_ERROR = "ERROR";
 
     private TrackerApplication mApplication;
 
-    private LocationRepository mRepository;
+    private LocationRepository mLocationRepository;
+    private PersonRepository mPersonRepository;
 
     private LocationSync mLocationSync = null;
 
@@ -45,7 +46,8 @@ public class LocationService extends Service implements LocationSync.Callback {
 
         mApplication = (TrackerApplication) this.getApplication();
 
-        mRepository = Injector.getLocationRepository(this);
+        mLocationRepository = Injector.getLocationRepository(this);
+        mPersonRepository = Injector.getPersonRepository(this);
     }
 
     @Override
@@ -65,10 +67,10 @@ public class LocationService extends Service implements LocationSync.Callback {
                 syncLocations();
                 break;
             case ACTION_CREATE:
-                createLocation(getLocationFromIntent(intent));
+                createLocation(getLocationFromIntent(intent), getPersonsFromIntent(intent));
                 break;
             case ACTION_UPDATE:
-                updateLocation(getLocationFromIntent(intent));
+                updateLocation(getLocationFromIntent(intent), getPersonsFromIntent(intent));
                 break;
             case ACTION_DELETE:
                 deleteLocation(getLocationIdFromIntent(intent));
@@ -91,13 +93,16 @@ public class LocationService extends Service implements LocationSync.Callback {
         new Thread(r).start();
     }
 
-    private void createLocation(final Location location) {
+    private void createLocation(final Location location, final ArrayList<Person> persons) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
                 location.setChanged(true);
 
-                mRepository.saveLocation(location);
+                ArrayList<Long> pIds = getPersonIds(persons);
+                location.setPersonIds(pIds);
+
+                mLocationRepository.saveLocation(location);
 
                 broadcastSuccess(ACTION_CREATE);
                 executeSync();
@@ -107,18 +112,22 @@ public class LocationService extends Service implements LocationSync.Callback {
         new Thread(r).start();
     }
 
-    private void updateLocation(final Location location) {
+    private void updateLocation(final Location location, final ArrayList<Person> persons) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                Location existingLocation = mRepository.getLocation(location.getId());
+                Location existingLocation = mLocationRepository.getLocation(location.getId());
                 if (existingLocation != null) {
                     location.setRemoteId(existingLocation.getRemoteId());
                 }
 
                 location.setChanged(true);
 
-                mRepository.saveLocation(location);
+                ArrayList<Long> pIds = getPersonIds(persons);
+                location.setPersonIds(pIds);
+
+                mLocationRepository.saveLocation(location);
+                mPersonRepository.deleteUnusedPersons();
 
                 broadcastSuccess(ACTION_UPDATE);
                 executeSync();
@@ -128,12 +137,26 @@ public class LocationService extends Service implements LocationSync.Callback {
         new Thread(r).start();
     }
 
+    private ArrayList<Long> getPersonIds(ArrayList<Person> persons) {
+        ArrayList<Long> personIds = new ArrayList<>();
+        for (Person person : persons) {
+            Person existingPerson = mPersonRepository.getPersonByFirstNameAndLastName(
+                    person.getFirstName(), person.getLastName());
+            if (existingPerson != null) {
+                personIds.add(existingPerson.getId());
+            } else {
+                long newPersonId = mPersonRepository.savePerson(person);
+                personIds.add(newPersonId);
+            }
+        }
+        return personIds;
+    }
+
     private void deleteLocation(final long locationId) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                mRepository.setLocationDeleted(locationId);
-
+                mLocationRepository.setLocationDeleted(locationId);
                 broadcastSuccess(ACTION_DELETE);
                 executeSync();
             }
@@ -170,14 +193,11 @@ public class LocationService extends Service implements LocationSync.Callback {
     }
 
     private Location getLocationFromIntent(Intent intent) {
-        Location location = new Location();
-        location.setId(intent.getLongExtra(EXTRA_ID, 0L));
-        location.setRemoteId(intent.getLongExtra(EXTRA_REMOTE_ID, 0L));
-        location.setName(intent.getStringExtra(EXTRA_NAME));
-        location.setDate(DateUtils.fromServiceFormat(intent.getStringExtra(EXTRA_DATE)));
-        location.setLatitude(intent.getDoubleExtra(EXTRA_LATITUDE, 0.0));
-        location.setLongitude(intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0));
-        return location;
+        return intent.getParcelableExtra(EXTRA_LOCATION);
+    }
+
+    private ArrayList<Person> getPersonsFromIntent(Intent intent) {
+        return intent.getParcelableArrayListExtra(EXTRA_PERSONS);
     }
 
     private void broadcastSuccess(String action) {

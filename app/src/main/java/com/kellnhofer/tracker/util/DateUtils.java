@@ -34,20 +34,6 @@ public class DateUtils {
         }
     }
 
-    public static String toServiceFormat(Date date) {
-        DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_SERVICE, Locale.getDefault());
-        return df.format(date);
-    }
-
-    public static Date fromServiceFormat(String date) {
-        try {
-            DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_SERVICE, Locale.getDefault());
-            return df.parse(date);
-        } catch (ParseException e) {
-            throw new RuntimeException("Invalid service date string!", e);
-        }
-    }
-
     public static String toDbFormat(Date date) {
         DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_DB, Locale.getDefault());
         df.setTimeZone(TimeZone.getTimeZone("UTC"));

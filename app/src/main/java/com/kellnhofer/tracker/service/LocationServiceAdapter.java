@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import java.util.ArrayList;
+
 import com.kellnhofer.tracker.model.Location;
-import com.kellnhofer.tracker.util.DateUtils;
+import com.kellnhofer.tracker.model.Person;
 
 public class LocationServiceAdapter {
 
@@ -64,27 +66,19 @@ public class LocationServiceAdapter {
         mContext.startService(intent);
     }
 
-    public void createLocation(Location location) {
+    public void createLocation(Location location, ArrayList<Person> persons) {
         Intent intent = new Intent(mContext, LocationService.class);
         intent.setAction(LocationService.ACTION_CREATE);
-        intent.putExtra(LocationService.EXTRA_ID, location.getId());
-        intent.putExtra(LocationService.EXTRA_REMOTE_ID, location.getRemoteId());
-        intent.putExtra(LocationService.EXTRA_NAME, location.getName());
-        intent.putExtra(LocationService.EXTRA_DATE, DateUtils.toServiceFormat(location.getDate()));
-        intent.putExtra(LocationService.EXTRA_LATITUDE, location.getLatitude());
-        intent.putExtra(LocationService.EXTRA_LONGITUDE, location.getLongitude());
+        intent.putExtra(LocationService.EXTRA_LOCATION, location);
+        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, persons);
         mContext.startService(intent);
     }
 
-    public void updateLocation(Location location) {
+    public void updateLocation(Location location, ArrayList<Person> persons) {
         Intent intent = new Intent(mContext, LocationService.class);
         intent.setAction(LocationService.ACTION_UPDATE);
-        intent.putExtra(LocationService.EXTRA_ID, location.getId());
-        intent.putExtra(LocationService.EXTRA_REMOTE_ID, location.getRemoteId());
-        intent.putExtra(LocationService.EXTRA_NAME, location.getName());
-        intent.putExtra(LocationService.EXTRA_DATE, DateUtils.toServiceFormat(location.getDate()));
-        intent.putExtra(LocationService.EXTRA_LATITUDE, location.getLatitude());
-        intent.putExtra(LocationService.EXTRA_LONGITUDE, location.getLongitude());
+        intent.putExtra(LocationService.EXTRA_LOCATION, location);
+        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, persons);
         mContext.startService(intent);
     }
 
