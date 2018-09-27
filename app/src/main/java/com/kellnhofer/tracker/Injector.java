@@ -4,12 +4,16 @@ import android.content.Context;
 
 import com.kellnhofer.tracker.data.LocationDataSource;
 import com.kellnhofer.tracker.data.LocationRepository;
+import com.kellnhofer.tracker.data.PersonDataSource;
+import com.kellnhofer.tracker.data.PersonRepository;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 
 public class Injector {
 
     private static LocationDataSource LOCATION_DS_INSTANCE;
     private static LocationRepository LOCATION_REP_INSTANCE;
+    private static PersonDataSource PERSON_DS_INSTANCE;
+    private static PersonRepository PERSON_REP_INSTANCE;
 
     public static LocationDataSource getLocationDataSource(Context context) {
         if (LOCATION_DS_INSTANCE == null) {
@@ -23,6 +27,20 @@ public class Injector {
             LOCATION_REP_INSTANCE = new LocationRepository(getLocationDataSource(context));
         }
         return LOCATION_REP_INSTANCE;
+    }
+
+    public static PersonDataSource getPersonDataSource(Context context) {
+        if (PERSON_DS_INSTANCE == null) {
+            PERSON_DS_INSTANCE = new PersonDataSource(context);
+        }
+        return PERSON_DS_INSTANCE;
+    }
+
+    public static PersonRepository getPersonRepository(Context context) {
+        if (PERSON_REP_INSTANCE == null) {
+            PERSON_REP_INSTANCE = new PersonRepository(getPersonDataSource(context));
+        }
+        return PERSON_REP_INSTANCE;
     }
 
     public static LocationServiceAdapter getLocationService(Context context) {

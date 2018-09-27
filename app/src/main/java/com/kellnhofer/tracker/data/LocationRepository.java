@@ -36,7 +36,7 @@ public class LocationRepository {
 
     // --- CRUD methods ---
 
-    public List<Location> getLocations() {
+    public ArrayList<Location> getLocations() {
         return mDataSource.getLocations();
     }
 
@@ -45,9 +45,10 @@ public class LocationRepository {
         return mDataSource.getLocation(id);
     }
 
-    public void saveLocation(@NonNull Location location) {
-        mDataSource.saveLocation(location);
+    public long saveLocation(@NonNull Location location) {
+        long id = mDataSource.saveLocation(location);
         notifyContentObserver();
+        return id;
     }
 
     public int deleteLocation(long id) {
@@ -63,11 +64,11 @@ public class LocationRepository {
         return mDataSource.getLocationByRemoteId(id);
     }
 
-    public List<Location> getNotDeletedLocations() {
+    public ArrayList<Location> getNotDeletedLocations() {
         return mDataSource.getNotDeletedLocations();
     }
 
-    public List<Location> getChangedOrDeletedLocations() {
+    public ArrayList<Location> getChangedOrDeletedLocations() {
         return mDataSource.getChangedOrDeletedLocations();
     }
 

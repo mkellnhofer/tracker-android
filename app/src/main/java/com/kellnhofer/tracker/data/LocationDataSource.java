@@ -8,9 +8,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.kellnhofer.tracker.data.DbContract.LocationEntry;
+import com.kellnhofer.tracker.data.DbContract.LocationPersonEntry;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.util.DateUtils;
 
@@ -24,15 +24,20 @@ public class LocationDataSource {
 
     // --- CRUD methods ---
 
-    public List<Location> getLocations() {
+    public ArrayList<Location> getLocations() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor = db.query(LocationEntry.TABLE, LocationEntry.PROJECTION_ALL, null, null,
                 null, null, null);
 
-        List<Location> locations = createLocationsFromCursor(cursor);
+        ArrayList<Location> locations = createLocationsFromCursor(cursor);
 
         if (cursor != null) {
             cursor.close();
+        }
+
+        for (Location location : locations) {
+            ArrayList<Long> personIds = getPersonIds(location.getId());
+            location.setPersonIds(personIds);
         }
 
         return locations;
@@ -50,10 +55,13 @@ public class LocationDataSource {
             cursor.close();
         }
 
+        ArrayList<Long> personIds = getPersonIds(location.getId());
+        location.setPersonIds(personIds);
+
         return location;
     }
 
-    public void saveLocation(@NonNull Location location) {
+    public long saveLocation(@NonNull Location location) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -68,7 +76,11 @@ public class LocationDataSource {
         values.put(LocationEntry.COLUMN_LATITUDE, location.getLatitude());
         values.put(LocationEntry.COLUMN_LONGITUDE, location.getLongitude());
 
-        db.replace(LocationEntry.TABLE, null, values);
+        long id = db.replace(LocationEntry.TABLE, null, values);
+
+        savePersonIds(id, location.getPersonIds());
+
+        return id;
     }
 
     public int deleteLocation(long id) {
@@ -92,36 +104,53 @@ public class LocationDataSource {
             cursor.close();
         }
 
+        if (location == null) {
+            return null;
+        }
+
+        ArrayList<Long> personIds = getPersonIds(location.getId());
+        location.setPersonIds(personIds);
+
         return location;
     }
 
-    public List<Location> getNotDeletedLocations() {
+    public ArrayList<Location> getNotDeletedLocations() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor = db.query(LocationEntry.TABLE,
                 LocationEntry.PROJECTION_ALL,
                 LocationEntry.COLUMN_DELETED + " = 0",
                 null, null, null, null);
 
-        List<Location> locations = createLocationsFromCursor(cursor);
+        ArrayList<Location> locations = createLocationsFromCursor(cursor);
 
         if (cursor != null) {
             cursor.close();
         }
 
+        for (Location location : locations) {
+            ArrayList<Long> personIds = getPersonIds(location.getId());
+            location.setPersonIds(personIds);
+        }
+
         return locations;
     }
 
-    public List<Location> getChangedOrDeletedLocations() {
+    public ArrayList<Location> getChangedOrDeletedLocations() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor = db.query(LocationEntry.TABLE,
                 LocationEntry.PROJECTION_ALL,
                 LocationEntry.COLUMN_CHANGED + " = 0 OR " + LocationEntry.COLUMN_DELETED + " = 0",
                 null, null, null, null);
 
-        List<Location> locations = createLocationsFromCursor(cursor);
+        ArrayList<Location> locations = createLocationsFromCursor(cursor);
 
         if (cursor != null) {
             cursor.close();
+        }
+
+        for (Location location : locations) {
+            ArrayList<Long> personIds = getPersonIds(location.getId());
+            location.setPersonIds(personIds);
         }
 
         return locations;
@@ -141,8 +170,8 @@ public class LocationDataSource {
 
     // --- Helper methods ---
 
-    private List<Location> createLocationsFromCursor(Cursor cursor) {
-        List<Location> locations = new ArrayList<>();
+    private ArrayList<Location> createLocationsFromCursor(Cursor cursor) {
+        ArrayList<Location> locations = new ArrayList<>();
         while (cursor != null && cursor.moveToNext()) {
             locations.add(readLocationFromCursor(cursor));
         }
@@ -168,6 +197,44 @@ public class LocationDataSource {
         location.setLatitude(cursor.getDouble(6));
         location.setLongitude(cursor.getDouble(7));
         return location;
+    }
+
+    private ArrayList<Long> getPersonIds(long locationId) {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        Cursor cursor = db.query(LocationPersonEntry.TABLE, LocationPersonEntry.PROJECTION_ALL,
+                LocationPersonEntry.COLUMN_LOCATION_ID + " = ?",
+                new String[]{Long.toString(locationId)}, null, null, null);
+
+        ArrayList<Long> personIds = createPersonIdsFromCursor(cursor);
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return personIds;
+    }
+
+    private void savePersonIds(long locationId, ArrayList<Long> personIds) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        db.delete(LocationPersonEntry.TABLE, LocationPersonEntry.COLUMN_LOCATION_ID + " = ?",
+                new String[]{Long.toString(locationId)});
+
+        for (Long personId : personIds) {
+            ContentValues values = new ContentValues();
+            values.put(LocationPersonEntry.COLUMN_LOCATION_ID, locationId);
+            values.put(LocationPersonEntry.COLUMN_PERSON_ID, personId);
+            db.insert(LocationPersonEntry.TABLE, null, values);
+        }
+    }
+
+    private ArrayList<Long> createPersonIdsFromCursor(Cursor cursor) {
+        ArrayList<Long> personIds = new ArrayList<>();
+        while (cursor != null && cursor.moveToNext()) {
+            personIds.add(cursor.getLong(1));
+        }
+        return personIds;
     }
 
 }

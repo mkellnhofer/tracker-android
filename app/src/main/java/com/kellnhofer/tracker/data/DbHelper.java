@@ -15,7 +15,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String LOG_TAG = DbHelper.class.getSimpleName();
 
     private static final String DATABASE_NAME = "location.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -48,6 +48,8 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private void clean(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS location");
+        db.execSQL("DROP TABLE IF EXISTS location_person");
+        db.execSQL("DROP TABLE IF EXISTS person");
     }
 
     private void update(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -109,6 +111,25 @@ public class DbHelper extends SQLiteOpenHelper {
                 + "longitude" + " REAL);";
 
         db.execSQL(sqlCreateLocationTable);
+    }
+
+    @DbUpdate(order=0, oldVersion=1, newVersion=2)
+    @SuppressWarnings("unused")
+    private void updateV2(SQLiteDatabase db) {
+        final String sqlCreatePersonTable = "CREATE TABLE person ("
+                + "_id"        + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "first_name" + " TEXT COLLATE LOCALIZED, "
+                + "last_name"  + " TEXT COLLATE LOCALIZED);";
+
+        final String sqlCreateLocationPersonTable = "CREATE TABLE location_person ("
+                + "location_id" + " INTEGER, "
+                + "person_id"   + " INTEGER, "
+                + "PRIMARY KEY(location_id, person_id), "
+                + "FOREIGN KEY(location_id) REFERENCES location(_id) ON DELETE CASCADE, "
+                + "FOREIGN KEY(person_id) REFERENCES person(_id) ON DELETE CASCADE);";
+
+        db.execSQL(sqlCreatePersonTable);
+        db.execSQL(sqlCreateLocationPersonTable);
     }
 
 }
