@@ -64,8 +64,8 @@ public class LocationRepository {
         return mDataSource.getLocationByRemoteId(id);
     }
 
-    public ArrayList<Location> getNotDeletedLocations() {
-        return mDataSource.getNotDeletedLocations();
+    public ArrayList<Location> getNotDeletedLocationsByDateDesc() {
+        return mDataSource.getNotDeletedLocationsByDateDesc();
     }
 
     public ArrayList<Location> getChangedOrDeletedLocations() {

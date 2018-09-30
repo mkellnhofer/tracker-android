@@ -114,12 +114,13 @@ public class LocationDataSource {
         return location;
     }
 
-    public ArrayList<Location> getNotDeletedLocations() {
+    public ArrayList<Location> getNotDeletedLocationsByDateDesc() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor = db.query(LocationEntry.TABLE,
                 LocationEntry.PROJECTION_ALL,
                 LocationEntry.COLUMN_DELETED + " = 0",
-                null, null, null, null);
+                null, null, null,
+                LocationEntry.COLUMN_DATE + " DESC");
 
         ArrayList<Location> locations = createLocationsFromCursor(cursor);
 

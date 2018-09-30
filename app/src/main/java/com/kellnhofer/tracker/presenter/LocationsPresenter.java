@@ -66,8 +66,8 @@ public class LocationsPresenter implements LocationsContract.Presenter,
     }
 
     @Override
-    public ArrayList<Location> getNotDeletedLocations() {
-        return mRepository.getNotDeletedLocations();
+    public ArrayList<Location> getNotDeletedLocationsByDateDesc() {
+        return mRepository.getNotDeletedLocationsByDateDesc();
     }
 
     @Override

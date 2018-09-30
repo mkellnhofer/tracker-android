@@ -13,7 +13,7 @@ public interface LocationsContract {
         void onResume();
         void onPause();
 
-        ArrayList<Location> getNotDeletedLocations();
+        ArrayList<Location> getNotDeletedLocationsByDateDesc();
 
         void startCreateActivity();
         void startViewActivity(long locationId);

@@ -162,7 +162,7 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
 
         @Override
         public List<Location> loadInBackground() {
-            return mPresenter.getNotDeletedLocations();
+            return mPresenter.getNotDeletedLocationsByDateDesc();
         }
 
         @Override
