@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
     defaultConfig {
-        applicationId "com.kellnhofer.tracker"
         minSdkVersion 17
         targetSdkVersion 25
         versionCode 1
@@ -13,6 +12,17 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    flavorDimensions "env"
+    productFlavors {
+        production {
+            dimension "env"
+            applicationId "com.kellnhofer.tracker"
+        }
+        development {
+            dimension "env"
+            applicationId "com.kellnhofer.develop.tracker"
         }
     }
 }
