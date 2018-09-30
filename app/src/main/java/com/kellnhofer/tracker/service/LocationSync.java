@@ -3,15 +3,19 @@ package com.kellnhofer.tracker.service;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.TrackerStates;
 import com.kellnhofer.tracker.data.LocationRepository;
+import com.kellnhofer.tracker.data.PersonRepository;
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.rest.ApiErrorParser;
 import com.kellnhofer.tracker.rest.ApiLocation;
+import com.kellnhofer.tracker.rest.ApiPerson;
 import com.kellnhofer.tracker.rest.LocationApi;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -42,7 +46,8 @@ public class LocationSync {
 
     private TrackerApplication mApplication;
 
-    private LocationRepository mRepository;
+    private LocationRepository mLocationRepository;
+    private PersonRepository mPersonRepository;
     private LocationApi mApi;
 
     private Callback mCallback;
@@ -50,7 +55,8 @@ public class LocationSync {
     public LocationSync(TrackerApplication application) {
         mApplication = application;
 
-        mRepository = Injector.getLocationRepository(mApplication);
+        mLocationRepository = Injector.getLocationRepository(mApplication);
+        mPersonRepository = Injector.getPersonRepository(mApplication);
         mApi = mApplication.getLocationApi();
     }
 
@@ -115,14 +121,20 @@ public class LocationSync {
             Location syncedLocation = fromApiLocation(apiLocation);
 
             // Get existing location
-            Location existingLocation = mRepository.getLocationByRemoteId(apiLocation.id);
+            Location existingLocation = mLocationRepository.getLocationByRemoteId(apiLocation.id);
             // If location already exists: Add its ID
             if (existingLocation != null) {
                 syncedLocation.setId(existingLocation.getId());
             }
 
+            // Get person IDs
+            ArrayList<Person> persons = fromApiPersons(apiLocation.persons);
+            ArrayList<Long> personIds = getPersonIds(persons);
+            // Add persons IDs
+            syncedLocation.setPersonIds(personIds);
+
             // Update location locally
-            mRepository.saveLocation(syncedLocation);
+            mLocationRepository.saveLocation(syncedLocation);
 
             // Increase sync version
             if (apiLocation.changeTime > syncVersion) {
@@ -132,6 +144,24 @@ public class LocationSync {
 
         // Return latest sync version
         return syncVersion;
+    }
+
+    private ArrayList<Long> getPersonIds(ArrayList<Person> persons) {
+        ArrayList<Long> personIds = new ArrayList<>();
+        for (Person person : persons) {
+            // Get existing person
+            Person existingPerson = mPersonRepository.getPersonByFirstNameAndLastName(
+                    person.getFirstName(), person.getLastName());
+            // If person already exists: Add its ID
+            if (existingPerson != null) {
+                personIds.add(existingPerson.getId());
+            // Otherwise: Create new person and add its ID
+            } else {
+                long newPersonId = mPersonRepository.savePerson(person);
+                personIds.add(newPersonId);
+            }
+        }
+        return personIds;
     }
 
     private void downSyncDeleted(long lastSyncVersion) throws SyncException {
@@ -163,18 +193,21 @@ public class LocationSync {
         // Process response
         for (Long apiId : apiIds) {
             // Get existing location
-            Location existingLocation = mRepository.getLocationByRemoteId(apiId);
+            Location existingLocation = mLocationRepository.getLocationByRemoteId(apiId);
 
             // Delete location locally
             if (existingLocation != null) {
-                mRepository.deleteLocation(existingLocation.getId());
+                mLocationRepository.deleteLocation(existingLocation.getId());
             }
         }
+
+        // Delete persons locally
+        mPersonRepository.deleteUnusedPersons();
     }
 
     private void upSync() throws SyncException {
         // Get local changed or deleted locations
-        List<Location> locations = mRepository.getChangedOrDeletedLocations();
+        List<Location> locations = mLocationRepository.getChangedOrDeletedLocations();
 
         // Process locations
         for (Location location : locations) {
@@ -191,6 +224,11 @@ public class LocationSync {
     private void upSyncChanged(Location location) throws SyncException {
         // Convert location to API model
         ApiLocation apiLocation = toApiLocation(location);
+
+        // Get persons
+        ArrayList<Person> persons = getPersons(location.getPersonIds());
+        // Add persons
+        apiLocation.persons = toApiPersons(persons);
 
         // Try to create/update location on remote
         Response<ApiLocation> response;
@@ -229,7 +267,15 @@ public class LocationSync {
         syncedLocation.setId(location.getId());
 
         // Update location locally
-        mRepository.saveLocation(syncedLocation);
+        mLocationRepository.saveLocation(syncedLocation);
+    }
+
+    private ArrayList<Person> getPersons(ArrayList<Long> personIds) {
+        ArrayList<Person> persons = new ArrayList<>();
+        for (Long personId : personIds) {
+            persons.add(mPersonRepository.getPerson(personId));
+        }
+        return persons;
     }
 
     private void upSyncDeleted(Location location) throws SyncException {
@@ -254,7 +300,7 @@ public class LocationSync {
         }
 
         // Delete location locally
-        mRepository.deleteLocation(location.getId());
+        mLocationRepository.deleteLocation(location.getId());
     }
 
     // --- Helper methods ---
@@ -288,6 +334,25 @@ public class LocationSync {
         location.setLatitude(apiLocation.lat);
         location.setLongitude(apiLocation.lng);
         return location;
+    }
+
+    private static List<ApiPerson> toApiPersons(ArrayList<Person> persons) {
+        List<ApiPerson> apiPersons = new ArrayList<>();
+        for (Person person : persons) {
+            ApiPerson apiPerson = new ApiPerson();
+            apiPerson.firstName = person.getFirstName();
+            apiPerson.lastName = person.getLastName();
+            apiPersons.add(apiPerson);
+        }
+        return apiPersons;
+    }
+
+    private static ArrayList<Person> fromApiPersons(List<ApiPerson> apiPersons) {
+        ArrayList<Person> persons = new ArrayList<>();
+        for (ApiPerson apiPerson : apiPersons) {
+            persons.add(new Person(0L, apiPerson.firstName, apiPerson.lastName));
+        }
+        return persons;
     }
 
 }
