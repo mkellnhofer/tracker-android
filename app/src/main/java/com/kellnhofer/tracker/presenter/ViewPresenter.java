@@ -9,6 +9,7 @@ import java.util.List;
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.view.CreateEditActivity;
 
 public class ViewPresenter implements ViewContract.Presenter {
@@ -19,12 +20,15 @@ public class ViewPresenter implements ViewContract.Presenter {
     private List<ViewContract.Observer> mObservers = new ArrayList<>();
 
     private LocationRepository mRepository;
+    private LocationServiceAdapter mService;
 
-    public ViewPresenter(Context context, LocationRepository locationRepository) {
+    public ViewPresenter(Context context, LocationRepository locationRepository,
+            LocationServiceAdapter locationService) {
         mContext = context;
         mApplication = (TrackerApplication) context.getApplicationContext();
 
         mRepository = locationRepository;
+        mService = locationService;
     }
 
     @Override
@@ -54,6 +58,11 @@ public class ViewPresenter implements ViewContract.Presenter {
     @Override
     public Location getLocation(long locationId) {
         return mRepository.getLocation(locationId);
+    }
+
+    @Override
+    public void deleteLocation(long locationId) {
+        mService.deleteLocation(locationId);
     }
 
     @Override

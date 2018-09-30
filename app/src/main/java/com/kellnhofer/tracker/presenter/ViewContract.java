@@ -12,6 +12,7 @@ public interface ViewContract {
         void onPause();
 
         Location getLocation(long locationId);
+        void deleteLocation(long locationId);
 
         void startEditActivity(long locationId);
     }
