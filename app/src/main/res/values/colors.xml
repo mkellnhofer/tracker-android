@@ -14,4 +14,12 @@
     <color name="fab_bg_color_white">#FFFFFF</color>
     <color name="fab_bg_color_disabled">#8A8A8A</color>
 
+    <color name="day_monday">#80deea</color>
+    <color name="day_tuesday">#80cbc4</color>
+    <color name="day_wednesday">#a5d6a7</color>
+    <color name="day_thursday">#c5e1a5</color>
+    <color name="day_friday">#e6ee9c</color>
+    <color name="day_saturday">#fff59d</color>
+    <color name="day_sunday">#ffe082</color>
+
 </resources>

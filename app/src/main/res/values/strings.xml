@@ -33,4 +33,12 @@
     <string name="error_location_date_invalid">Invalid date</string>
     <string name="error_location_person_name_invalid">Invalid name</string>
 
+    <string name="day_monday">Mo</string>
+    <string name="day_tuesday">Tu</string>
+    <string name="day_wednesday">We</string>
+    <string name="day_thursday">Th</string>
+    <string name="day_friday">Fr</string>
+    <string name="day_saturday">Sa</string>
+    <string name="day_sunday">So</string>
+
 </resources>

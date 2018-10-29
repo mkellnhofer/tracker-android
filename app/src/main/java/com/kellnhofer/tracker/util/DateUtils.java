@@ -3,6 +3,7 @@ package com.kellnhofer.tracker.util;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -48,6 +49,12 @@ public class DateUtils {
         } catch (ParseException e) {
             throw new RuntimeException("Invalid DB date string!", e);
         }
+    }
+
+    public static int getWeekDay(Date date) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        return (c.get(Calendar.DAY_OF_WEEK) + 5) % 7;
     }
 
 }

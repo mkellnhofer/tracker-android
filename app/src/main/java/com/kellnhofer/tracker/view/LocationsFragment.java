@@ -60,7 +60,7 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_locations, container, false);
 
-        mAdapter = new LocationsAdapter(new ArrayList<Location>(0));
+        mAdapter = new LocationsAdapter(mActivity, new ArrayList<Location>(0));
         mAdapter.setLocationItemListener(this);
 
         mInfoContainer = (LinearLayout) view.findViewById(R.id.container_info);

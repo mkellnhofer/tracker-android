@@ -1,9 +1,13 @@
 package com.kellnhofer.tracker.view;
 
+import android.content.Context;
+import android.graphics.drawable.GradientDrawable;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
@@ -17,14 +21,26 @@ public class LocationsAdapter extends BaseAdapter {
 
     private static final DecimalFormat df = new DecimalFormat("#.000000");
 
+    private static final int WEEK_DAY_TEXT_ID[] = new int[] {
+            R.string.day_monday, R.string.day_tuesday, R.string.day_wednesday, R.string.day_thursday,
+            R.string.day_friday, R.string.day_saturday, R.string.day_sunday};
+
+    private static final int WEEK_DAY_COLOR_ID[] = new int[] {
+            R.color.day_monday, R.color.day_tuesday, R.color.day_wednesday, R.color.day_thursday,
+            R.color.day_friday, R.color.day_saturday, R.color.day_sunday};
+
     public interface LocationItemListener {
         void onLocationClick(Location location);
     }
 
+    private Context mContext;
+
     private List<Location> mLocations;
     private LocationItemListener mItemListener;
 
-    public LocationsAdapter(List<Location> locations) {
+    public LocationsAdapter(Context context, List<Location> locations) {
+        mContext = context;
+
         setList(locations);
     }
 
@@ -66,13 +82,27 @@ public class LocationsAdapter extends BaseAdapter {
 
         final Location location = getItem(i);
 
-        TextView nameView = (TextView) rowView.findViewById(R.id.name);
-        TextView dateView = (TextView) rowView.findViewById(R.id.info);
+        TextView labelView = (TextView) rowView.findViewById(R.id.view_label);
+        TextView nameView = (TextView) rowView.findViewById(R.id.view_name);
+        TextView dateView = (TextView) rowView.findViewById(R.id.view_info);
+        ImageView syncStateView = (ImageView) rowView.findViewById(R.id.image_sync_state);
+
+        int weekDay = DateUtils.getWeekDay(location.getDate());
+        int weekDayTextId = WEEK_DAY_TEXT_ID[weekDay];
+        int weekDayColorId = WEEK_DAY_COLOR_ID[weekDay];
+        int weekDayColor = ContextCompat.getColor(mContext, weekDayColorId);
+        labelView.setText(weekDayTextId);
+        ((GradientDrawable) labelView.getBackground()).setColor(weekDayColor);
 
         nameView.setText(location.getName());
+
         String date = DateUtils.toUiFormat(location.getDate());
         String pos = df.format(location.getLatitude()) + "/" + df.format(location.getLongitude());
         dateView.setText(date + " | " + pos);
+
+        long remoteId = location.getRemoteId();
+        boolean changed = location.isChanged();
+        syncStateView.setVisibility(remoteId != 0L && !changed ? View.VISIBLE : View.INVISIBLE);
 
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
