@@ -11,12 +11,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.presenter.ViewContract;
 import com.kellnhofer.tracker.presenter.ViewPresenter;
 import com.kellnhofer.tracker.util.DateUtils;
@@ -25,6 +27,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         DecisionDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_VIEW = "view_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_VIEW = "view_dialog_fragment";
     private static final String DIALOG_FRAGMENT_TAG_DELETE = "delete_dialog_fragment";
 
     public static final String EXTRA_LOCATION_ID = "location_id";
@@ -38,6 +41,9 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     private ViewFragment mFragment;
 
     private long mLocationId;
+    private String mLocationName;
+    private Date mLocationDate;
+    private ArrayList<String> mLocationPersons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +52,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         mApplication = (TrackerApplication) getApplication();
 
         mPresenter = new ViewPresenter(this, Injector.getLocationRepository(this),
-                Injector.getLocationService(this));
+                Injector.getPersonRepository(this), Injector.getLocationService(this));
 
         Intent intent = getIntent();
         if (!intent.hasExtra(EXTRA_LOCATION_ID)) {
@@ -99,7 +105,23 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         super.onResume();
 
         Location location = mPresenter.getLocation(mLocationId);
-        updateToolbar(location.getName(), location.getDate());
+        ArrayList<Person> locationPersons = mPresenter.getLocationPersons(mLocationId);
+
+        mLocationName = location.getName();
+        mLocationDate = location.getDate();
+        mLocationPersons = new ArrayList<>();
+        for (Person locationPerson : locationPersons) {
+            String name;
+            if (!locationPerson.getFirstName().isEmpty() &&
+                    !locationPerson.getLastName().isEmpty()) {
+                name = locationPerson.getFirstName() + " " + locationPerson.getLastName();
+            } else {
+                name = locationPerson.getFirstName() + locationPerson.getLastName();
+            }
+            mLocationPersons.add(name);
+        }
+
+        updateToolbar(mLocationName, mLocationDate);
 
         mPresenter.addObserver(this);
         mPresenter.onResume();
@@ -119,7 +141,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     }
 
     private void onFabClicked() {
-        mPresenter.startEditActivity(mLocationId);
+        showViewDialog();
     }
 
     // --- Action bar callback methods ---
@@ -134,6 +156,9 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
+            case R.id.action_edit:
+                mPresenter.startEditActivity(mLocationId);
+                return true;
             case R.id.action_delete:
                 showDeleteDialog();
                 return true;
@@ -143,6 +168,12 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     }
 
     // --- Dialog methods ---
+
+    private void showViewDialog() {
+        ViewDialogFragment fragment = ViewDialogFragment.newInstance(mLocationName, mLocationDate,
+                    mLocationPersons);
+        fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_VIEW);
+    }
 
     private void showDeleteDialog() {
         DecisionDialogFragment fragment = DecisionDialogFragment.newInstance(

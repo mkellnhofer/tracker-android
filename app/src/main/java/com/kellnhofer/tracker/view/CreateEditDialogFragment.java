@@ -181,8 +181,8 @@ public class CreateEditDialogFragment extends DialogFragment {
     private void addPersonView(int[] viewIds, String name, boolean isLast) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        final RelativeLayout container = (RelativeLayout) inflater.inflate(R.layout.view_location_person,
-                null);
+        final RelativeLayout container = (RelativeLayout) inflater.inflate(
+                R.layout.view_create_edit_person, null);
         final EditText nameView = (EditText) container.findViewById(R.id.view_person_name);
         final ImageButton addButton = (ImageButton) container.findViewById(R.id.button_person_add);
         final ImageButton removeButton = (ImageButton) container.findViewById(R.id.button_person_remove);

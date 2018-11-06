@@ -3,8 +3,6 @@
 
     <string name="app_name">Tracker</string>
 
-    <string name="locations_empty">No Locations.</string>
-
     <string name="message_gps_permissions">App has no GPS permissions!</string>
 
     <string name="activity_title_create">Create location</string>
@@ -13,10 +11,12 @@
     <string name="dialog_title_create">Create location</string>
     <string name="dialog_title_edit">Edit location</string>
     <string name="dialog_title_delete">Delete location</string>
+    <string name="dialog_title_view">Details</string>
 
     <string name="dialog_message_delete">Do you really want to delete this location?</string>
 
     <string name="action_create">Create</string>
+    <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
     <string name="action_delete">Delete</string>
     <string name="action_ok">OK</string>
@@ -24,6 +24,9 @@
 
     <string name="category_general">General</string>
     <string name="category_persons">Persons</string>
+
+    <string name="empty_locations">No Locations.</string>
+    <string name="empty_persons">none</string>
 
     <string name="hint_name">Name</string>
     <string name="hint_date">Date</string>
