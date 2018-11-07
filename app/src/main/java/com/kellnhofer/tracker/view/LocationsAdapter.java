@@ -10,7 +10,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 import com.kellnhofer.tracker.R;
@@ -18,8 +17,6 @@ import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.util.DateUtils;
 
 public class LocationsAdapter extends BaseAdapter {
-
-    private static final DecimalFormat df = new DecimalFormat("#.000000");
 
     private static final int WEEK_DAY_TEXT_ID[] = new int[] {
             R.string.day_monday, R.string.day_tuesday, R.string.day_wednesday, R.string.day_thursday,
@@ -97,8 +94,7 @@ public class LocationsAdapter extends BaseAdapter {
         nameView.setText(location.getName());
 
         String date = DateUtils.toUiFormat(location.getDate());
-        String pos = df.format(location.getLatitude()) + "/" + df.format(location.getLongitude());
-        dateView.setText(date + " | " + pos);
+        dateView.setText(date);
 
         long remoteId = location.getRemoteId();
         boolean changed = location.isChanged();
