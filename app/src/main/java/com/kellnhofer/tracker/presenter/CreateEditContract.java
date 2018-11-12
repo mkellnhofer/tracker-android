@@ -19,6 +19,8 @@ public interface CreateEditContract {
         void createLocation(Location location, ArrayList<Person> locationPersons);
         void updateLocation(Location location, ArrayList<Person> locationPersons);
 
+        ArrayList<Person> getPersons();
+
         void requestGpsLocationUpdates();
         void removeGpsLocationUpdates();
         LatLng getGpsLocation();

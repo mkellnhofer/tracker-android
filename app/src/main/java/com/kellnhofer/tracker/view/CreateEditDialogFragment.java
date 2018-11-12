@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -37,13 +39,14 @@ public class CreateEditDialogFragment extends DialogFragment {
     public static final int MODE_EDIT = 2;
 
     public static final String BUNDLE_KEY_MODE = "mode";
-    public static final String BUNDLE_KEY_NAME = "name";
-    public static final String BUNDLE_KEY_DATE = "date";
-    public static final String BUNDLE_KEY_PERSONS = "persons";
+    public static final String BUNDLE_KEY_LOCATION_NAME = "location_name";
+    public static final String BUNDLE_KEY_LOCATION_DATE = "location_date";
+    public static final String BUNDLE_KEY_LOCATION_PERSON_NAMES = "location_person_names";
+    public static final String BUNDLE_KEY_PERSON_NAMES = "person_names";
 
     public interface Listener {
         void onCreateEditDialogOk(String locationName, Date locationDate,
-                ArrayList<String> personNames);
+                ArrayList<String> locationPersonNames);
 
         void onCreateEditDialogCancel();
     }
@@ -74,6 +77,8 @@ public class CreateEditDialogFragment extends DialogFragment {
 
     private Listener mListener;
 
+    private ArrayList<String> mPersonNames;
+
     private EditText mNameView;
     private EditText mDateView;
     private LinearLayout mPersonsContainer;
@@ -100,12 +105,15 @@ public class CreateEditDialogFragment extends DialogFragment {
             throw new IllegalStateException("Arguments missing!");
         }
         int mode = arguments.getInt(BUNDLE_KEY_MODE);
-        String name = arguments.getString(BUNDLE_KEY_NAME, "");
-        Date date = new Date(arguments.getLong(BUNDLE_KEY_DATE));
-        ArrayList<String> persons = arguments.getStringArrayList(BUNDLE_KEY_PERSONS);
-        if (persons == null) {
-            persons = new ArrayList<>();
+        String locationName = arguments.getString(BUNDLE_KEY_LOCATION_NAME, "");
+        Date locationDate = new Date(arguments.getLong(BUNDLE_KEY_LOCATION_DATE));
+        ArrayList<String> locationPersonNames = arguments.getStringArrayList(
+                BUNDLE_KEY_LOCATION_PERSON_NAMES);
+        if (locationPersonNames == null) {
+            locationPersonNames = new ArrayList<>();
         }
+
+        mPersonNames = arguments.getStringArrayList(BUNDLE_KEY_PERSON_NAMES);
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_create_edit, null);
@@ -119,9 +127,9 @@ public class CreateEditDialogFragment extends DialogFragment {
             if (mode == MODE_CREATE) {
                 mDateView.setText(DateUtils.toUiFormat(new Date()));
             } else if (mode == MODE_EDIT) {
-                mNameView.setText(name);
-                mNameView.setSelection(name.length());
-                mDateView.setText(DateUtils.toUiFormat(date));
+                mNameView.setText(locationName);
+                mNameView.setSelection(locationName.length());
+                mDateView.setText(DateUtils.toUiFormat(locationDate));
             }
         }
 
@@ -129,8 +137,8 @@ public class CreateEditDialogFragment extends DialogFragment {
         mDateView.addTextChangedListener(mDateTextWatcher);
 
         if (savedInstanceState == null) {
-            for (String person : persons) {
-                addPersonView(null, person, false);
+            for (String locationPersonName : locationPersonNames) {
+                addPersonView(null, locationPersonName, false);
             }
             addPersonView(null, "", true);
         } else {
@@ -169,8 +177,8 @@ public class CreateEditDialogFragment extends DialogFragment {
     private void onPositiveButtonClicked() {
         String locationName = mNameView.getText().toString().trim();
         Date locationDate = DateUtils.fromUiFormat(mDateView.getText().toString());
-        ArrayList<String> personNames = getPersonNames();
-        mListener.onCreateEditDialogOk(locationName, locationDate, personNames);
+        ArrayList<String> locationPersonNames = getPersonNames();
+        mListener.onCreateEditDialogOk(locationName, locationDate, locationPersonNames);
         CreateEditDialogFragment.this.getDialog().dismiss();
     }
 
@@ -183,13 +191,18 @@ public class CreateEditDialogFragment extends DialogFragment {
 
         final RelativeLayout container = (RelativeLayout) inflater.inflate(
                 R.layout.view_create_edit_person, null);
-        final EditText nameView = (EditText) container.findViewById(R.id.view_person_name);
+        final AutoCompleteTextView nameView = (AutoCompleteTextView) container.findViewById(
+                R.id.view_person_name);
         final ImageButton addButton = (ImageButton) container.findViewById(R.id.button_person_add);
-        final ImageButton removeButton = (ImageButton) container.findViewById(R.id.button_person_remove);
+        final ImageButton removeButton = (ImageButton) container.findViewById(
+                R.id.button_person_remove);
 
         container.setId(viewIds != null ? viewIds[0] : View.generateViewId());
         nameView.setId(viewIds != null ? viewIds[1] : View.generateViewId());
         nameView.setText(name);
+        ArrayAdapter<String> nameAdapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_list_item_1, mPersonNames);
+        nameView.setAdapter(nameAdapter);
         nameView.addTextChangedListener(mPersonNameTextWatcher);
         addButton.setId(viewIds != null ? viewIds[2] : View.generateViewId());
         addButton.setVisibility(isLast ? View.VISIBLE : View.GONE);
@@ -276,9 +289,10 @@ public class CreateEditDialogFragment extends DialogFragment {
 
     // --- Factory methods ---
 
-    public static CreateEditDialogFragment newCreateInstance() {
+    public static CreateEditDialogFragment newCreateInstance(ArrayList<String> personNames) {
         Bundle args = new Bundle();
         args.putInt(BUNDLE_KEY_MODE, MODE_CREATE);
+        args.putStringArrayList(BUNDLE_KEY_PERSON_NAMES, personNames);
 
         CreateEditDialogFragment fragment = new CreateEditDialogFragment();
         fragment.setArguments(args);
@@ -286,13 +300,14 @@ public class CreateEditDialogFragment extends DialogFragment {
         return fragment;
     }
 
-    public static CreateEditDialogFragment newEditInstance(String name, Date date,
-            ArrayList<String> persons) {
+    public static CreateEditDialogFragment newEditInstance(String locationName, Date locationDate,
+            ArrayList<String> locationPersonNames, ArrayList<String> personNames) {
         Bundle args = new Bundle();
         args.putInt(BUNDLE_KEY_MODE, MODE_EDIT);
-        args.putString(BUNDLE_KEY_NAME, name);
-        args.putLong(BUNDLE_KEY_DATE, date.getTime());
-        args.putStringArrayList(BUNDLE_KEY_PERSONS, persons);
+        args.putString(BUNDLE_KEY_LOCATION_NAME, locationName);
+        args.putLong(BUNDLE_KEY_LOCATION_DATE, locationDate.getTime());
+        args.putStringArrayList(BUNDLE_KEY_LOCATION_PERSON_NAMES, locationPersonNames);
+        args.putStringArrayList(BUNDLE_KEY_PERSON_NAMES, personNames);
 
         CreateEditDialogFragment fragment = new CreateEditDialogFragment();
         fragment.setArguments(args);

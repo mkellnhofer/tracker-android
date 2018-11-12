@@ -91,6 +91,11 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
         mService.updateLocation(location, persons);
     }
 
+    @Override
+    public ArrayList<Person> getPersons() {
+        return mPersonRepository.getPersons();
+    }
+
     @SuppressLint("MissingPermission")
     @Override
     public void requestGpsLocationUpdates() {

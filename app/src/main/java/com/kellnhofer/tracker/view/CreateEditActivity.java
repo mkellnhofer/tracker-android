@@ -57,8 +57,8 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     private long mLocationId;
     private String mLocationName = "";
     private Date mLocationDate = new Date();
-    private LatLng mLatLng = new LatLng();
-    private ArrayList<String> mLocationPersons = new ArrayList<>();
+    private LatLng mLocationLatLng = new LatLng();
+    private ArrayList<String> mLocationPersonNames = new ArrayList<>();
 
     private boolean mUseGpsLocation = false;
     private boolean mRequestedPermissions = false;
@@ -79,18 +79,9 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
             Location location = mPresenter.getLocation(mLocationId);
             mLocationName = location.getName();
             mLocationDate = location.getDate();
-            mLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            mLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
             ArrayList<Person> locationPersons = mPresenter.getLocationPersons(mLocationId);
-            for (Person locationPerson : locationPersons) {
-                String name;
-                if (!locationPerson.getFirstName().isEmpty() &&
-                        !locationPerson.getLastName().isEmpty()) {
-                    name = locationPerson.getFirstName() + " " + locationPerson.getLastName();
-                } else {
-                    name = locationPerson.getFirstName() + locationPerson.getLastName();
-                }
-                mLocationPersons.add(name);
-            }
+            mLocationPersonNames = toPersonNameList(locationPersons);
         }
 
         if (savedInstanceState == null && mLocationId == 0L) {
@@ -159,11 +150,11 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         mLocationDate = new Date(savedInstanceState.getLong(STATE_LOCATION_DATE));
         double[] pos = savedInstanceState.getDoubleArray(STATE_LAT_LNG);
         if (pos != null && pos.length >= 2) {
-            mLatLng = new LatLng(pos[0], pos[1]);
+            mLocationLatLng = new LatLng(pos[0], pos[1]);
         } else {
-            mLatLng = new LatLng();
+            mLocationLatLng = new LatLng();
         }
-        mLocationPersons = savedInstanceState.getStringArrayList(STATE_LOCATION_PERSONS);
+        mLocationPersonNames = savedInstanceState.getStringArrayList(STATE_LOCATION_PERSONS);
         mUseGpsLocation = savedInstanceState.getBoolean(STATE_USE_GPS_LOCATION);
         mRequestedPermissions = savedInstanceState.getBoolean(STATE_REQUESTED_PERMISSIONS);
     }
@@ -199,9 +190,9 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
         outState.putString(STATE_LOCATION_NAME, mLocationName);
         outState.putLong(STATE_LOCATION_DATE, mLocationDate.getTime());
-        double[] pos = new double[]{mLatLng.lng, mLatLng.lat};
+        double[] pos = new double[]{mLocationLatLng.lng, mLocationLatLng.lat};
         outState.putDoubleArray(STATE_LAT_LNG, pos);
-        outState.putStringArrayList(STATE_LOCATION_PERSONS, mLocationPersons);
+        outState.putStringArrayList(STATE_LOCATION_PERSONS, mLocationPersonNames);
         outState.putBoolean(STATE_USE_GPS_LOCATION, mUseGpsLocation);
         outState.putBoolean(STATE_REQUESTED_PERMISSIONS, mRequestedPermissions);
     }
@@ -262,7 +253,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
     private void onOkFabClicked() {
         if (mUseGpsLocation) {
-            mLatLng = mPresenter.getGpsLocation();
+            mLocationLatLng = mPresenter.getGpsLocation();
         }
         showCreateEditDialog();
     }
@@ -281,29 +272,32 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         mUseGpsLocation = false;
         setGpsFabColor(R.color.color_icon_dark);
         setOkFabEnabled(true);
-        mLatLng = latLng;
+        mLocationLatLng = latLng;
     }
 
     // --- Dialog methods ---
 
     private void showCreateEditDialog() {
+        ArrayList<Person> persons = mPresenter.getPersons();
+        ArrayList<String> personNames = toPersonNameList(persons);
+
         CreateEditDialogFragment fragment;
         if (mLocationId == 0L) {
-            fragment = CreateEditDialogFragment.newCreateInstance();
+            fragment = CreateEditDialogFragment.newCreateInstance(personNames);
         } else {
             fragment = CreateEditDialogFragment.newEditInstance(mLocationName, mLocationDate,
-                    mLocationPersons);
+                    mLocationPersonNames, personNames);
         }
         fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_CREATE_EDIT);
     }
 
     @Override
     public void onCreateEditDialogOk(String locationName, Date locationDate,
-            ArrayList<String> personNames) {
+            ArrayList<String> locationPersonNames) {
         if (mLocationId == 0L) {
-            createLocation(locationName, locationDate, mLatLng, personNames);
+            createLocation(locationName, locationDate, mLocationLatLng, locationPersonNames);
         } else {
-            updateLocation(locationName, locationDate, mLatLng, personNames);
+            updateLocation(locationName, locationDate, mLocationLatLng, locationPersonNames);
         }
     }
 
@@ -355,6 +349,20 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     }
 
     // --- Helper methods ---
+
+    private static ArrayList<String> toPersonNameList(ArrayList<Person> persons) {
+        ArrayList<String> personNames = new ArrayList<>();
+        for (Person person : persons) {
+            String personName;
+            if (!person.getFirstName().isEmpty() && !person.getLastName().isEmpty()) {
+                personName = person.getFirstName() + " " + person.getLastName();
+            } else {
+                personName = person.getFirstName() + person.getLastName();
+            }
+            personNames.add(personName);
+        }
+        return personNames;
+    }
 
     private static ArrayList<Person> toPersonList(ArrayList<String> personNames) {
         if (personNames == null) {
