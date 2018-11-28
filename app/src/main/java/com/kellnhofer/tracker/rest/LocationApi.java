@@ -13,7 +13,7 @@ import retrofit2.http.Query;
 
 public interface LocationApi {
 
-    String BASE_PATH = "";
+    String BASE_PATH = "/api/v1";
 
     @GET(BASE_PATH + "/loc")
     Call<List<ApiLocation>> getLocations(@Query("change_time") Long changeTime);
