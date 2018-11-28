@@ -16,6 +16,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.kellnhofer.tracker.data.DbHelper;
+import com.kellnhofer.tracker.rest.AuthInterceptor;
 import com.kellnhofer.tracker.rest.LocationApi;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -26,6 +27,7 @@ public class TrackerApplication extends Application {
     private static final String LOG_TAG = TrackerApplication.class.getSimpleName();
 
     private static final String SERVER_URL = "http://192.168.178.41:8080";
+    private static final String SERVER_PASSWORD = "qwer1234";
 
     private TrackerStates mStates;
 
@@ -65,10 +67,14 @@ public class TrackerApplication extends Application {
     private void initOkHttp() {
         Log.d(LOG_TAG, "Init OkHttp.");
 
+        AuthInterceptor authInterceptor = new AuthInterceptor();
+        authInterceptor.setPassword(SERVER_PASSWORD);
+
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         if (BuildConfig.DEBUG) {
             builder.addNetworkInterceptor(new StethoInterceptor());
         }
+        builder.addNetworkInterceptor(authInterceptor);
         mOkHttpClient = builder.build();
     }
 

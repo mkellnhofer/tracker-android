@@ -8,6 +8,8 @@ public class ApiErrorParser {
         switch (code) {
             case 400:
                 return LocationError.BAD_REQUEST;
+            case 401:
+                return LocationError.UNAUTHORIZED;
             case 404:
                 return LocationError.LOCATION_NOT_FOUND;
             default:
