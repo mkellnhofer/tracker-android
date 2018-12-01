@@ -17,6 +17,7 @@ public interface LocationsContract {
 
         void startCreateActivity();
         void startViewActivity(long locationId);
+        void startSettingsActivity();
     }
 
     interface Observer {

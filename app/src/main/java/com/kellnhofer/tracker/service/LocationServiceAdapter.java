@@ -89,4 +89,16 @@ public class LocationServiceAdapter {
         mContext.startService(intent);
     }
 
+    public void startSync() {
+        Intent intent = new Intent(mContext, LocationService.class);
+        intent.setAction(LocationService.ACTION_START_SYNC);
+        mContext.startService(intent);
+    }
+
+    public void stopSync() {
+        Intent intent = new Intent(mContext, LocationService.class);
+        intent.setAction(LocationService.ACTION_STOP_SYNC);
+        mContext.startService(intent);
+    }
+
 }

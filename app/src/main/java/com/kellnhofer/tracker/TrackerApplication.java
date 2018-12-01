@@ -26,9 +26,7 @@ public class TrackerApplication extends Application {
 
     private static final String LOG_TAG = TrackerApplication.class.getSimpleName();
 
-    private static final String SERVER_URL = "http://192.168.178.41:8080";
-    private static final String SERVER_PASSWORD = "qwer1234";
-
+    private TrackerSettings mSettings;
     private TrackerStates mStates;
 
     private DbHelper mDbHelper;
@@ -41,6 +39,7 @@ public class TrackerApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        mSettings = new TrackerSettings(this, Injector.getLocationService(this));
         mStates = new TrackerStates(this);
 
         initData();
@@ -64,11 +63,11 @@ public class TrackerApplication extends Application {
         }
     }
 
-    private void initOkHttp() {
+    public void initOkHttp() {
         Log.d(LOG_TAG, "Init OkHttp.");
 
         AuthInterceptor authInterceptor = new AuthInterceptor();
-        authInterceptor.setPassword(SERVER_PASSWORD);
+        authInterceptor.setPassword(mSettings.getServerPassword());
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         if (BuildConfig.DEBUG) {
@@ -94,14 +93,18 @@ public class TrackerApplication extends Application {
         mGson = gsonBuilder.create();
     }
 
-    private void initRetrofit() {
+    public void initRetrofit() {
         Log.d(LOG_TAG, "Init Retrofit.");
 
         mRetrofit = new Retrofit.Builder()
-                .baseUrl(SERVER_URL)
+                .baseUrl(mSettings.getServerUrl())
                 .client(mOkHttpClient)
                 .addConverterFactory(GsonConverterFactory.create(mGson))
                 .build();
+    }
+
+    public TrackerSettings getSettings() {
+        return mSettings;
     }
 
     public TrackerStates getStates() {

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import com.kellnhofer.tracker.BuildConfig;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.TrackerApplication;
+import com.kellnhofer.tracker.TrackerSettings;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.data.PersonRepository;
 import com.kellnhofer.tracker.model.Location;
@@ -23,6 +24,9 @@ public class LocationService extends Service implements LocationSync.Callback {
     public static final String ACTION_UPDATE = BuildConfig.APPLICATION_ID + ".action.LOCATION_UPDATE";
     public static final String ACTION_DELETE = BuildConfig.APPLICATION_ID + ".action.LOCATION_DELETE";
 
+    public static final String ACTION_START_SYNC = BuildConfig.APPLICATION_ID + ".action.START_SYNC";
+    public static final String ACTION_STOP_SYNC = BuildConfig.APPLICATION_ID + ".action.STOP_SYNC";
+
     public static final String EVENT_SUCCESS = BuildConfig.APPLICATION_ID + ".event.LOCATIONS_SUCCESS";
     public static final String EVENT_ERROR = BuildConfig.APPLICATION_ID + ".event.LOCATIONS_ERROR";
 
@@ -34,6 +38,7 @@ public class LocationService extends Service implements LocationSync.Callback {
     public static final String EXTRA_ERROR = "ERROR";
 
     private TrackerApplication mApplication;
+    private TrackerSettings mSettings;
 
     private LocationRepository mLocationRepository;
     private PersonRepository mPersonRepository;
@@ -45,6 +50,7 @@ public class LocationService extends Service implements LocationSync.Callback {
         super.onCreate();
 
         mApplication = (TrackerApplication) this.getApplication();
+        mSettings = mApplication.getSettings();
 
         mLocationRepository = Injector.getLocationRepository(this);
         mPersonRepository = Injector.getPersonRepository(this);
@@ -75,6 +81,12 @@ public class LocationService extends Service implements LocationSync.Callback {
             case ACTION_DELETE:
                 deleteLocation(getLocationIdFromIntent(intent));
                 break;
+            case ACTION_START_SYNC:
+                // TODO!!!
+                break;
+            case ACTION_STOP_SYNC:
+                // TODO!!!
+                break;
             default:
                 throw new UnsupportedOperationException("Unsupported action '" + action + "'!");
         }
@@ -86,7 +98,7 @@ public class LocationService extends Service implements LocationSync.Callback {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                executeSync();
+                startSync(false);
             }
         };
 
@@ -105,7 +117,7 @@ public class LocationService extends Service implements LocationSync.Callback {
                 mLocationRepository.saveLocation(location);
 
                 broadcastSuccess(ACTION_CREATE);
-                executeSync();
+                startSync(false);
             }
         };
 
@@ -130,7 +142,7 @@ public class LocationService extends Service implements LocationSync.Callback {
                 mPersonRepository.deleteUnusedPersons();
 
                 broadcastSuccess(ACTION_UPDATE);
-                executeSync();
+                startSync(false);
             }
         };
 
@@ -158,20 +170,19 @@ public class LocationService extends Service implements LocationSync.Callback {
             public void run() {
                 mLocationRepository.setLocationDeleted(locationId);
                 broadcastSuccess(ACTION_DELETE);
-                executeSync();
+                startSync(false);
             }
         };
 
         new Thread(r).start();
     }
 
-    private void executeSync() {
-        if (mLocationSync != null) {
-            return;
-        }
-        mLocationSync = new LocationSync(mApplication);
-        mLocationSync.setCallback(this);
-        mLocationSync.execute();
+    private void startSync(boolean restart) {
+        // TODO!!!
+    }
+
+    private void stopSync() {
+        // TODO!!!
     }
 
     // --- Sync callbacks ---

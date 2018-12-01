@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.kellnhofer.tracker.Injector;
@@ -67,6 +69,26 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
 
         mPresenter.onPause();
         mPresenter.removeObserver(this);
+    }
+
+    // --- Action bar callback methods ---
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_locations_action, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_settings:
+                mPresenter.startSettingsActivity();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     // --- Presenter callback methods ---
