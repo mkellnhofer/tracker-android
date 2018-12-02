@@ -20,12 +20,13 @@ import com.kellnhofer.tracker.rest.LocationApi;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class LocationSync {
+public class LocationSyncThread extends Thread {
 
-    private static final String LOG_TAG = LocationSync.class.getSimpleName();
+    private static final String LOG_TAG = LocationSyncThread.class.getSimpleName();
 
     public interface Callback {
         void onSyncSuccess();
+        void onSyncCancel();
         void onSyncError(LocationError error);
     }
 
@@ -52,7 +53,7 @@ public class LocationSync {
 
     private Callback mCallback;
 
-    public LocationSync(TrackerApplication application) {
+    public LocationSyncThread(TrackerApplication application) {
         mApplication = application;
 
         mLocationRepository = Injector.getLocationRepository(mApplication);
@@ -64,18 +65,21 @@ public class LocationSync {
         mCallback = callback;
     }
 
-    public void execute() {
+    @Override
+    public void run() {
         try {
             downSync();
             upSync();
             downSync();
             notifySuccess();
+        } catch (InterruptedException e) {
+            notifyCancel();
         } catch (SyncException e) {
             notifyError(e.getError());
         }
     }
 
-    private void downSync() throws SyncException {
+    private void downSync() throws InterruptedException, SyncException {
         TrackerStates states = mApplication.getStates();
         // Get last sync version
         long lastSyncVersion = states.getLastSyncVersion();
@@ -85,6 +89,10 @@ public class LocationSync {
         downSyncDeleted(lastSyncVersion);
         // Update last sync version
         states.setLastSyncVersion(newSyncVersion);
+        // If canceled: Abort
+        if (interrupted()) {
+            throw new InterruptedException();
+        }
     }
 
     private long downSyncChanged(long lastSyncVersion) throws SyncException {
@@ -205,7 +213,7 @@ public class LocationSync {
         mPersonRepository.deleteUnusedPersons();
     }
 
-    private void upSync() throws SyncException {
+    private void upSync() throws InterruptedException, SyncException {
         // Get local changed or deleted locations
         List<Location> locations = mLocationRepository.getChangedOrDeletedLocations();
 
@@ -217,6 +225,10 @@ public class LocationSync {
             // Sync deleted location
             } else if (location.isDeleted()) {
                 upSyncDeleted(location);
+            }
+            // If canceled: Abort
+            if (interrupted()) {
+                throw new InterruptedException();
             }
         }
     }
@@ -308,6 +320,12 @@ public class LocationSync {
     private void notifySuccess() {
         if (mCallback != null) {
             mCallback.onSyncSuccess();
+        }
+    }
+
+    private void notifyCancel() {
+        if (mCallback != null) {
+            mCallback.onSyncCancel();
         }
     }
 

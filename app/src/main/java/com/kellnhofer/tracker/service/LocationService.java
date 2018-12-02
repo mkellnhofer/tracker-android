@@ -3,6 +3,7 @@ package com.kellnhofer.tracker.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -15,7 +16,7 @@ import com.kellnhofer.tracker.data.PersonRepository;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 
-public class LocationService extends Service implements LocationSync.Callback {
+public class LocationService extends Service implements LocationSyncThread.Callback {
 
     private static final String LOG_TAG = LocationService.class.getSimpleName();
 
@@ -43,7 +44,7 @@ public class LocationService extends Service implements LocationSync.Callback {
     private LocationRepository mLocationRepository;
     private PersonRepository mPersonRepository;
 
-    private LocationSync mLocationSync = null;
+    private LocationSyncThread mSyncThread = null;
 
     @Override
     public void onCreate() {
@@ -82,10 +83,10 @@ public class LocationService extends Service implements LocationSync.Callback {
                 deleteLocation(getLocationIdFromIntent(intent));
                 break;
             case ACTION_START_SYNC:
-                // TODO!!!
+                startSync(true);
                 break;
             case ACTION_STOP_SYNC:
-                // TODO!!!
+                stopSync();
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported action '" + action + "'!");
@@ -178,23 +179,57 @@ public class LocationService extends Service implements LocationSync.Callback {
     }
 
     private void startSync(boolean restart) {
-        // TODO!!!
+        if (!mSettings.isSyncEnabled()) {
+            return;
+        }
+
+        if (restart) {
+            stopSync();
+        }
+
+        if (mSyncThread != null) {
+            Log.d(LOG_TAG, "Location sync is already running. No need to start sync.");
+            return;
+        }
+
+        Log.i(LOG_TAG, "Starting location sync ...");
+
+        mSyncThread = new LocationSyncThread(mApplication);
+        mSyncThread.setCallback(this);
+        mSyncThread.start();
     }
 
     private void stopSync() {
-        // TODO!!!
+        if (mSyncThread == null) {
+            return;
+        }
+
+        Log.i(LOG_TAG, "Stopping location sync ...");
+
+        if (mSyncThread.isAlive()) {
+            mSyncThread.interrupt();
+        }
+
+        mSyncThread = null;
     }
 
     // --- Sync callbacks ---
 
     @Override
     public void onSyncSuccess() {
-        mLocationSync = null;
+        Log.i(LOG_TAG, "Location sync finished.");
+        mSyncThread = null;
+    }
+
+    @Override
+    public void onSyncCancel() {
+        Log.i(LOG_TAG, "Location sync canceled.");
     }
 
     @Override
     public void onSyncError(LocationError error) {
-        mLocationSync = null;
+        Log.i(LOG_TAG, "Location sync failed.");
+        mSyncThread = null;
     }
 
     // --- Helper methods ---
