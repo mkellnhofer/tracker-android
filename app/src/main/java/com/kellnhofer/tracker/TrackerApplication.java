@@ -97,7 +97,7 @@ public class TrackerApplication extends Application {
         Log.d(LOG_TAG, "Init Retrofit.");
 
         mRetrofit = new Retrofit.Builder()
-                .baseUrl(mSettings.getServerUrl())
+                .baseUrl(mSettings.getServerUrl() + "/")
                 .client(mOkHttpClient)
                 .addConverterFactory(GsonConverterFactory.create(mGson))
                 .build();
