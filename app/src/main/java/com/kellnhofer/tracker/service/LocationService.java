@@ -118,7 +118,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
                 mLocationRepository.saveLocation(location);
 
                 broadcastSuccess(ACTION_CREATE);
-                startSync(false);
             }
         };
 
@@ -143,7 +142,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
                 mPersonRepository.deleteUnusedPersons();
 
                 broadcastSuccess(ACTION_UPDATE);
-                startSync(false);
             }
         };
 
@@ -171,7 +169,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
             public void run() {
                 mLocationRepository.setLocationDeleted(locationId);
                 broadcastSuccess(ACTION_DELETE);
-                startSync(false);
             }
         };
 
