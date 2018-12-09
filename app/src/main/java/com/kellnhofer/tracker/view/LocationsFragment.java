@@ -19,6 +19,7 @@ import java.util.List;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.presenter.LocationsContract;
+import com.kellnhofer.tracker.service.LocationSyncError;
 
 public class LocationsFragment extends Fragment implements LocationsAdapter.LocationItemListener,
         LocationsContract.Observer, LoaderManager.LoaderCallbacks<List<Location>> {
@@ -109,6 +110,21 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
         if (mLoader != null) {
             mLoader.onContentChanged();
         }
+    }
+
+    @Override
+    public void onSyncStarted() {
+
+    }
+
+    @Override
+    public void onSyncFinished() {
+
+    }
+
+    @Override
+    public void onSyncFailed(LocationSyncError error) {
+
     }
 
     // --- Loader methods ---

@@ -27,16 +27,28 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     public static final String ACTION_START_SYNC = BuildConfig.APPLICATION_ID + ".action.START_SYNC";
     public static final String ACTION_STOP_SYNC = BuildConfig.APPLICATION_ID + ".action.STOP_SYNC";
 
-    public static final String EVENT_SUCCESS = BuildConfig.APPLICATION_ID + ".event.LOCATIONS_SUCCESS";
-    public static final String EVENT_ERROR = BuildConfig.APPLICATION_ID + ".event.LOCATIONS_ERROR";
-
     public static final String EXTRA_ID = "ID";
     public static final String EXTRA_LOCATION = "LOCATION";
     public static final String EXTRA_PERSONS = "PERSONS";
     public static final String EXTRA_FORCE = "FORCE";
 
-    public static final String EXTRA_ACTION = "ACTION";
-    public static final String EXTRA_ERROR = "ERROR";
+    public class Binder extends android.os.Binder {
+        public LocationService getService() {
+            return LocationService.this;
+        }
+    }
+
+    public interface Callback {
+        void onLocationCreated(long locationId);
+        void onLocationUpdated(long locationId);
+        void onLocationDeleted(long locationId);
+
+        void onSyncStarted();
+        void onSyncFinished();
+        void onSyncFailed(LocationSyncError error);
+    }
+
+    private final IBinder mBinder = new Binder();
 
     private TrackerApplication mApplication;
     private TrackerSettings mSettings;
@@ -44,7 +56,10 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     private LocationRepository mLocationRepository;
     private PersonRepository mPersonRepository;
 
+    private Callback mCallback;
+
     private LocationSyncThread mSyncThread = null;
+    private LocationSyncState mLastSyncState = null;
 
     @Override
     public void onCreate() {
@@ -59,14 +74,22 @@ public class LocationService extends Service implements LocationSyncThread.Callb
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
+    }
+
+    public void setCallback(Callback callback) {
+        if (callback != null) {
+            notifyLastSyncState(callback);
+        }
+
+        mCallback = callback;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
         if (action == null) {
-            throw new IllegalStateException("Action missing!");
+            return START_NOT_STICKY;
         }
 
         switch(action) {
@@ -102,9 +125,9 @@ public class LocationService extends Service implements LocationSyncThread.Callb
                 ArrayList<Long> pIds = getPersonIds(persons);
                 location.setPersonIds(pIds);
 
-                mLocationRepository.saveLocation(location);
+                long locationId = mLocationRepository.saveLocation(location);
 
-                broadcastSuccess(ACTION_CREATE);
+                notifyLocationCreated(locationId);
             }
         };
 
@@ -125,10 +148,10 @@ public class LocationService extends Service implements LocationSyncThread.Callb
                 ArrayList<Long> pIds = getPersonIds(persons);
                 location.setPersonIds(pIds);
 
-                mLocationRepository.saveLocation(location);
+                long locationId = mLocationRepository.saveLocation(location);
                 mPersonRepository.deleteUnusedPersons();
 
-                broadcastSuccess(ACTION_UPDATE);
+                notifyLocationUpdated(locationId);
             }
         };
 
@@ -155,7 +178,8 @@ public class LocationService extends Service implements LocationSyncThread.Callb
             @Override
             public void run() {
                 mLocationRepository.setLocationDeleted(locationId);
-                broadcastSuccess(ACTION_DELETE);
+
+                notifyLocationDeleted(locationId);
             }
         };
 
@@ -200,20 +224,35 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     // --- Sync callbacks ---
 
     @Override
-    public void onSyncSuccess() {
+    public void onSyncStarted() {
+        Log.i(LOG_TAG, "Location sync started.");
+
+        notifySyncStarted();
+    }
+
+    @Override
+    public void onSyncFinished() {
         Log.i(LOG_TAG, "Location sync finished.");
+
         mSyncThread = null;
+
+        notifySyncFinished();
     }
 
     @Override
-    public void onSyncCancel() {
+    public void onSyncCanceled() {
         Log.i(LOG_TAG, "Location sync canceled.");
+
+        mSyncThread = null;
     }
 
     @Override
-    public void onSyncError(LocationError error) {
-        Log.i(LOG_TAG, "Location sync failed.");
+    public void onSyncFailed(LocationSyncError error) {
+        Log.e(LOG_TAG, "Location sync failed.");
+
         mSyncThread = null;
+
+        notifySyncFailed(error);
     }
 
     // --- Helper methods ---
@@ -230,16 +269,61 @@ public class LocationService extends Service implements LocationSyncThread.Callb
         return intent.getParcelableArrayListExtra(EXTRA_PERSONS);
     }
 
-    private void broadcastSuccess(String action) {
-        Intent i = new Intent(EVENT_SUCCESS);
-        i.putExtra(EXTRA_ACTION, action);
-        sendBroadcast(i);
+    private void notifyLocationCreated(long locationId) {
+        if (mCallback != null) {
+            mCallback.onLocationCreated(locationId);
+        }
     }
 
-    private void broadcastError(LocationError error) {
-        Intent i = new Intent(EVENT_ERROR);
-        i.putExtra(EXTRA_ERROR, error.ordinal());
-        sendBroadcast(i);
+    private void notifyLocationUpdated(long locationId) {
+        if (mCallback != null) {
+            mCallback.onLocationUpdated(locationId);
+        }
+    }
+
+    private void notifyLocationDeleted(long locationId) {
+        if (mCallback != null) {
+            mCallback.onLocationDeleted(locationId);
+        }
+    }
+
+    private void notifySyncStarted() {
+        if (mCallback != null) {
+            mCallback.onSyncStarted();
+        }
+    }
+
+    private void notifySyncFinished() {
+        if (mCallback != null) {
+            mCallback.onSyncFinished();
+        }
+    }
+
+    private void notifySyncFailed(LocationSyncError error) {
+        if (mCallback != null) {
+            mCallback.onSyncFailed(error);
+        } else {
+            mLastSyncState = LocationSyncState.createFailedState(error);
+        }
+    }
+
+    private void notifyLastSyncState(Callback callback) {
+        if (mLastSyncState == null) {
+            return;
+        }
+        switch (mLastSyncState.getState()) {
+            case LocationSyncState.STATE_STARTED:
+                callback.onSyncStarted();
+                break;
+            case LocationSyncState.STATE_FINISHED:
+                callback.onSyncFinished();
+                break;
+            case LocationSyncState.STATE_FAILED:
+                callback.onSyncFailed(mLastSyncState.getError());
+                break;
+            default:
+        }
+        mLastSyncState = null;
     }
 
 }

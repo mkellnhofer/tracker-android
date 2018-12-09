@@ -1,9 +1,11 @@
 package com.kellnhofer.tracker.service;
 
-import android.content.BroadcastReceiver;
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 
 import java.util.ArrayList;
 
@@ -13,48 +15,84 @@ import com.kellnhofer.tracker.model.Person;
 public class LocationServiceAdapter {
 
     public interface Listener {
-        void onServiceSuccess();
-        void onServiceError();
+        void onLocationCreated(long locationId);
+        void onLocationUpdated(long locationId);
+        void onLocationDeleted(long locationId);
+
+        void onSyncStarted();
+        void onSyncFinished();
+        void onSyncFailed(LocationSyncError error);
     }
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case LocationService.EVENT_SUCCESS:
-                    mListener.onServiceSuccess();
-                    break;
-                case LocationService.EVENT_ERROR:
-                    mListener.onServiceError();
-                    break;
-                default:
-            }
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocationService.Binder binder = (LocationService.Binder) service;
+            mService = binder.getService();
+            mService.setCallback(new LocationService.Callback() {
+                @Override
+                public void onLocationCreated(long locationId) {
+                    mListener.onLocationCreated(locationId);
+                }
+
+                @Override
+                public void onLocationUpdated(long locationId) {
+                    mListener.onLocationUpdated(locationId);
+                }
+
+                @Override
+                public void onLocationDeleted(long locationId) {
+                    mListener.onLocationDeleted(locationId);
+                }
+
+                @Override
+                public void onSyncStarted() {
+                    mListener.onSyncStarted();
+                }
+
+                @Override
+                public void onSyncFinished() {
+                    mListener.onSyncFinished();
+                }
+
+                @Override
+                public void onSyncFailed(LocationSyncError error) {
+                    mListener.onSyncFailed(error);
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
         }
     };
 
     private Context mContext;
 
-    private boolean mIsReceiverRegistered = false;
+    private LocationService mService;
+
     private Listener mListener;
 
     public LocationServiceAdapter(Context context) {
         mContext = context;
     }
 
-    public void addListener(Listener listener) {
+    public void setListener(Listener listener) {
         mListener = listener;
 
-        IntentFilter f = new IntentFilter();
-        f.addAction(LocationService.EVENT_SUCCESS);
-        f.addAction(LocationService.EVENT_ERROR);
-        mContext.registerReceiver(mReceiver, f);
-        mIsReceiverRegistered = true;
+        if (mService == null) {
+            mContext.startService(new Intent(mContext, LocationService.class));
+            mContext.bindService(new Intent(mContext, LocationService.class),
+                    mServiceConnection, Service.BIND_AUTO_CREATE);
+        }
     }
 
     public void removeListener() {
-        if (mIsReceiverRegistered) {
-            mIsReceiverRegistered = false;
-            mContext.unregisterReceiver(mReceiver);
+        if (mService != null) {
+            mService.setCallback(null);
+            mService = null;
+            mContext.unbindService(mServiceConnection);
         }
 
         mListener = null;

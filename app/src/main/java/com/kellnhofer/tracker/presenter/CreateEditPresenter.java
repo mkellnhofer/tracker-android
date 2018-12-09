@@ -5,6 +5,7 @@ import android.content.Context;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import com.kellnhofer.tracker.data.PersonRepository;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
+import com.kellnhofer.tracker.service.LocationSyncError;
 
 public class CreateEditPresenter implements CreateEditContract.Presenter,
         LocationServiceAdapter.Listener, LocationListener {
@@ -62,13 +64,14 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     @Override
     public void onResume() {
-        mService.addListener(this);
+        mService.setListener(this);
     }
 
     @Override
     public void onPause() {
-        mLocationManager.removeUpdates(this);
         mService.removeListener();
+
+        mLocationManager.removeUpdates(this);
     }
 
     @Override
@@ -118,13 +121,47 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
     // --- Service callback methods ---
 
     @Override
-    public void onServiceSuccess() {
-        Log.d(LOG_TAG, "onServiceSuccess");
+    public void onLocationCreated(long locationId) {
+        executeOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (CreateEditContract.Observer observer : mObservers) {
+                    observer.onLocationCreated();
+                }
+            }
+        });
     }
 
     @Override
-    public void onServiceError() {
-        Log.d(LOG_TAG, "onServiceError");
+    public void onLocationUpdated(long locationId) {
+        executeOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (CreateEditContract.Observer observer : mObservers) {
+                    observer.onLocationUpdated();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onLocationDeleted(long locationId) {
+
+    }
+
+    @Override
+    public void onSyncStarted() {
+
+    }
+
+    @Override
+    public void onSyncFinished() {
+
+    }
+
+    @Override
+    public void onSyncFailed(LocationSyncError error) {
+
     }
 
     // --- GPS location callback methods ---
@@ -153,6 +190,13 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
     @Override
     public void onProviderDisabled(String provider) {
         Log.d(LOG_TAG, "Provider disabled.");
+    }
+
+    // --- Helper methods ---
+
+    private void executeOnMainThread(Runnable runnable) {
+        Handler mainHandler = new Handler(mContext.getMainLooper());
+        mainHandler.post(runnable);
     }
 
 }

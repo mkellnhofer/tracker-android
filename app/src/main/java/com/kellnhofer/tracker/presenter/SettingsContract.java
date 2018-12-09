@@ -1,5 +1,7 @@
 package com.kellnhofer.tracker.presenter;
 
+import com.kellnhofer.tracker.service.LocationSyncError;
+
 public interface SettingsContract {
 
     interface Presenter {
@@ -11,7 +13,9 @@ public interface SettingsContract {
     }
 
     interface Observer {
-
+        void onSyncStarted();
+        void onSyncFinished();
+        void onSyncFailed(LocationSyncError error);
     }
 
 }

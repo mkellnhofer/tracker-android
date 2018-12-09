@@ -309,6 +309,16 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     // --- Presenter callback methods ---
 
     @Override
+    public void onLocationCreated() {
+        finish();
+    }
+
+    @Override
+    public void onLocationUpdated() {
+        finish();
+    }
+
+    @Override
     public void onGpsLocationChanged(LatLng latLng) {
         mUseGpsLocation = true;
         setGpsFabColor(R.color.color_accent);
@@ -328,8 +338,6 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         ArrayList<Person> persons = toPersonList(personNames);
 
         mPresenter.createLocation(location, persons);
-
-        finish();
     }
 
     private void updateLocation(String name, Date date, LatLng latLng,
@@ -344,8 +352,6 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         ArrayList<Person> persons = toPersonList(personNames);
 
         mPresenter.updateLocation(location, persons);
-
-        finish();
     }
 
     // --- Helper methods ---

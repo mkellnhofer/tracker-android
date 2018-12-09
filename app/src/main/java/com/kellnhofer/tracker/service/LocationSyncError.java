@@ -1,6 +1,6 @@
 package com.kellnhofer.tracker.service;
 
-public enum LocationError {
+public enum LocationSyncError {
     COMMUNICATION_ERROR,
     UNAUTHORIZED,
     BAD_REQUEST,

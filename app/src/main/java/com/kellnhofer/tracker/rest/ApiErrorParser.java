@@ -1,19 +1,19 @@
 package com.kellnhofer.tracker.rest;
 
-import com.kellnhofer.tracker.service.LocationError;
+import com.kellnhofer.tracker.service.LocationSyncError;
 
 public class ApiErrorParser {
 
-    public static LocationError parseError(int code) {
+    public static LocationSyncError parseError(int code) {
         switch (code) {
             case 400:
-                return LocationError.BAD_REQUEST;
+                return LocationSyncError.BAD_REQUEST;
             case 401:
-                return LocationError.UNAUTHORIZED;
+                return LocationSyncError.UNAUTHORIZED;
             case 404:
-                return LocationError.LOCATION_NOT_FOUND;
+                return LocationSyncError.LOCATION_NOT_FOUND;
             default:
-                return LocationError.SERVER_ERROR;
+                return LocationSyncError.SERVER_ERROR;
         }
     }
 

@@ -22,8 +22,6 @@ import com.kellnhofer.tracker.presenter.LatLng;
 public class CreateEditFragment extends Fragment implements OnMapReadyCallback, OnMapClickListener,
         CreateEditContract.Observer {
 
-    private static final String LOG_TAG = CreateEditFragment.class.getSimpleName();
-
     private static final String STATE_MAP_VIEW = "map_view";
     private static final String STATE_MAP_VIEW_INITIALIZED = "map_view_initialized";
     private static final String STATE_MAP_VIEW_CENTERED = "map_view_centered";
@@ -190,6 +188,16 @@ public class CreateEditFragment extends Fragment implements OnMapReadyCallback, 
     }
 
     // --- Presenter callback methods ---
+
+    @Override
+    public void onLocationCreated() {
+
+    }
+
+    @Override
+    public void onLocationUpdated() {
+
+    }
 
     @Override
     public void onGpsLocationChanged(LatLng latLng) {

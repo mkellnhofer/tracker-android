@@ -3,6 +3,7 @@ package com.kellnhofer.tracker.presenter;
 import java.util.ArrayList;
 
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.service.LocationSyncError;
 
 public interface LocationsContract {
 
@@ -22,6 +23,9 @@ public interface LocationsContract {
 
     interface Observer {
         void onLocationsChanged();
+        void onSyncStarted();
+        void onSyncFinished();
+        void onSyncFailed(LocationSyncError error);
     }
 
 }

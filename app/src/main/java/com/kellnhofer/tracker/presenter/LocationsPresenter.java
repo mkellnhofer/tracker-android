@@ -3,7 +3,6 @@ package com.kellnhofer.tracker.presenter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,14 +11,13 @@ import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
+import com.kellnhofer.tracker.service.LocationSyncError;
 import com.kellnhofer.tracker.view.CreateEditActivity;
 import com.kellnhofer.tracker.view.SettingsActivity;
 import com.kellnhofer.tracker.view.ViewActivity;
 
 public class LocationsPresenter implements LocationsContract.Presenter,
         LocationServiceAdapter.Listener, LocationRepository.LocationRepositoryObserver {
-
-    private static final String LOG_TAG = LocationsPresenter.class.getSimpleName();
 
     private Context mContext;
     private TrackerApplication mApplication;
@@ -55,7 +53,7 @@ public class LocationsPresenter implements LocationsContract.Presenter,
     @Override
     public void onResume() {
         mRepository.addContentObserver(this);
-        mService.addListener(this);
+        mService.setListener(this);
 
         mService.startSync(false);
     }
@@ -92,30 +90,75 @@ public class LocationsPresenter implements LocationsContract.Presenter,
     // --- Service callback methods ---
 
     @Override
-    public void onServiceSuccess() {
-        Log.d(LOG_TAG, "onServiceSuccess");
+    public void onLocationCreated(long locationId) {
+
     }
 
     @Override
-    public void onServiceError() {
-        Log.d(LOG_TAG, "onServiceError");
+    public void onLocationUpdated(long locationId) {
+
+    }
+
+    @Override
+    public void onLocationDeleted(long locationId) {
+
+    }
+
+    @Override
+    public void onSyncStarted() {
+        executeOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (LocationsContract.Observer observer : mObservers) {
+                    observer.onSyncStarted();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onSyncFinished() {
+        executeOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (LocationsContract.Observer observer : mObservers) {
+                    observer.onSyncFinished();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onSyncFailed(final LocationSyncError error) {
+        executeOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (LocationsContract.Observer observer : mObservers) {
+                    observer.onSyncFailed(error);
+                }
+            }
+        });
     }
 
     // --- Repository callback methods ---
 
     @Override
     public void onLocationChanged() {
-        Runnable myRunnable = new Runnable() {
+        executeOnMainThread(new Runnable() {
             @Override
             public void run() {
                 for (LocationsContract.Observer observer : mObservers) {
                     observer.onLocationsChanged();
                 }
             }
-        };
+        });
+    }
 
+    // --- Helper methods ---
+
+    private void executeOnMainThread(Runnable runnable) {
         Handler mainHandler = new Handler(mContext.getMainLooper());
-        mainHandler.post(myRunnable);
+        mainHandler.post(runnable);
     }
 
 }

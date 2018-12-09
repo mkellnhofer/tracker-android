@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.kellnhofer.tracker.BuildConfig;
 import com.kellnhofer.tracker.Injector;
@@ -12,9 +13,12 @@ import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.TrackerSettings;
 import com.kellnhofer.tracker.presenter.SettingsContract;
 import com.kellnhofer.tracker.presenter.SettingsPresenter;
+import com.kellnhofer.tracker.service.LocationSyncError;
 
 public class SettingsActivity extends AppCompatActivity implements SettingsContract.Observer,
         ServerUrlDialogFragment.Listener {
+
+    private static final String LOG_TAG = SettingsActivity.class.getSimpleName();
 
     private static final String FRAGMENT_TAG_SETTINGS = "settings_fragment";
     private static final String DIALOG_FRAGMENT_TAG_SERVER_URL = "server_url_dialog_fragment";
@@ -97,6 +101,26 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     public void onServerUrlClicked() {
         showServerUrlDialog();
+    }
+
+    // --- Presenter callback methods ---
+
+    @Override
+    public void onSyncStarted() {
+        Log.d(LOG_TAG, "onSyncStarted");
+        // TODO!!!
+    }
+
+    @Override
+    public void onSyncFinished() {
+        Log.d(LOG_TAG, "onSyncFinished");
+        // TODO!!!
+    }
+
+    @Override
+    public void onSyncFailed(LocationSyncError error) {
+        Log.d(LOG_TAG, "onSyncFailed");
+        // TODO!!!
     }
 
     // --- Dialog methods ---

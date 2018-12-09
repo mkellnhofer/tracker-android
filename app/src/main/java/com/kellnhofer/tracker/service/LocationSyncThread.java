@@ -25,21 +25,22 @@ public class LocationSyncThread extends Thread {
     private static final String LOG_TAG = LocationSyncThread.class.getSimpleName();
 
     public interface Callback {
-        void onSyncSuccess();
-        void onSyncCancel();
-        void onSyncError(LocationError error);
+        void onSyncStarted();
+        void onSyncFinished();
+        void onSyncCanceled();
+        void onSyncFailed(LocationSyncError error);
     }
 
     protected static class SyncException extends Exception {
 
-        private final LocationError mError;
+        private final LocationSyncError mError;
 
-        public SyncException(LocationError code) {
+        public SyncException(LocationSyncError error) {
             super();
-            mError = code;
+            mError = error;
         }
 
-        public LocationError getError() {
+        public LocationSyncError getError() {
             return mError;
         }
 
@@ -68,14 +69,15 @@ public class LocationSyncThread extends Thread {
     @Override
     public void run() {
         try {
+            notifyStarted();
             downSync();
             upSync();
             downSync();
-            notifySuccess();
+            notifyFinished();
         } catch (InterruptedException e) {
-            notifyCancel();
+            notifyCanceled();
         } catch (SyncException e) {
-            notifyError(e.getError());
+            notifyFailed(e.getError());
         }
     }
 
@@ -103,14 +105,14 @@ public class LocationSyncThread extends Thread {
             response = call.execute();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Server communication failed at down sync of changed locations.", e);
-            throw new SyncException(LocationError.COMMUNICATION_ERROR);
+            throw new SyncException(LocationSyncError.COMMUNICATION_ERROR);
         }
 
         // Check response
         if (!response.isSuccessful()) {
             Log.e(LOG_TAG, String.format("Server call at down sync of changed locations failed " +
                     "with %d.", response.code()));
-            LocationError error = ApiErrorParser.parseError(response.code());
+            LocationSyncError error = ApiErrorParser.parseError(response.code());
             throw new SyncException(error);
         }
 
@@ -180,14 +182,14 @@ public class LocationSyncThread extends Thread {
             response = call.execute();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Server communication failed at down sync of deleted locations.", e);
-            throw new SyncException(LocationError.COMMUNICATION_ERROR);
+            throw new SyncException(LocationSyncError.COMMUNICATION_ERROR);
         }
 
         // Check response
         if (!response.isSuccessful()) {
             Log.e(LOG_TAG, String.format("Server call at down sync of deleted locations failed " +
                     "with %d.", response.code()));
-            LocationError error = ApiErrorParser.parseError(response.code());
+            LocationSyncError error = ApiErrorParser.parseError(response.code());
             throw new SyncException(error);
         }
 
@@ -256,14 +258,14 @@ public class LocationSyncThread extends Thread {
             response = call.execute();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Server communication failed at up sync of changed locations.", e);
-            throw new SyncException(LocationError.COMMUNICATION_ERROR);
+            throw new SyncException(LocationSyncError.COMMUNICATION_ERROR);
         }
 
         // Check response
         if (!response.isSuccessful()) {
             Log.e(LOG_TAG, String.format("Server call at up sync of changed locations failed " +
                     "with %d.", response.code()));
-            LocationError error = ApiErrorParser.parseError(response.code());
+            LocationSyncError error = ApiErrorParser.parseError(response.code());
             throw new SyncException(error);
         }
 
@@ -299,14 +301,14 @@ public class LocationSyncThread extends Thread {
                 response = call.execute();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Server communication failed at up sync of deleted locations.", e);
-                throw new SyncException(LocationError.COMMUNICATION_ERROR);
+                throw new SyncException(LocationSyncError.COMMUNICATION_ERROR);
             }
 
             // Check response
             if (!response.isSuccessful()) {
                 Log.e(LOG_TAG, String.format("Server call at up sync of deleted locations failed " +
                         "with %d.", response.code()));
-                LocationError error = ApiErrorParser.parseError(response.code());
+                LocationSyncError error = ApiErrorParser.parseError(response.code());
                 throw new SyncException(error);
             }
         }
@@ -317,21 +319,27 @@ public class LocationSyncThread extends Thread {
 
     // --- Helper methods ---
 
-    private void notifySuccess() {
+    private void notifyStarted() {
         if (mCallback != null) {
-            mCallback.onSyncSuccess();
+            mCallback.onSyncStarted();
         }
     }
 
-    private void notifyCancel() {
+    private void notifyFinished() {
         if (mCallback != null) {
-            mCallback.onSyncCancel();
+            mCallback.onSyncFinished();
         }
     }
 
-    private void notifyError(LocationError error) {
+    private void notifyCanceled() {
         if (mCallback != null) {
-            mCallback.onSyncError(error);
+            mCallback.onSyncCanceled();
+        }
+    }
+
+    private void notifyFailed(LocationSyncError error) {
+        if (mCallback != null) {
+            mCallback.onSyncFailed(error);
         }
     }
 
