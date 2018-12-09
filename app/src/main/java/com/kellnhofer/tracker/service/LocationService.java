@@ -20,7 +20,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
 
     private static final String LOG_TAG = LocationService.class.getSimpleName();
 
-    public static final String ACTION_REFRESH = BuildConfig.APPLICATION_ID + ".action.LOCATIONS_REFRESH";
     public static final String ACTION_CREATE = BuildConfig.APPLICATION_ID + ".action.LOCATION_CREATE";
     public static final String ACTION_UPDATE = BuildConfig.APPLICATION_ID + ".action.LOCATION_UPDATE";
     public static final String ACTION_DELETE = BuildConfig.APPLICATION_ID + ".action.LOCATION_DELETE";
@@ -34,6 +33,7 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     public static final String EXTRA_ID = "ID";
     public static final String EXTRA_LOCATION = "LOCATION";
     public static final String EXTRA_PERSONS = "PERSONS";
+    public static final String EXTRA_FORCE = "FORCE";
 
     public static final String EXTRA_ACTION = "ACTION";
     public static final String EXTRA_ERROR = "ERROR";
@@ -70,9 +70,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
         }
 
         switch(action) {
-            case ACTION_REFRESH:
-                syncLocations();
-                break;
             case ACTION_CREATE:
                 createLocation(getLocationFromIntent(intent), getPersonsFromIntent(intent));
                 break;
@@ -83,7 +80,8 @@ public class LocationService extends Service implements LocationSyncThread.Callb
                 deleteLocation(getLocationIdFromIntent(intent));
                 break;
             case ACTION_START_SYNC:
-                startSync(true);
+                boolean force = intent.getBooleanExtra(EXTRA_FORCE, false);
+                startSync(force);
                 break;
             case ACTION_STOP_SYNC:
                 stopSync();
@@ -93,17 +91,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
         }
 
         return START_NOT_STICKY;
-    }
-
-    private void syncLocations() {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                startSync(false);
-            }
-        };
-
-        new Thread(r).start();
     }
 
     private void createLocation(final Location location, final ArrayList<Person> persons) {

@@ -57,7 +57,7 @@ public class LocationsPresenter implements LocationsContract.Presenter,
         mRepository.addContentObserver(this);
         mService.addListener(this);
 
-        mService.fetchLocations();
+        mService.startSync(false);
     }
 
     @Override

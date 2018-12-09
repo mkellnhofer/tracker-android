@@ -60,12 +60,6 @@ public class LocationServiceAdapter {
         mListener = null;
     }
 
-    public void fetchLocations() {
-        Intent intent = new Intent(mContext, LocationService.class);
-        intent.setAction(LocationService.ACTION_REFRESH);
-        mContext.startService(intent);
-    }
-
     public void createLocation(Location location, ArrayList<Person> persons) {
         Intent intent = new Intent(mContext, LocationService.class);
         intent.setAction(LocationService.ACTION_CREATE);
@@ -89,9 +83,10 @@ public class LocationServiceAdapter {
         mContext.startService(intent);
     }
 
-    public void startSync() {
+    public void startSync(boolean force) {
         Intent intent = new Intent(mContext, LocationService.class);
         intent.setAction(LocationService.ACTION_START_SYNC);
+        intent.putExtra(LocationService.EXTRA_FORCE, force);
         mContext.startService(intent);
     }
 

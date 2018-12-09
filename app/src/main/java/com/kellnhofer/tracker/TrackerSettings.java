@@ -77,7 +77,7 @@ public class TrackerSettings implements SharedPreferences.OnSharedPreferenceChan
 
     private void handleSyncEnabled() {
         if (isSyncEnabled()) {
-            mService.startSync();
+            mService.startSync(true);
         } else {
             mService.stopSync();
         }
@@ -86,7 +86,7 @@ public class TrackerSettings implements SharedPreferences.OnSharedPreferenceChan
     private void handleServerUrlChanged() {
         mApplication.initRetrofit();
         if (isSyncEnabled()) {
-            mService.startSync();
+            mService.startSync(true);
         }
     }
 
@@ -94,7 +94,7 @@ public class TrackerSettings implements SharedPreferences.OnSharedPreferenceChan
         mApplication.initOkHttp();
         mApplication.initRetrofit();
         if (isSyncEnabled()) {
-            mService.startSync();
+            mService.startSync(true);
         }
     }
 
