@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 
 import com.kellnhofer.tracker.BuildConfig;
 import com.kellnhofer.tracker.Injector;
@@ -16,12 +15,11 @@ import com.kellnhofer.tracker.presenter.SettingsPresenter;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
 public class SettingsActivity extends AppCompatActivity implements SettingsContract.Observer,
-        ServerUrlDialogFragment.Listener {
-
-    private static final String LOG_TAG = SettingsActivity.class.getSimpleName();
+        ServerUrlDialogFragment.Listener, ErrorDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_SETTINGS = "settings_fragment";
     private static final String DIALOG_FRAGMENT_TAG_SERVER_URL = "server_url_dialog_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_ERROR = "error_dialog_fragment";
 
     private TrackerApplication mApplication;
 
@@ -30,6 +28,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     private SettingsContract.Presenter mPresenter;
 
     private SettingsFragment mFragment;
+    private ErrorDialogFragment mErrorDialogFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +59,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         } else {
             mFragment = (SettingsFragment) getFragmentManager().findFragmentByTag(
                     FRAGMENT_TAG_SETTINGS);
+            mErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager().findFragmentByTag(
+                    DIALOG_FRAGMENT_TAG_ERROR);
         }
     }
 
@@ -107,20 +108,17 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void onSyncStarted() {
-        Log.d(LOG_TAG, "onSyncStarted");
-        // TODO!!!
+
     }
 
     @Override
     public void onSyncFinished() {
-        Log.d(LOG_TAG, "onSyncFinished");
-        // TODO!!!
+
     }
 
     @Override
     public void onSyncFailed(LocationSyncError error) {
-        Log.d(LOG_TAG, "onSyncFailed");
-        // TODO!!!
+        showErrorDialog(error);
     }
 
     // --- Dialog methods ---
@@ -140,6 +138,28 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     @Override
     public void onServerUrlDialogCancel() {
 
+    }
+
+    private void showErrorDialog(LocationSyncError error) {
+        if (mErrorDialogFragment != null) {
+            return;
+        }
+
+        boolean isCommunicationError = error == LocationSyncError.COMMUNICATION_ERROR;
+        mErrorDialogFragment = ErrorDialogFragment.newInstance(R.string.dialog_title_error,
+                error.getTextResId(), isCommunicationError);
+        mErrorDialogFragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_ERROR);
+    }
+
+    @Override
+    public void onErrorDialogRetry(String tag) {
+        mErrorDialogFragment = null;
+        mPresenter.executeLocationSync();
+    }
+
+    @Override
+    public void onErrorDialogCancel(String tag) {
+        mErrorDialogFragment = null;
     }
 
 }

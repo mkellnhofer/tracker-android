@@ -70,6 +70,11 @@ public class LocationsPresenter implements LocationsContract.Presenter,
     }
 
     @Override
+    public void executeLocationSync() {
+        mService.startSync(false);
+    }
+
+    @Override
     public void startCreateActivity() {
         Intent intent = new Intent(mContext, CreateEditActivity.class);
         mContext.startActivity(intent);

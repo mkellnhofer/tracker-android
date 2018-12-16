@@ -16,6 +16,8 @@ public interface LocationsContract {
 
         ArrayList<Location> getNotDeletedLocationsByDateDesc();
 
+        void executeLocationSync();
+
         void startCreateActivity();
         void startViewActivity(long locationId);
         void startSettingsActivity();

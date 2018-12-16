@@ -51,6 +51,11 @@ public class SettingsPresenter implements SettingsContract.Presenter,
         mService.removeListener();
     }
 
+    @Override
+    public void executeLocationSync() {
+        mService.startSync(false);
+    }
+
     // --- Service callback methods ---
 
     @Override

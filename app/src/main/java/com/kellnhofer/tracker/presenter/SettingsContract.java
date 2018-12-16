@@ -10,6 +10,8 @@ public interface SettingsContract {
 
         void onResume();
         void onPause();
+
+        void executeLocationSync();
     }
 
     interface Observer {

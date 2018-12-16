@@ -14,6 +14,7 @@
     <string name="dialog_title_delete">Delete location</string>
     <string name="dialog_title_view">Details</string>
     <string name="dialog_title_server_url">Server URL</string>
+    <string name="dialog_title_error">Error</string>
 
     <string name="dialog_message_delete">Do you really want to delete this location?</string>
 
@@ -23,6 +24,7 @@
     <string name="action_delete">Delete</string>
     <string name="action_settings">Settings</string>
     <string name="action_ok">OK</string>
+    <string name="action_retry">Retry</string>
     <string name="action_cancel">Cancel</string>
 
     <string name="category_general">General</string>
@@ -41,6 +43,11 @@
     <string name="error_location_date_invalid">Invalid date</string>
     <string name="error_location_person_name_invalid">Invalid name</string>
     <string name="error_server_url_invalid">Invalid server URL</string>
+
+    <string name="error_unknown">A unknown error occurred!</string>
+    <string name="error_server_communication">The server communication failed!</string>
+    <string name="error_server_unauthorized">The server authorization failed!</string>
+    <string name="error_server_internal">A unknown server error occurred!</string>
 
     <string name="day_monday">Mo</string>
     <string name="day_tuesday">Tu</string>

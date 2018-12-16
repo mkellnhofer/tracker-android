@@ -1,10 +1,11 @@
 package com.kellnhofer.tracker.view;
 
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,15 +16,18 @@ import com.kellnhofer.tracker.presenter.LocationsContract;
 import com.kellnhofer.tracker.presenter.LocationsPresenter;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
-public class LocationsActivity extends AppCompatActivity implements LocationsContract.Observer {
-
-    private static final String LOG_TAG = LocationsActivity.class.getSimpleName();
+public class LocationsActivity extends AppCompatActivity implements LocationsContract.Observer,
+        ErrorDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_LOCATIONS = "locations_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_ERROR = "error_dialog_fragment";
 
     private LocationsContract.Presenter mPresenter;
 
     private LocationsFragment mFragment;
+    private ErrorDialogFragment mErrorDialogFragment;
+
+    private CoordinatorLayout mCoordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +37,8 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
                 Injector.getLocationService(this));
 
         setContentView(R.layout.activity_locations);
+
+        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.container_coordinator);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -54,6 +60,8 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
         } else {
             mFragment = (LocationsFragment) getSupportFragmentManager().findFragmentByTag(
                     FRAGMENT_TAG_LOCATIONS);
+            mErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager().findFragmentByTag(
+                    DIALOG_FRAGMENT_TAG_ERROR);
         }
 
         mFragment.setPresenter(mPresenter);
@@ -104,20 +112,57 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
 
     @Override
     public void onSyncStarted() {
-        Log.d(LOG_TAG, "onSyncStarted");
-        // TODO!!!
+
     }
 
     @Override
     public void onSyncFinished() {
-        Log.d(LOG_TAG, "onSyncFinished");
-        // TODO!!!
+
     }
 
     @Override
     public void onSyncFailed(LocationSyncError error) {
-        Log.d(LOG_TAG, "onSyncFailed");
-        // TODO!!!
+        if (error == LocationSyncError.COMMUNICATION_ERROR) {
+            showErrorSnackBar(error);
+        } else {
+            showErrorDialog(error);
+        }
+    }
+
+    // --- Dialog methods ---
+
+    private void showErrorDialog(LocationSyncError error) {
+        if (mErrorDialogFragment != null) {
+            return;
+        }
+
+        mErrorDialogFragment = ErrorDialogFragment.newInstance(R.string.dialog_title_error,
+                error.getTextResId(), false);
+        mErrorDialogFragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_ERROR);
+    }
+
+    @Override
+    public void onErrorDialogRetry(String tag) {
+        mErrorDialogFragment = null;
+    }
+
+    @Override
+    public void onErrorDialogCancel(String tag) {
+        mErrorDialogFragment = null;
+    }
+
+    // --- SnackBar methods ---
+
+    private void showErrorSnackBar(LocationSyncError error) {
+        Snackbar snackbar = Snackbar.make(mCoordinatorLayout, error.getTextResId(),
+                Snackbar.LENGTH_LONG);
+        snackbar.setAction(R.string.action_retry, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.executeLocationSync();
+            }
+        });
+        snackbar.show();
     }
 
 }
