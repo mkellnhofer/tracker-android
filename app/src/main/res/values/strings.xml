@@ -35,12 +35,14 @@
 
     <string name="hint_name">Name</string>
     <string name="hint_date">Date</string>
+    <string name="hint_description">Description</string>
     <string name="hint_person_name">Name</string>
     <string name="hint_server_url">Server URL</string>
     <string name="hint_server_password">Server password</string>
 
     <string name="error_location_name_invalid">Invalid name</string>
     <string name="error_location_date_invalid">Invalid date</string>
+    <string name="error_location_description_invalid">Invalid description</string>
     <string name="error_location_person_name_invalid">Invalid name</string>
     <string name="error_server_url_invalid">Invalid server URL</string>
 

@@ -43,6 +43,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     private long mLocationId;
     private String mLocationName;
     private Date mLocationDate;
+    private String mLocationDescription;
     private ArrayList<String> mLocationPersons;
 
     @Override
@@ -109,6 +110,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
 
         mLocationName = location.getName();
         mLocationDate = location.getDate();
+        mLocationDescription = location.getDescription();
         mLocationPersons = new ArrayList<>();
         for (Person locationPerson : locationPersons) {
             String name;
@@ -171,7 +173,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
 
     private void showViewDialog() {
         ViewDialogFragment fragment = ViewDialogFragment.newInstance(mLocationName, mLocationDate,
-                    mLocationPersons);
+                mLocationDescription, mLocationPersons);
         fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_VIEW);
     }
 

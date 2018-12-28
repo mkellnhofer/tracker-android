@@ -39,6 +39,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     private static final String STATE_LOCATION_NAME = "location_name";
     private static final String STATE_LOCATION_DATE = "location_date";
     private static final String STATE_LAT_LNG = "lat_lng";
+    private static final String STATE_LOCATION_DESCRIPTION = "location_description";
     private static final String STATE_LOCATION_PERSONS = "location_persons";
     private static final String STATE_USE_GPS_LOCATION = "use_gps_location";
     private static final String STATE_REQUESTED_PERMISSIONS = "requested_permissions";
@@ -58,6 +59,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     private String mLocationName = "";
     private Date mLocationDate = new Date();
     private LatLng mLocationLatLng = new LatLng();
+    private String mLocationDescription = null;
     private ArrayList<String> mLocationPersonNames = new ArrayList<>();
 
     private boolean mUseGpsLocation = false;
@@ -80,6 +82,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
             mLocationName = location.getName();
             mLocationDate = location.getDate();
             mLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            mLocationDescription = location.getDescription();
             ArrayList<Person> locationPersons = mPresenter.getLocationPersons(mLocationId);
             mLocationPersonNames = toPersonNameList(locationPersons);
         }
@@ -154,6 +157,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         } else {
             mLocationLatLng = new LatLng();
         }
+        mLocationDescription = savedInstanceState.getString(STATE_LOCATION_DESCRIPTION);
         mLocationPersonNames = savedInstanceState.getStringArrayList(STATE_LOCATION_PERSONS);
         mUseGpsLocation = savedInstanceState.getBoolean(STATE_USE_GPS_LOCATION);
         mRequestedPermissions = savedInstanceState.getBoolean(STATE_REQUESTED_PERMISSIONS);
@@ -192,6 +196,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         outState.putLong(STATE_LOCATION_DATE, mLocationDate.getTime());
         double[] pos = new double[]{mLocationLatLng.lng, mLocationLatLng.lat};
         outState.putDoubleArray(STATE_LAT_LNG, pos);
+        outState.putString(STATE_LOCATION_DESCRIPTION, mLocationDescription);
         outState.putStringArrayList(STATE_LOCATION_PERSONS, mLocationPersonNames);
         outState.putBoolean(STATE_USE_GPS_LOCATION, mUseGpsLocation);
         outState.putBoolean(STATE_REQUESTED_PERMISSIONS, mRequestedPermissions);
@@ -286,18 +291,20 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
             fragment = CreateEditDialogFragment.newCreateInstance(personNames);
         } else {
             fragment = CreateEditDialogFragment.newEditInstance(mLocationName, mLocationDate,
-                    mLocationPersonNames, personNames);
+                    mLocationDescription, mLocationPersonNames, personNames);
         }
         fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_CREATE_EDIT);
     }
 
     @Override
     public void onCreateEditDialogOk(String locationName, Date locationDate,
-            ArrayList<String> locationPersonNames) {
+            String locationDescription, ArrayList<String> locationPersonNames) {
         if (mLocationId == 0L) {
-            createLocation(locationName, locationDate, mLocationLatLng, locationPersonNames);
+            createLocation(locationName, locationDate, mLocationLatLng, locationDescription,
+                    locationPersonNames);
         } else {
-            updateLocation(locationName, locationDate, mLocationLatLng, locationPersonNames);
+            updateLocation(locationName, locationDate, mLocationLatLng, locationDescription,
+                    locationPersonNames);
         }
     }
 
@@ -327,20 +334,21 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
     // --- Executor methods ---
 
-    private void createLocation(String name, Date date, LatLng latLng,
+    private void createLocation(String name, Date date, LatLng latLng, String description,
             ArrayList<String> personNames) {
         Location location = new Location();
         location.setName(name);
         location.setDate(date);
         location.setLatitude(latLng.lat);
         location.setLongitude(latLng.lng);
+        location.setDescription(description);
 
         ArrayList<Person> persons = toPersonList(personNames);
 
         mPresenter.createLocation(location, persons);
     }
 
-    private void updateLocation(String name, Date date, LatLng latLng,
+    private void updateLocation(String name, Date date, LatLng latLng, String description,
             ArrayList<String> personNames) {
         Location location = new Location();
         location.setId(mLocationId);
@@ -348,6 +356,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         location.setDate(date);
         location.setLatitude(latLng.lat);
         location.setLongitude(latLng.lng);
+        location.setDescription(description);
 
         ArrayList<Person> persons = toPersonList(personNames);
 

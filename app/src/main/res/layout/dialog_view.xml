@@ -42,6 +42,17 @@
             android:textColor="@color/color_text_dark" />
 
         <TextView
+            android:id="@+id/view_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="2dp"
+            android:visibility="visible"
+            android:text="Regensburg is a city in south-east Germany, at the confluence of the Danube, Naab and Regen rivers."
+            android:textSize="18sp"
+            android:textColor="@color/color_text_dark" />
+
+        <TextView
             android:id="@+id/view_title_persons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

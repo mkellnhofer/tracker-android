@@ -36,6 +36,13 @@
             android:inputType="datetime"
             android:hint="@string/hint_date" />
 
+        <EditText
+            android:id="@+id/view_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:hint="@string/hint_description" />
+
         <TextView
             android:id="@+id/view_title_persons"
             android:layout_width="match_parent"
