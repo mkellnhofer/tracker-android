@@ -15,7 +15,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String LOG_TAG = DbHelper.class.getSimpleName();
 
     private static final String DATABASE_NAME = "location.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -113,7 +113,7 @@ public class DbHelper extends SQLiteOpenHelper {
         db.execSQL(sqlCreateLocationTable);
     }
 
-    @DbUpdate(order=0, oldVersion=1, newVersion=2)
+    @DbUpdate(order=1, oldVersion=1, newVersion=2)
     @SuppressWarnings("unused")
     private void updateV2(SQLiteDatabase db) {
         final String sqlCreatePersonTable = "CREATE TABLE person ("
@@ -130,6 +130,15 @@ public class DbHelper extends SQLiteOpenHelper {
 
         db.execSQL(sqlCreatePersonTable);
         db.execSQL(sqlCreateLocationPersonTable);
+    }
+
+    @DbUpdate(order=2, oldVersion=2, newVersion=3)
+    @SuppressWarnings("unused")
+    private void updateV3(SQLiteDatabase db) {
+        final String sqlAlterLocationTable = "ALTER TABLE location "
+                + "ADD COLUMN " + "description" + " TEXT COLLATE LOCALIZED;";
+
+        db.execSQL(sqlAlterLocationTable);
     }
 
 }

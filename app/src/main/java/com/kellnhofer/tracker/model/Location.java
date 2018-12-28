@@ -27,6 +27,7 @@ public class Location implements Parcelable {
     private Date mDate;
     private Double mLatitude;
     private Double mLongitude;
+    private String mDescription;
     private ArrayList<Long> mPersonIds;
 
     public Location() {
@@ -34,7 +35,7 @@ public class Location implements Parcelable {
     }
 
     public Location(long id, long remoteId, boolean changed, boolean deleted, String name, Date date,
-            Double latitude, Double longitude, ArrayList<Long> personIds) {
+            Double latitude, Double longitude, String description, ArrayList<Long> personIds) {
         mId = id;
         mRemoteId = remoteId;
         mDeleted = deleted;
@@ -43,6 +44,7 @@ public class Location implements Parcelable {
         mDate = date;
         mLatitude = latitude;
         mLongitude = longitude;
+        mDescription = description;
         mPersonIds = personIds != null ? personIds : new ArrayList<Long>();
     }
 
@@ -110,6 +112,14 @@ public class Location implements Parcelable {
         mLongitude = longitude;
     }
 
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public void setDescription(String description) {
+        mDescription = description;
+    }
+
     public ArrayList<Long> getPersonIds() {
         return mPersonIds;
     }
@@ -130,6 +140,7 @@ public class Location implements Parcelable {
         mDate = date > 0 ? new Date(date) : null;
         mLatitude = source.readDouble();
         mLongitude = source.readDouble();
+        mDescription = source.readString();
         int personIdsLength = source.readInt();
         long[] personIds = new long[personIdsLength];
         source.readLongArray(personIds);
@@ -146,6 +157,7 @@ public class Location implements Parcelable {
         dest.writeLong(mDate != null ? mDate.getTime() : -1);
         dest.writeDouble(mLatitude);
         dest.writeDouble(mLongitude);
+        dest.writeString(mDescription);
         int personIdsLength = mPersonIds.size();
         dest.writeInt(personIdsLength);
         long[] personIds = TypeUtils.toLongArray(mPersonIds);

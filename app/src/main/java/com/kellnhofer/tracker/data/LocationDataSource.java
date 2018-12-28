@@ -75,6 +75,7 @@ public class LocationDataSource {
         values.put(LocationEntry.COLUMN_DATE, DateUtils.toDbFormat(location.getDate()));
         values.put(LocationEntry.COLUMN_LATITUDE, location.getLatitude());
         values.put(LocationEntry.COLUMN_LONGITUDE, location.getLongitude());
+        values.put(LocationEntry.COLUMN_DESCRIPTION, location.getDescription());
 
         long id = db.replace(LocationEntry.TABLE, null, values);
 
@@ -197,6 +198,7 @@ public class LocationDataSource {
         location.setDate(DateUtils.fromDbFormat(cursor.getString(5)));
         location.setLatitude(cursor.getDouble(6));
         location.setLongitude(cursor.getDouble(7));
+        location.setDescription(cursor.getString(8));
         return location;
     }
 

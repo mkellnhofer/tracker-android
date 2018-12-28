@@ -16,17 +16,19 @@ public class DbContract {
         public static final String COLUMN_DATE = "date";
         public static final String COLUMN_LATITUDE = "latitude";
         public static final String COLUMN_LONGITUDE = "longitude";
+        public static final String COLUMN_DESCRIPTION = "description";
 
         // All projection
         public static final String[] PROJECTION_ALL = {
-                _ID,              // 0
-                COLUMN_REMOTE_ID, // 1
-                COLUMN_CHANGED,   // 2
-                COLUMN_DELETED,   // 3
-                COLUMN_NAME,      // 4
-                COLUMN_DATE,      // 5
-                COLUMN_LATITUDE,  // 6
-                COLUMN_LONGITUDE  // 7
+                _ID,               // 0
+                COLUMN_REMOTE_ID,  // 1
+                COLUMN_CHANGED,    // 2
+                COLUMN_DELETED,    // 3
+                COLUMN_NAME,       // 4
+                COLUMN_DATE,       // 5
+                COLUMN_LATITUDE,   // 6
+                COLUMN_LONGITUDE,  // 7
+                COLUMN_DESCRIPTION // 8
         };
 
         protected LocationEntry() {}

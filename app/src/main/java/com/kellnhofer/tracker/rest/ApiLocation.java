@@ -10,5 +10,6 @@ public class ApiLocation {
     public Date time;
     public Double lat;
     public Double lng;
+    public String description;
     public List<ApiPerson> persons;
 }

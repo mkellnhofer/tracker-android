@@ -349,6 +349,7 @@ public class LocationSyncThread extends Thread {
         apiLocation.time = location.getDate();
         apiLocation.lat = location.getLatitude();
         apiLocation.lng = location.getLongitude();
+        apiLocation.description = location.getDescription();
         return apiLocation;
     }
 
@@ -359,6 +360,7 @@ public class LocationSyncThread extends Thread {
         location.setDate(apiLocation.time);
         location.setLatitude(apiLocation.lat);
         location.setLongitude(apiLocation.lng);
+        location.setDescription(apiLocation.description);
         return location;
     }
 
