@@ -50,6 +50,7 @@
     <string name="error_server_communication">The server communication failed!</string>
     <string name="error_server_unauthorized">The server authorization failed!</string>
     <string name="error_server_internal">A unknown server error occurred!</string>
+    <string name="error_export_file_io">Could not write export file!</string>
 
     <string name="day_monday">Mo</string>
     <string name="day_tuesday">Tu</string>
