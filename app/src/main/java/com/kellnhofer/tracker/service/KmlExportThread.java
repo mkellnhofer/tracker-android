@@ -1,13 +1,11 @@
 package com.kellnhofer.tracker.service;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import android.util.Xml;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,12 +26,8 @@ public class KmlExportThread extends Thread {
 
     private static final String LOG_TAG = KmlExportThread.class.getSimpleName();
 
-    private static final String EXPORT_FILE_NAME = "Tracker Export";
-    private static final String EXPORT_FILE_EXTENSION = "kml";
-    private static final String EXPORT_TITLE = "Tracker Export";
-
-    private static final String DATE_FORMAT_FILE_NAME = "yyyy-MM-dd HH-mm-ss";
-    private static final String DATE_FORMAT_FILE_CONTENT = "yyyy-MM-dd HH:mm:ss";
+    private static final String CONTENT_TITLE = "Tracker Export";
+    private static final String CONTENT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     private static final double LOOK_AT_REGENSBURG_LAT = 49.02181388372180;
     private static final double LOOK_AT_REGENSBURG_LNG = 12.10508158473729;
@@ -56,24 +50,25 @@ public class KmlExportThread extends Thread {
 
     private TrackerApplication mApplication;
 
+    private Uri mFileUri;
+
     private LocationRepository mLocationRepository;
     private PersonRepository mPersonRepository;
 
-    private DateFormat mFileNameDateFormat;
-    private DateFormat mFileContentDateFormat;
+    private DateFormat mContentDateFormat;
 
     private Callback mCallback;
 
-    public KmlExportThread(TrackerApplication application) {
+    public KmlExportThread(TrackerApplication application, Uri fileUri) {
         mApplication = application;
+
+        mFileUri = fileUri;
 
         mLocationRepository = Injector.getLocationRepository(mApplication);
         mPersonRepository = Injector.getPersonRepository(mApplication);
 
-        mFileNameDateFormat = new SimpleDateFormat(DATE_FORMAT_FILE_NAME, Locale.getDefault());
-        mFileNameDateFormat.setTimeZone(TimeZone.getDefault());
-        mFileContentDateFormat = new SimpleDateFormat(DATE_FORMAT_FILE_CONTENT, Locale.getDefault());
-        mFileContentDateFormat.setTimeZone(TimeZone.getDefault());
+        mContentDateFormat = new SimpleDateFormat(CONTENT_DATE_FORMAT, Locale.getDefault());
+        mContentDateFormat.setTimeZone(TimeZone.getDefault());
     }
 
     public void setCallback(Callback callback) {
@@ -107,26 +102,15 @@ public class KmlExportThread extends Thread {
     private void export(List<Location> locations) throws InterruptedException, IOException {
         Date currentDate = new Date();
 
-        // Get directory
-        File dir = mApplication.getExternalFilesDir(null);
-        if (dir == null) {
-            return;
-        }
-        dir.mkdirs();
-
-        // Open file
-        File file = new File(dir, EXPORT_FILE_NAME + " " + mFileNameDateFormat.format(currentDate) +
-                "." + EXPORT_FILE_EXTENSION);
-
         // Try to write file
-        FileOutputStream fos = null;
+        OutputStream os = null;
         try {
             // Open file output stream
-            fos = new FileOutputStream(file);
+            os = mApplication.getContentResolver().openOutputStream(mFileUri);
 
             // Create serializer
             XmlSerializer serializer = Xml.newSerializer();
-            serializer.setOutput(fos, "UTF-8");
+            serializer.setOutput(os, "UTF-8");
 
             // Start document
             serializer.startDocument("UTF-8", null);
@@ -141,13 +125,10 @@ public class KmlExportThread extends Thread {
             // End document
             serializer.endDocument();
         } finally {
-            if (fos != null) {
-                fos.close();
+            if (os != null) {
+                os.close();
             }
         }
-
-        // Update media content provider
-        updateMediaContentProvider(file);
     }
 
     private void writeHeader(XmlSerializer serializer, Date date) throws IOException {
@@ -155,7 +136,7 @@ public class KmlExportThread extends Thread {
         serializer.attribute("", "xmlns", "http://www.opengis.net/kml/2.2");
         serializer.startTag("", "Document");
         serializer.startTag("", "name");
-        serializer.text(EXPORT_TITLE + " - " + mFileNameDateFormat.format(date));
+        serializer.text(CONTENT_TITLE + " - " + mContentDateFormat.format(date));
         serializer.endTag("", "name");
     }
 
@@ -266,7 +247,7 @@ public class KmlExportThread extends Thread {
     private void writeExtendedData(XmlSerializer serializer, Location location,
             ArrayList<Person> persons) throws IOException {
         serializer.startTag("", "ExtendedData");
-        writeData(serializer, "locDate", mFileContentDateFormat.format(location.getDate()));
+        writeData(serializer, "locDate", mContentDateFormat.format(location.getDate()));
         if (location.getDescription() != null) {
             writeData(serializer, "locDescription", location.getDescription());
         }
@@ -351,12 +332,6 @@ public class KmlExportThread extends Thread {
             }
         }
         return sb.toString();
-    }
-
-    private void updateMediaContentProvider(File file) {
-        Intent mediaScannerIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        mediaScannerIntent.setData(Uri.fromFile(file));
-        mApplication.sendBroadcast(mediaScannerIntent);
     }
 
 }

@@ -51,6 +51,22 @@ public class DateUtils {
         }
     }
 
+    public static String toFileFormat(Date date) {
+        DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_FILE, Locale.getDefault());
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return df.format(date);
+    }
+
+    public static Date fromFileFormat(String date) {
+        try {
+            DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_FILE, Locale.getDefault());
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return df.parse(date);
+        } catch (ParseException e) {
+            throw new RuntimeException("Invalid DB date string!", e);
+        }
+    }
+
     public static int getWeekDay(Date date) {
         Calendar c = Calendar.getInstance();
         c.setTime(date);

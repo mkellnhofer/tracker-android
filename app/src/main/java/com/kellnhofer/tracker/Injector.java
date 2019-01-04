@@ -6,6 +6,7 @@ import com.kellnhofer.tracker.data.LocationDataSource;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.data.PersonDataSource;
 import com.kellnhofer.tracker.data.PersonRepository;
+import com.kellnhofer.tracker.service.ExportServiceAdapter;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 
 public class Injector {
@@ -45,6 +46,10 @@ public class Injector {
 
     public static LocationServiceAdapter getLocationService(Context context) {
         return new LocationServiceAdapter(context);
+    }
+
+    public static ExportServiceAdapter getExportService(Context context) {
+        return new ExportServiceAdapter(context);
     }
 
 }
