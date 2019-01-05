@@ -11,4 +11,11 @@
         android:visible="true"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_kml_export"
+        android:title="@string/action_kml_export"
+        android:orderInCategory="102"
+        android:visible="true"
+        app:showAsAction="never" />
+
 </menu>

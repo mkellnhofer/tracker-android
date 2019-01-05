@@ -2,6 +2,7 @@ package com.kellnhofer.tracker.presenter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 
 import java.util.ArrayList;
@@ -10,6 +11,8 @@ import java.util.List;
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.service.ExportServiceAdapter;
+import com.kellnhofer.tracker.service.KmlExportError;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.service.LocationSyncError;
 import com.kellnhofer.tracker.view.CreateEditActivity;
@@ -17,7 +20,8 @@ import com.kellnhofer.tracker.view.SettingsActivity;
 import com.kellnhofer.tracker.view.ViewActivity;
 
 public class LocationsPresenter implements LocationsContract.Presenter,
-        LocationServiceAdapter.Listener, LocationRepository.LocationRepositoryObserver {
+        LocationRepository.LocationRepositoryObserver, LocationServiceAdapter.Listener,
+        ExportServiceAdapter.Listener {
 
     private Context mContext;
     private TrackerApplication mApplication;
@@ -25,15 +29,17 @@ public class LocationsPresenter implements LocationsContract.Presenter,
     private List<LocationsContract.Observer> mObservers = new ArrayList<>();
 
     private LocationRepository mRepository;
-    private LocationServiceAdapter mService;
+    private LocationServiceAdapter mLocationService;
+    private ExportServiceAdapter mExportService;
 
     public LocationsPresenter(Context context, LocationRepository locationRepository,
-            LocationServiceAdapter locationService) {
+            LocationServiceAdapter locationService, ExportServiceAdapter exportService) {
         mContext = context;
         mApplication = (TrackerApplication) context.getApplicationContext();
 
         mRepository = locationRepository;
-        mService = locationService;
+        mLocationService = locationService;
+        mExportService = exportService;
     }
 
     @Override
@@ -53,15 +59,20 @@ public class LocationsPresenter implements LocationsContract.Presenter,
     @Override
     public void onResume() {
         mRepository.addContentObserver(this);
-        mService.setListener(this);
 
-        mService.startSync(false);
+        mLocationService.setListener(this);
+        mLocationService.startSync(false);
+
+        mExportService.setListener(this);
     }
 
     @Override
     public void onPause() {
         mRepository.removeContentObserver(this);
-        mService.removeListener();
+
+        mLocationService.removeListener();
+
+        mExportService.removeListener();
     }
 
     @Override
@@ -71,7 +82,17 @@ public class LocationsPresenter implements LocationsContract.Presenter,
 
     @Override
     public void executeLocationSync() {
-        mService.startSync(false);
+        mLocationService.startSync(false);
+    }
+
+    @Override
+    public void executeKmlExport(Uri fileUri) {
+        mExportService.startKmlExport(fileUri);
+    }
+
+    @Override
+    public void cancelKmlExport() {
+        mExportService.stopKmlExport();
     }
 
     @Override
@@ -140,6 +161,54 @@ public class LocationsPresenter implements LocationsContract.Presenter,
             public void run() {
                 for (LocationsContract.Observer observer : mObservers) {
                     observer.onSyncFailed(error);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onKmlExportStarted() {
+        executeOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (LocationsContract.Observer observer : mObservers) {
+                    observer.onKmlExportStarted();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onKmlExportProgress(final int current, final int total) {
+        executeOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (LocationsContract.Observer observer : mObservers) {
+                    observer.onKmlExportProgress(current, total);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onKmlExportFinished(final int total) {
+        executeOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (LocationsContract.Observer observer : mObservers) {
+                    observer.onKmlExportFinished(total);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onKmlExportFailed(final KmlExportError error) {
+        executeOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (LocationsContract.Observer observer : mObservers) {
+                    observer.onKmlExportFailed(error);
                 }
             }
         });

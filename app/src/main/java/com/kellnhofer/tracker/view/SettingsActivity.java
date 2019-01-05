@@ -19,7 +19,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     private static final String FRAGMENT_TAG_SETTINGS = "settings_fragment";
     private static final String DIALOG_FRAGMENT_TAG_SERVER_URL = "server_url_dialog_fragment";
-    private static final String DIALOG_FRAGMENT_TAG_ERROR = "error_dialog_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_SYNC_ERROR = "sync_error_dialog_fragment";
 
     private TrackerApplication mApplication;
 
@@ -28,7 +28,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     private SettingsContract.Presenter mPresenter;
 
     private SettingsFragment mFragment;
-    private ErrorDialogFragment mErrorDialogFragment;
+    private ErrorDialogFragment mSyncErrorDialogFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +59,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         } else {
             mFragment = (SettingsFragment) getFragmentManager().findFragmentByTag(
                     FRAGMENT_TAG_SETTINGS);
-            mErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager().findFragmentByTag(
-                    DIALOG_FRAGMENT_TAG_ERROR);
+            mSyncErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
+                    .findFragmentByTag(DIALOG_FRAGMENT_TAG_SYNC_ERROR);
         }
     }
 
@@ -118,7 +118,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void onSyncFailed(LocationSyncError error) {
-        showErrorDialog(error);
+        showSyncErrorDialog(error);
     }
 
     // --- Dialog methods ---
@@ -140,26 +140,38 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     }
 
-    private void showErrorDialog(LocationSyncError error) {
-        if (mErrorDialogFragment != null) {
+    private void showSyncErrorDialog(LocationSyncError error) {
+        if (mSyncErrorDialogFragment != null) {
             return;
         }
 
         boolean isCommunicationError = error == LocationSyncError.COMMUNICATION_ERROR;
-        mErrorDialogFragment = ErrorDialogFragment.newInstance(R.string.dialog_title_error,
+        mSyncErrorDialogFragment = ErrorDialogFragment.newInstance(R.string.dialog_title_error,
                 error.getTextResId(), isCommunicationError);
-        mErrorDialogFragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_ERROR);
+        mSyncErrorDialogFragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_SYNC_ERROR);
     }
+
+    // --- Dialog callback methods ---
 
     @Override
     public void onErrorDialogRetry(String tag) {
-        mErrorDialogFragment = null;
-        mPresenter.executeLocationSync();
+        switch (tag) {
+            case DIALOG_FRAGMENT_TAG_SYNC_ERROR:
+                mSyncErrorDialogFragment = null;
+                mPresenter.executeLocationSync();
+                break;
+            default:
+        }
     }
 
     @Override
     public void onErrorDialogCancel(String tag) {
-        mErrorDialogFragment = null;
+        switch (tag) {
+            case DIALOG_FRAGMENT_TAG_SYNC_ERROR:
+                mSyncErrorDialogFragment = null;
+                break;
+            default:
+        }
     }
 
 }

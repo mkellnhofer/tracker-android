@@ -1,8 +1,11 @@
 package com.kellnhofer.tracker.presenter;
 
+import android.net.Uri;
+
 import java.util.ArrayList;
 
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.service.KmlExportError;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
 public interface LocationsContract {
@@ -17,6 +20,8 @@ public interface LocationsContract {
         ArrayList<Location> getNotDeletedLocationsByDateDesc();
 
         void executeLocationSync();
+        void executeKmlExport(Uri fileUri);
+        void cancelKmlExport();
 
         void startCreateActivity();
         void startViewActivity(long locationId);
@@ -28,6 +33,10 @@ public interface LocationsContract {
         void onSyncStarted();
         void onSyncFinished();
         void onSyncFailed(LocationSyncError error);
+        void onKmlExportStarted();
+        void onKmlExportProgress(int current, int total);
+        void onKmlExportFinished(int total);
+        void onKmlExportFailed(KmlExportError error);
     }
 
 }

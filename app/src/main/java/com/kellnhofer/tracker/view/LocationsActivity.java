@@ -1,5 +1,8 @@
 package com.kellnhofer.tracker.view;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -14,18 +17,25 @@ import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.presenter.LocationsContract;
 import com.kellnhofer.tracker.presenter.LocationsPresenter;
+import com.kellnhofer.tracker.service.KmlExportError;
 import com.kellnhofer.tracker.service.LocationSyncError;
+import com.kellnhofer.tracker.util.ExportUtils;
 
 public class LocationsActivity extends AppCompatActivity implements LocationsContract.Observer,
         ErrorDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_LOCATIONS = "locations_fragment";
-    private static final String DIALOG_FRAGMENT_TAG_ERROR = "error_dialog_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_SYNC_ERROR = "sync_error_dialog_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR =
+            "kml_export_error_dialog_fragment";
+
+    private static final int REQUEST_CODE_CREATE_KML_EXPORT_FILE = 0;
 
     private LocationsContract.Presenter mPresenter;
 
     private LocationsFragment mFragment;
-    private ErrorDialogFragment mErrorDialogFragment;
+    private ErrorDialogFragment mSyncErrorDialogFragment;
+    private ErrorDialogFragment mKmlExportErrorDialogFragment;
 
     private CoordinatorLayout mCoordinatorLayout;
 
@@ -34,7 +44,7 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
         super.onCreate(savedInstanceState);
 
         mPresenter = new LocationsPresenter(this, Injector.getLocationRepository(this),
-                Injector.getLocationService(this));
+                Injector.getLocationService(this), Injector.getExportService(this));
 
         setContentView(R.layout.activity_locations);
 
@@ -60,8 +70,10 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
         } else {
             mFragment = (LocationsFragment) getSupportFragmentManager().findFragmentByTag(
                     FRAGMENT_TAG_LOCATIONS);
-            mErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager().findFragmentByTag(
-                    DIALOG_FRAGMENT_TAG_ERROR);
+            mSyncErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
+                    .findFragmentByTag(DIALOG_FRAGMENT_TAG_SYNC_ERROR);
+            mKmlExportErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
+                    .findFragmentByTag(DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR);
         }
 
         mFragment.setPresenter(mPresenter);
@@ -88,6 +100,14 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_locations_action, menu);
+
+        // Disable export for API < 19
+        // (Storage Access Framework is only available for API >= 19)
+        MenuItem kmlExportItem = menu.findItem(R.id.action_kml_export);
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT) {
+            kmlExportItem.setVisible(false);
+        }
+
         return true;
     }
 
@@ -98,8 +118,40 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
             case R.id.action_settings:
                 mPresenter.startSettingsActivity();
                 return true;
+            case R.id.action_kml_export:
+                createKmlExportFile();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @SuppressLint("NewApi")
+    private void createKmlExportFile() {
+        String fileName = ExportUtils.generateKmlExportFileName();
+        String fileMimeType = ExportUtils.getKmlExportMimeType();
+
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_TITLE, fileName);
+        intent.setType(fileMimeType);
+        startActivityForResult(intent, REQUEST_CODE_CREATE_KML_EXPORT_FILE);
+    }
+
+    // --- Activity result callback methods ---
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent returnIntent) {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+
+        switch (requestCode) {
+            case REQUEST_CODE_CREATE_KML_EXPORT_FILE:
+                Uri fileUri = returnIntent.getData();
+                mPresenter.executeKmlExport(fileUri);
+                break;
+            default:
         }
     }
 
@@ -123,37 +175,85 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     @Override
     public void onSyncFailed(LocationSyncError error) {
         if (error == LocationSyncError.COMMUNICATION_ERROR) {
-            showErrorSnackBar(error);
+            showSyncErrorSnackBar(error);
         } else {
-            showErrorDialog(error);
+            showSyncErrorDialog(error);
         }
+    }
+
+    @Override
+    public void onKmlExportStarted() {
+
+    }
+
+    @Override
+    public void onKmlExportProgress(int current, int total) {
+
+    }
+
+    @Override
+    public void onKmlExportFinished(int total) {
+
+    }
+
+    @Override
+    public void onKmlExportFailed(KmlExportError error) {
+        showKmlExportErrorDialog(error);
     }
 
     // --- Dialog methods ---
 
-    private void showErrorDialog(LocationSyncError error) {
-        if (mErrorDialogFragment != null) {
+    private void showSyncErrorDialog(LocationSyncError error) {
+        if (mSyncErrorDialogFragment != null) {
             return;
         }
 
-        mErrorDialogFragment = ErrorDialogFragment.newInstance(R.string.dialog_title_error,
+        mSyncErrorDialogFragment = ErrorDialogFragment.newInstance(R.string.dialog_title_error,
                 error.getTextResId(), false);
-        mErrorDialogFragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_ERROR);
+        mSyncErrorDialogFragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_SYNC_ERROR);
+    }
+
+    private void showKmlExportErrorDialog(KmlExportError error) {
+        if (mKmlExportErrorDialogFragment != null) {
+            return;
+        }
+
+        mKmlExportErrorDialogFragment = ErrorDialogFragment.newInstance(R.string.dialog_title_error,
+                error.getTextResId(), false);
+        mKmlExportErrorDialogFragment.show(getSupportFragmentManager(),
+                DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR);
     }
 
     @Override
     public void onErrorDialogRetry(String tag) {
-        mErrorDialogFragment = null;
+        switch (tag) {
+            case DIALOG_FRAGMENT_TAG_SYNC_ERROR:
+                mSyncErrorDialogFragment = null;
+                mPresenter.executeLocationSync();
+                break;
+            case DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR:
+                mKmlExportErrorDialogFragment = null;
+                break;
+            default:
+        }
     }
 
     @Override
     public void onErrorDialogCancel(String tag) {
-        mErrorDialogFragment = null;
+        switch (tag) {
+            case DIALOG_FRAGMENT_TAG_SYNC_ERROR:
+                mSyncErrorDialogFragment = null;
+                break;
+            case DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR:
+                mKmlExportErrorDialogFragment = null;
+                break;
+            default:
+        }
     }
 
     // --- SnackBar methods ---
 
-    private void showErrorSnackBar(LocationSyncError error) {
+    private void showSyncErrorSnackBar(LocationSyncError error) {
         Snackbar snackbar = Snackbar.make(mCoordinatorLayout, error.getTextResId(),
                 Snackbar.LENGTH_LONG);
         snackbar.setAction(R.string.action_retry, new View.OnClickListener() {

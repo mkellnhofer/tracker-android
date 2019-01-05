@@ -19,6 +19,7 @@ import java.util.List;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.presenter.LocationsContract;
+import com.kellnhofer.tracker.service.KmlExportError;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
 public class LocationsFragment extends Fragment implements LocationsAdapter.LocationItemListener,
@@ -124,6 +125,26 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
 
     @Override
     public void onSyncFailed(LocationSyncError error) {
+
+    }
+
+    @Override
+    public void onKmlExportStarted() {
+
+    }
+
+    @Override
+    public void onKmlExportProgress(int current, int total) {
+
+    }
+
+    @Override
+    public void onKmlExportFinished(int total) {
+
+    }
+
+    @Override
+    public void onKmlExportFailed(KmlExportError error) {
 
     }
 
