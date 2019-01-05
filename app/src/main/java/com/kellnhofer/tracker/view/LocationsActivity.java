@@ -22,10 +22,11 @@ import com.kellnhofer.tracker.service.LocationSyncError;
 import com.kellnhofer.tracker.util.ExportUtils;
 
 public class LocationsActivity extends AppCompatActivity implements LocationsContract.Observer,
-        ErrorDialogFragment.Listener {
+        ProgressBarDialogFragment.Listener, ErrorDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_LOCATIONS = "locations_fragment";
     private static final String DIALOG_FRAGMENT_TAG_SYNC_ERROR = "sync_error_dialog_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_KML_EXPORT = "kml_export_dialog_fragment";
     private static final String DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR =
             "kml_export_error_dialog_fragment";
 
@@ -35,6 +36,7 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
 
     private LocationsFragment mFragment;
     private ErrorDialogFragment mSyncErrorDialogFragment;
+    private ProgressBarDialogFragment mKmlExportDialogFragment;
     private ErrorDialogFragment mKmlExportErrorDialogFragment;
 
     private CoordinatorLayout mCoordinatorLayout;
@@ -72,6 +74,8 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
                     FRAGMENT_TAG_LOCATIONS);
             mSyncErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
                     .findFragmentByTag(DIALOG_FRAGMENT_TAG_SYNC_ERROR);
+            mKmlExportDialogFragment = (ProgressBarDialogFragment) getSupportFragmentManager()
+                    .findFragmentByTag(DIALOG_FRAGMENT_TAG_KML_EXPORT);
             mKmlExportErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
                     .findFragmentByTag(DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR);
         }
@@ -183,17 +187,17 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
 
     @Override
     public void onKmlExportStarted() {
-
+        showKmlExportDialog();
     }
 
     @Override
     public void onKmlExportProgress(int current, int total) {
-
+        updateKmlExportDialog(current, total);
     }
 
     @Override
     public void onKmlExportFinished(int total) {
-
+        updateKmlExportDialog(total, total);
     }
 
     @Override
@@ -213,6 +217,24 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
         mSyncErrorDialogFragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_SYNC_ERROR);
     }
 
+    private void showKmlExportDialog() {
+        if (mKmlExportDialogFragment != null) {
+            return;
+        }
+
+        mKmlExportDialogFragment = ProgressBarDialogFragment.newInstance(
+                R.string.dialog_title_kml_export);
+        mKmlExportDialogFragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_KML_EXPORT);
+    }
+
+    private void updateKmlExportDialog(int current, int total) {
+        if (mKmlExportDialogFragment == null) {
+            return;
+        }
+
+        mKmlExportDialogFragment.updateProgress(current, total);
+    }
+
     private void showKmlExportErrorDialog(KmlExportError error) {
         if (mKmlExportErrorDialogFragment != null) {
             return;
@@ -222,6 +244,29 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
                 error.getTextResId(), false);
         mKmlExportErrorDialogFragment.show(getSupportFragmentManager(),
                 DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR);
+    }
+
+    // --- Dialog callback methods ---
+
+    @Override
+    public void onProgressBarDialogOk(String tag) {
+        switch (tag) {
+            case DIALOG_FRAGMENT_TAG_KML_EXPORT:
+                mKmlExportDialogFragment = null;
+                break;
+            default:
+        }
+    }
+
+    @Override
+    public void onProgressBarDialogCancel(String tag) {
+        switch (tag) {
+            case DIALOG_FRAGMENT_TAG_KML_EXPORT:
+                mKmlExportDialogFragment = null;
+                mPresenter.cancelKmlExport();
+                break;
+            default:
+        }
     }
 
     @Override
