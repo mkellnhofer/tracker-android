@@ -31,6 +31,7 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     private static final String DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR =
             "kml_export_error_dialog_fragment";
     private static final String DIALOG_FRAGMENT_TAG_HELP = "help_dialog_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_API_KEY = "api_key_dialog_fragment";
 
     private static final int REQUEST_CODE_CREATE_KML_EXPORT_FILE = 0;
 
@@ -83,6 +84,10 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
         }
 
         mFragment.setPresenter(mPresenter);
+
+        if (savedInstanceState == null && isApiKeyMissing()) {
+            showApiKeyErrorDialog();
+        }
     }
 
     @Override
@@ -256,6 +261,11 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
                 .show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_HELP);
     }
 
+    private void showApiKeyErrorDialog() {
+        ApiKeyErrorDialogFragment.newInstance()
+                .show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_API_KEY);
+    }
+
     // --- Dialog callback methods ---
 
     @Override
@@ -323,6 +333,13 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
             }
         });
         snackbar.show();
+    }
+
+    // --- Helper methods ---
+
+    private boolean isApiKeyMissing() {
+        String key = getString(R.string.google_maps_api_key);
+        return key == null || key.isEmpty();
     }
 
 }

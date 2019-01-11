@@ -25,6 +25,8 @@
         \n<a href='https://github.com/mkellnhofer'>GitHub</a> - <a href='https://stackoverflow.com/users/8253209'>Stack Overflow</a> - <a href='https://www.linkedin.com/in/mkellnhofer'>LinkedIn</a>\n
         \nThe Tracker server software can be found here: <a href='https://github.com/mkellnhofer/tracker-server'>https://github.com/mkellnhofer/tracker-server</a>\n
         \nReport bugs or request features here: <a href='https://github.com/mkellnhofer/tracker-android/issues'>https://github.com/mkellnhofer/tracker-android/issues</a>.</string>
+    <string name="dialog_message_missing_api_key">The Google Maps API key is missing!\n
+        \nThis app does not work without a valid API key. Please insert API key into file \'/app/src/main/res/values/keys.xml\'.</string>
 
     <string name="action_create">Create</string>
     <string name="action_edit">Edit</string>
