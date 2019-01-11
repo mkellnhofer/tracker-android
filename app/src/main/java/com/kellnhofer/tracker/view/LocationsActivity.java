@@ -22,13 +22,15 @@ import com.kellnhofer.tracker.service.LocationSyncError;
 import com.kellnhofer.tracker.util.ExportUtils;
 
 public class LocationsActivity extends AppCompatActivity implements LocationsContract.Observer,
-        ProgressBarDialogFragment.Listener, ErrorDialogFragment.Listener {
+        ProgressBarDialogFragment.Listener, ErrorDialogFragment.Listener,
+        InfoDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_LOCATIONS = "locations_fragment";
     private static final String DIALOG_FRAGMENT_TAG_SYNC_ERROR = "sync_error_dialog_fragment";
     private static final String DIALOG_FRAGMENT_TAG_KML_EXPORT = "kml_export_dialog_fragment";
     private static final String DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR =
             "kml_export_error_dialog_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_HELP = "help_dialog_fragment";
 
     private static final int REQUEST_CODE_CREATE_KML_EXPORT_FILE = 0;
 
@@ -124,6 +126,9 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
                 return true;
             case R.id.action_kml_export:
                 createKmlExportFile();
+                return true;
+            case R.id.action_help:
+                showHelpDialog();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -246,6 +251,11 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
                 DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR);
     }
 
+    private void showHelpDialog() {
+        InfoDialogFragment.newInstance(R.string.dialog_title_help, R.string.dialog_message_help)
+                .show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_HELP);
+    }
+
     // --- Dialog callback methods ---
 
     @Override
@@ -294,6 +304,11 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
                 break;
             default:
         }
+    }
+
+    @Override
+    public void onInfoDialogOk(String tag) {
+
     }
 
     // --- SnackBar methods ---

@@ -15,9 +15,16 @@
     <string name="dialog_title_view">Details</string>
     <string name="dialog_title_server_url">Server URL</string>
     <string name="dialog_title_kml_export">KML Export</string>
+    <string name="dialog_title_help">Help &amp; Feedback</string>
     <string name="dialog_title_error">Error</string>
 
     <string name="dialog_message_delete">Do you really want to delete this location?</string>
+    <string name="dialog_message_help"><b>Tracker</b>. A simple open source Android app to record visited places.\n
+        \nTracker isn\'t intended to record your complete location history or record your location for a specific time. It\'s more like a little diary you can use at your vacation trip. &#x1F642;\n
+        \nDeveloped by <b>Matthias Kellnhofer</b>.
+        \n<a href='https://github.com/mkellnhofer'>GitHub</a> - <a href='https://stackoverflow.com/users/8253209'>Stack Overflow</a> - <a href='https://www.linkedin.com/in/mkellnhofer'>LinkedIn</a>\n
+        \nThe Tracker server software can be found here: <a href='https://github.com/mkellnhofer/tracker-server'>https://github.com/mkellnhofer/tracker-server</a>\n
+        \nReport bugs or request features here: <a href='https://github.com/mkellnhofer/tracker-android/issues'>https://github.com/mkellnhofer/tracker-android/issues</a>.</string>
 
     <string name="action_create">Create</string>
     <string name="action_edit">Edit</string>
@@ -25,6 +32,7 @@
     <string name="action_delete">Delete</string>
     <string name="action_settings">Settings</string>
     <string name="action_kml_export">Export as KML</string>
+    <string name="action_help">Help &amp; Feedback</string>
     <string name="action_ok">OK</string>
     <string name="action_retry">Retry</string>
     <string name="action_cancel">Cancel</string>

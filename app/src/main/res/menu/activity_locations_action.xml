@@ -18,4 +18,11 @@
         android:visible="true"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_help"
+        android:title="@string/action_help"
+        android:orderInCategory="103"
+        android:visible="true"
+        app:showAsAction="never" />
+
 </menu>
