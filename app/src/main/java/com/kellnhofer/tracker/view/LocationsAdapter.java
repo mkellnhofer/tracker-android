@@ -79,10 +79,10 @@ public class LocationsAdapter extends BaseAdapter {
 
         final Location location = getItem(i);
 
-        TextView labelView = (TextView) rowView.findViewById(R.id.view_label);
-        TextView nameView = (TextView) rowView.findViewById(R.id.view_name);
-        TextView dateView = (TextView) rowView.findViewById(R.id.view_info);
-        ImageView syncStateView = (ImageView) rowView.findViewById(R.id.image_sync_state);
+        TextView labelView = rowView.findViewById(R.id.view_label);
+        TextView nameView = rowView.findViewById(R.id.view_name);
+        TextView dateView = rowView.findViewById(R.id.view_info);
+        ImageView syncStateView = rowView.findViewById(R.id.image_sync_state);
 
         int weekDay = DateUtils.getWeekDay(location.getDate());
         int weekDayTextId = WEEK_DAY_TEXT_ID[weekDay];

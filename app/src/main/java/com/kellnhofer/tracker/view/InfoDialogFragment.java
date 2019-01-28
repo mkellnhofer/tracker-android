@@ -57,7 +57,7 @@ public class InfoDialogFragment extends DialogFragment {
         // The initialization has to be done here, because the message view is only available after
         // the dialog has been created
         AlertDialog dialog = (AlertDialog) getDialog();
-        TextView textView = (TextView) dialog.findViewById(android.R.id.message);
+        TextView textView = dialog.findViewById(android.R.id.message);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 

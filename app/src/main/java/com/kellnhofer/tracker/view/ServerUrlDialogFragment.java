@@ -63,7 +63,7 @@ public class ServerUrlDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         FrameLayout view = (FrameLayout) inflater.inflate(R.layout.dialog_name, null);
 
-        mUrlView = (EditText) view.findViewById(R.id.view_name);
+        mUrlView = view.findViewById(R.id.view_name);
 
         if (savedInstanceState == null) {
             mUrlView.setText(url);

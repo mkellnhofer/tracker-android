@@ -65,9 +65,9 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
         mAdapter = new LocationsAdapter(mActivity, new ArrayList<Location>(0));
         mAdapter.setLocationItemListener(this);
 
-        mInfoContainer = (LinearLayout) view.findViewById(R.id.container_info);
+        mInfoContainer = view.findViewById(R.id.container_info);
 
-        mListView = (ListView) view.findViewById(R.id.list);
+        mListView = view.findViewById(R.id.list);
         mListView.setAdapter(mAdapter);
 
         return view;

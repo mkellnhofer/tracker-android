@@ -134,10 +134,10 @@ public class CreateEditDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_create_edit, null);
 
-        mNameView = (EditText) view.findViewById(R.id.view_name);
-        mDateView = (EditText) view.findViewById(R.id.view_date);
-        mDescriptionView = (EditText) view.findViewById(R.id.view_description);
-        mPersonsContainer = (LinearLayout) view.findViewById(R.id.container_persons);
+        mNameView = view.findViewById(R.id.view_name);
+        mDateView = view.findViewById(R.id.view_date);
+        mDescriptionView = view.findViewById(R.id.view_description);
+        mPersonsContainer = view.findViewById(R.id.container_persons);
         mPersonNameViews = new ArrayList<>();
 
         if (savedInstanceState == null) {
@@ -212,11 +212,9 @@ public class CreateEditDialogFragment extends DialogFragment {
 
         final RelativeLayout container = (RelativeLayout) inflater.inflate(
                 R.layout.view_create_edit_person, null);
-        final AutoCompleteTextView nameView = (AutoCompleteTextView) container.findViewById(
-                R.id.view_person_name);
-        final ImageButton addButton = (ImageButton) container.findViewById(R.id.button_person_add);
-        final ImageButton removeButton = (ImageButton) container.findViewById(
-                R.id.button_person_remove);
+        final AutoCompleteTextView nameView = container.findViewById(R.id.view_person_name);
+        final ImageButton addButton = container.findViewById(R.id.button_person_add);
+        final ImageButton removeButton = container.findViewById(R.id.button_person_remove);
 
         container.setId(viewIds != null ? viewIds[0] : View.generateViewId());
         nameView.setId(viewIds != null ? viewIds[1] : View.generateViewId());

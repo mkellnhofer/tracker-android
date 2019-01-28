@@ -44,11 +44,11 @@ public class ViewDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_view, null);
 
-        TextView nameView = (TextView) view.findViewById(R.id.view_name);
-        TextView dateView = (TextView) view.findViewById(R.id.view_date);
-        TextView descriptionView = (TextView) view.findViewById(R.id.view_description);
-        TextView noPersonsView = (TextView) view.findViewById(R.id.view_no_persons);
-        LinearLayout personsContainer = (LinearLayout) view.findViewById(R.id.container_persons);
+        TextView nameView = view.findViewById(R.id.view_name);
+        TextView dateView = view.findViewById(R.id.view_date);
+        TextView descriptionView = view.findViewById(R.id.view_description);
+        TextView noPersonsView = view.findViewById(R.id.view_no_persons);
+        LinearLayout personsContainer = view.findViewById(R.id.container_persons);
 
         nameView.setText(name);
         dateView.setText(DateUtils.toUiFormat(date));

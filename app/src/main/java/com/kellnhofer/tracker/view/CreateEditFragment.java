@@ -74,7 +74,7 @@ public class CreateEditFragment extends Fragment implements OnMapReadyCallback, 
             mMapCentered = savedInstanceState.getBoolean(STATE_MAP_VIEW_CENTERED);
         }
 
-        mMapView = (MapView) view.findViewById(R.id.map);
+        mMapView = view.findViewById(R.id.map);
         mMapView.onCreate(mapViewBundle);
 
         return view;

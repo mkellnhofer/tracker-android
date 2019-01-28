@@ -63,10 +63,10 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
 
         setContentView(R.layout.activity_view);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
-        mNameTextView = (TextView) toolbar.findViewById(R.id.view_location_name);
-        mDateTextView = (TextView) toolbar.findViewById(R.id.view_location_date);
+        mNameTextView = toolbar.findViewById(R.id.view_location_name);
+        mDateTextView = toolbar.findViewById(R.id.view_location_date);
 
         setSupportActionBar(toolbar);
 
@@ -75,7 +75,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab = findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

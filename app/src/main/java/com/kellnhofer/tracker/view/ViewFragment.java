@@ -69,7 +69,7 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
             mapViewBundle = savedInstanceState.getBundle(STATE_MAP_VIEW);
         }
 
-        mMapView = (MapView) view.findViewById(R.id.map);
+        mMapView = view.findViewById(R.id.map);
         mMapView.onCreate(mapViewBundle);
 
         return view;

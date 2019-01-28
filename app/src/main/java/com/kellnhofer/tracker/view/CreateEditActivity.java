@@ -93,7 +93,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
         setContentView(R.layout.activity_create_edit);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         if (savedInstanceState == null) {
             String createTile = getString(R.string.activity_title_create);
             String editTile = getString(R.string.activity_title_edit);
@@ -107,7 +107,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mGpsFab = (FloatingActionButton) findViewById(R.id.fab_gps);
+        mGpsFab = findViewById(R.id.fab_gps);
         mGpsFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,7 +115,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
             }
         });
 
-        mOkFab = (FloatingActionButton) findViewById(R.id.fab_ok);
+        mOkFab = findViewById(R.id.fab_ok);
         mOkFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

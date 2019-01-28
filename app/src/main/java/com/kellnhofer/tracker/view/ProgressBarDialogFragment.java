@@ -73,9 +73,9 @@ public class ProgressBarDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.dialog_progress_bar, null);
 
-        mProgressBar = (ProgressBar) view.findViewById(R.id.view_progress_bar);
-        mPercentTextView = (TextView) view.findViewById(R.id.view_progress_percent);
-        mAbsoluteTextView = (TextView) view.findViewById(R.id.view_progress_absolute);
+        mProgressBar = view.findViewById(R.id.view_progress_bar);
+        mPercentTextView = view.findViewById(R.id.view_progress_percent);
+        mAbsoluteTextView = view.findViewById(R.id.view_progress_absolute);
 
         return new AlertDialog.Builder(getContext())
                 .setTitle(titleResId)
