@@ -5,23 +5,31 @@
     tools:context=".view.LocationsActivity">
 
     <item
+        android:id="@+id/action_search"
+        android:title="@string/action_search"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:orderInCategory="101"
+        android:visible="true"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
-        android:orderInCategory="101"
+        android:orderInCategory="102"
         android:visible="true"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_kml_export"
         android:title="@string/action_kml_export"
-        android:orderInCategory="102"
+        android:orderInCategory="103"
         android:visible="true"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_help"
         android:title="@string/action_help"
-        android:orderInCategory="103"
+        android:orderInCategory="104"
         android:visible="true"
         app:showAsAction="never" />
 

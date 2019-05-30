@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import com.kellnhofer.tracker.data.DbContract.LocationEntry;
 import com.kellnhofer.tracker.data.DbContract.LocationPersonEntry;
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.util.ArrayUtils;
 import com.kellnhofer.tracker.util.DateUtils;
+import com.kellnhofer.tracker.util.DbUtils;
 
 public class LocationDataSource {
 
@@ -35,10 +37,7 @@ public class LocationDataSource {
             cursor.close();
         }
 
-        for (Location location : locations) {
-            ArrayList<Long> personIds = getPersonIds(location.getId());
-            location.setPersonIds(personIds);
-        }
+        addPersonIds(locations);
 
         return locations;
     }
@@ -55,8 +54,7 @@ public class LocationDataSource {
             cursor.close();
         }
 
-        ArrayList<Long> personIds = getPersonIds(location.getId());
-        location.setPersonIds(personIds);
+        addPersonIds(location);
 
         return location;
     }
@@ -109,13 +107,12 @@ public class LocationDataSource {
             return null;
         }
 
-        ArrayList<Long> personIds = getPersonIds(location.getId());
-        location.setPersonIds(personIds);
+        addPersonIds(location);
 
         return location;
     }
 
-    public ArrayList<Location> getNotDeletedLocationsByDateDesc() {
+    public ArrayList<Location> getNotDeletedLocationsOrderByDateDesc() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor = db.query(LocationEntry.TABLE,
                 LocationEntry.PROJECTION_ALL,
@@ -129,10 +126,30 @@ public class LocationDataSource {
             cursor.close();
         }
 
-        for (Location location : locations) {
-            ArrayList<Long> personIds = getPersonIds(location.getId());
-            location.setPersonIds(personIds);
+        addPersonIds(locations);
+
+        return locations;
+    }
+
+    public ArrayList<Location> getNotDeletedLocationsByPersonIds(ArrayList<Long> personIds) {
+        String pIds = ArrayUtils.join(personIds);
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT " + DbUtils.toColumnsString(LocationEntry.PROJECTION_ALL)
+                        + " FROM " + LocationEntry.TABLE
+                        + " WHERE " + LocationEntry._ID + " IN"
+                        + " (SELECT " + LocationPersonEntry.COLUMN_LOCATION_ID
+                        + " FROM " + LocationPersonEntry.TABLE
+                        + " WHERE " + LocationPersonEntry.COLUMN_PERSON_ID + " IN (" + pIds + "))",
+                null);
+
+        ArrayList<Location> locations = createLocationsFromCursor(cursor);
+
+        if (cursor != null) {
+            cursor.close();
         }
+
+        addPersonIds(locations);
 
         return locations;
     }
@@ -150,10 +167,37 @@ public class LocationDataSource {
             cursor.close();
         }
 
-        for (Location location : locations) {
-            ArrayList<Long> personIds = getPersonIds(location.getId());
-            location.setPersonIds(personIds);
+        addPersonIds(locations);
+
+        return locations;
+    }
+
+    public ArrayList<Location> findNotDeletedLocationsByName(String name) {
+        if (name == null || name.isEmpty()) {
+            return new ArrayList<>();
         }
+
+        String n = DbUtils.escapeString(name);
+
+        if (n.indexOf('*') < 0) {
+            n = "*" + n + "*";
+        }
+
+        n = n.replace('*', '%');
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(LocationEntry.TABLE,
+                LocationEntry.PROJECTION_ALL,
+                LocationEntry.COLUMN_DELETED + " = 0 AND " + LocationEntry.COLUMN_NAME + " LIKE ?",
+                new String[]{n}, null, null, null);
+
+        ArrayList<Location> locations = createLocationsFromCursor(cursor);
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        addPersonIds(locations);
 
         return locations;
     }
@@ -200,6 +244,17 @@ public class LocationDataSource {
         location.setLongitude(cursor.getDouble(7));
         location.setDescription(cursor.getString(8));
         return location;
+    }
+
+    private void addPersonIds(ArrayList<Location> locations) {
+        for (Location location : locations) {
+            addPersonIds(location);
+        }
+    }
+
+    private void addPersonIds(Location location) {
+        ArrayList<Long> personIds = getPersonIds(location.getId());
+        location.setPersonIds(personIds);
     }
 
     private ArrayList<Long> getPersonIds(long locationId) {

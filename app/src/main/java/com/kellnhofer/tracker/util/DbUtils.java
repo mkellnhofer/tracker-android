@@ -17,4 +17,15 @@ public class DbUtils {
         return sb.toString();
     }
 
+    public static String escapeString(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (Character c : s.toCharArray()) {
+            if (c == '%' || c == '_') {
+                sb.append('\\');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
+    }
+
 }

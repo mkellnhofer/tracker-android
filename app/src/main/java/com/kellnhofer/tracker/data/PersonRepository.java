@@ -68,6 +68,10 @@ public class PersonRepository {
         return mDataSource.getPersonsByLocationId(locationId);
     }
 
+    public ArrayList<Person> findPersonsByName(String name) {
+        return mDataSource.findPersonsByName(name);
+    }
+
     // --- Update methods ---
 
     public int deleteUnusedPersons() {

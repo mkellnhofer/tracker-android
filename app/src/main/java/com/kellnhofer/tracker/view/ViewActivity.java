@@ -16,7 +16,6 @@ import java.util.Date;
 
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
-import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.presenter.ViewContract;
@@ -32,7 +31,6 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
 
     public static final String EXTRA_LOCATION_ID = "location_id";
 
-    private TrackerApplication mApplication;
     private ViewContract.Presenter mPresenter;
 
     private TextView mNameTextView;
@@ -49,8 +47,6 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mApplication = (TrackerApplication) getApplication();
 
         mPresenter = new ViewPresenter(this, Injector.getLocationRepository(this),
                 Injector.getPersonRepository(this), Injector.getLocationService(this));
@@ -158,6 +154,9 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
+            case android.R.id.home:
+                finish();
+                return true;
             case R.id.action_edit:
                 mPresenter.startEditActivity(mLocationId);
                 return true;

@@ -25,6 +25,7 @@ public interface LocationsContract {
 
         void startCreateActivity();
         void startViewActivity(long locationId);
+        void startSearchActivity();
         void startSettingsActivity();
     }
 

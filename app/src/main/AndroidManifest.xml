@@ -43,6 +43,11 @@
         </activity>
 
         <activity
+            android:name=".view.SearchActivity"
+            android:parentActivityName=".view.LocationsActivity">
+        </activity>
+
+        <activity
             android:name=".view.SettingsActivity"
             android:parentActivityName=".view.LocationsActivity"
             android:label="@string/activity_title_settings">
