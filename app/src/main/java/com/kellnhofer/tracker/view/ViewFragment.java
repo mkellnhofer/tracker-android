@@ -118,18 +118,21 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
     @Override
     public void onStop() {
         mMapView.onStop();
+
         super.onStop();
     }
 
     @Override
     public void onDestroy() {
         mMapView.onDestroy();
+
         super.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
         mMapView.onLowMemory();
+
         super.onLowMemory();
     }
 

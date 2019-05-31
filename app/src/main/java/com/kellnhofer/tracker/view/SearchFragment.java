@@ -24,6 +24,7 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
         SearchContract.Observer, LoaderManager.LoaderCallbacks<List<Location>> {
 
     private static final String STATE_SEARCH_STRING = "search_string";
+    private static final String STATE_SCROLL_POSITION = "scroll_position";
 
     private static final int LOADER_LOCATIONS = 0;
 
@@ -37,6 +38,8 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
 
     private LinearLayout mInfoContainer;
     private ListView mListView;
+    private int mScrollPosition = 0;
+    private boolean mRestoreScrollPosition = false;
 
     public void setPresenter(@NonNull SearchContract.Presenter presenter) {
         mPresenter = presenter;
@@ -60,6 +63,7 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
 
         if (savedInstanceState != null) {
             mSearchString = savedInstanceState.getString(STATE_SEARCH_STRING, "");
+            mScrollPosition = savedInstanceState.getInt(STATE_SCROLL_POSITION, 0);
         }
     }
 
@@ -82,19 +86,25 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
     @Override
     public void onStart() {
         super.onStart();
+
+        mRestoreScrollPosition = true;
         getLoaderManager().initLoader(LOADER_LOCATIONS, null, this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
         mPresenter.addObserver(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+
         mPresenter.removeObserver(this);
+
+        mScrollPosition = mListView.getFirstVisiblePosition();
     }
 
     @Override
@@ -107,6 +117,7 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
     @Override
     public void onStop() {
         super.onStop();
+
         getLoaderManager().destroyLoader(LOADER_LOCATIONS);
     }
 
@@ -130,9 +141,14 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
 
     @Override
     public void onLocationsChanged() {
-        if (mLoader != null) {
-            mLoader.onContentChanged();
+        if (mLoader == null) {
+            return;
         }
+
+        mScrollPosition = mListView.getFirstVisiblePosition();
+        mRestoreScrollPosition = true;
+
+        mLoader.onContentChanged();
     }
 
     // --- Loader methods ---
@@ -150,9 +166,24 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
     public void onLoadFinished(Loader<List<Location>> loader, List<Location> data) {
         if (loader.getId() == LOADER_LOCATIONS) {
             mAdapter.replaceData(data);
+            restoreScrollPosition();
             mListView.setVisibility(!data.isEmpty() ? View.VISIBLE : View.GONE);
             mInfoContainer.setVisibility(data.isEmpty() ? View.VISIBLE : View.GONE);
         }
+    }
+
+    private void restoreScrollPosition() {
+        if (!mRestoreScrollPosition) {
+            return;
+        }
+
+        mListView.post(new Runnable() {
+            @Override
+            public void run() {
+                mListView.setSelection(mScrollPosition);
+                mRestoreScrollPosition = false;
+            }
+        });
     }
 
     @Override
