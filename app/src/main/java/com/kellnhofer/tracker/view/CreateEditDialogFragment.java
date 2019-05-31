@@ -51,7 +51,8 @@ public class CreateEditDialogFragment extends DialogFragment {
         void onCreateEditDialogOk(String locationName, Date locationDate, String locationDescription,
                 ArrayList<String> locationPersonNames);
 
-        void onCreateEditDialogCancel();
+        void onCreateEditDialogCancel(String locationName, Date locationDate,
+                String locationDescription, ArrayList<String> locationPersonNames);
     }
 
     private TextWatcher mNameTextWatcher = new ValidationWatcher() {
@@ -141,14 +142,10 @@ public class CreateEditDialogFragment extends DialogFragment {
         mPersonNameViews = new ArrayList<>();
 
         if (savedInstanceState == null) {
-            if (mode == MODE_CREATE) {
-                mDateView.setText(DateUtils.toUiFormat(new Date()));
-            } else if (mode == MODE_EDIT) {
-                mNameView.setText(locationName);
-                mNameView.setSelection(locationName.length());
-                mDateView.setText(DateUtils.toUiFormat(locationDate));
-                mDescriptionView.setText(locationDescription);
-            }
+            mNameView.setText(locationName);
+            mNameView.setSelection(locationName.length());
+            mDateView.setText(DateUtils.toUiFormat(locationDate));
+            mDescriptionView.setText(locationDescription);
         }
 
         mNameView.addTextChangedListener(mNameTextWatcher);
@@ -178,33 +175,21 @@ public class CreateEditDialogFragment extends DialogFragment {
                 .setPositiveButton(actionText, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        onPositiveButtonClicked();
+                        notifyOk();
+                        CreateEditDialogFragment.this.getDialog().dismiss();
                     }
                 })
                 .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        onNegativeButtonClicked();
+                        notifyCancel();
+                        CreateEditDialogFragment.this.getDialog().dismiss();
                     }
                 }).create();
 
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         return dialog;
-    }
-
-    private void onPositiveButtonClicked() {
-        String locationName = mNameView.getText().toString().trim();
-        Date locationDate = DateUtils.fromUiFormat(mDateView.getText().toString());
-        String locationDescription = mDescriptionView.getText().toString().trim();
-        ArrayList<String> locationPersonNames = getPersonNames();
-        mListener.onCreateEditDialogOk(locationName, locationDate, locationDescription,
-                locationPersonNames);
-        CreateEditDialogFragment.this.getDialog().dismiss();
-    }
-
-    private void onNegativeButtonClicked() {
-        CreateEditDialogFragment.this.getDialog().cancel();
     }
 
     private void addPersonView(int[] viewIds, String name, boolean isLast) {
@@ -254,7 +239,10 @@ public class CreateEditDialogFragment extends DialogFragment {
         for (int i=0; i<mPersonsContainer.getChildCount(); i++) {
             ViewGroup vg = (ViewGroup) mPersonsContainer.getChildAt(i);
             EditText v = (EditText) vg.getChildAt(0);
-            names.add(v.getText().toString().trim());
+            String name = v.getText().toString().trim();
+            if (!name.isEmpty()) {
+                names.add(name);
+            }
         }
         return names;
     }
@@ -298,7 +286,7 @@ public class CreateEditDialogFragment extends DialogFragment {
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
 
-        mListener.onCreateEditDialogCancel();
+        notifyCancel();
     }
 
     private void updatePositiveButtonState() {
@@ -308,24 +296,47 @@ public class CreateEditDialogFragment extends DialogFragment {
         }
     }
 
+    private void notifyOk() {
+        String locationName = mNameView.getText().toString().trim();
+        Date locationDate = DateUtils.fromUiFormat(mDateView.getText().toString());
+        String locationDescription = mDescriptionView.getText().toString().trim();
+        ArrayList<String> locationPersonNames = getPersonNames();
+
+        mListener.onCreateEditDialogOk(locationName, locationDate, locationDescription,
+                locationPersonNames);
+    }
+
+    private void notifyCancel() {
+        String locationName = mNameView.getText().toString().trim();
+        Date locationDate = DateUtils.fromUiFormat(mDateView.getText().toString());
+        String locationDescription = mDescriptionView.getText().toString().trim();
+        ArrayList<String> locationPersonNames = getPersonNames();
+
+        mListener.onCreateEditDialogCancel(locationName, locationDate, locationDescription,
+                locationPersonNames);
+    }
+
     // --- Factory methods ---
 
-    public static CreateEditDialogFragment newCreateInstance(ArrayList<String> personNames) {
-        Bundle args = new Bundle();
-        args.putInt(BUNDLE_KEY_MODE, MODE_CREATE);
-        args.putStringArrayList(BUNDLE_KEY_PERSON_NAMES, personNames);
-
-        CreateEditDialogFragment fragment = new CreateEditDialogFragment();
-        fragment.setArguments(args);
-
-        return fragment;
+    public static CreateEditDialogFragment newCreateInstance(String locationName, Date locationDate,
+            String locationDescription, ArrayList<String> locationPersonNames,
+            ArrayList<String> personNames) {
+        return newInstance(MODE_CREATE, locationName, locationDate, locationDescription,
+                locationPersonNames, personNames);
     }
 
     public static CreateEditDialogFragment newEditInstance(String locationName, Date locationDate,
             String locationDescription, ArrayList<String> locationPersonNames,
             ArrayList<String> personNames) {
+        return newInstance(MODE_EDIT, locationName, locationDate, locationDescription,
+                locationPersonNames, personNames);
+    }
+
+    private static CreateEditDialogFragment newInstance(int mode, String locationName,
+            Date locationDate, String locationDescription, ArrayList<String> locationPersonNames,
+            ArrayList<String> personNames) {
         Bundle args = new Bundle();
-        args.putInt(BUNDLE_KEY_MODE, MODE_EDIT);
+        args.putInt(BUNDLE_KEY_MODE, mode);
         args.putString(BUNDLE_KEY_LOCATION_NAME, locationName);
         args.putLong(BUNDLE_KEY_LOCATION_DATE, locationDate.getTime());
         args.putString(BUNDLE_KEY_LOCATION_DESCRIPTION, locationDescription);

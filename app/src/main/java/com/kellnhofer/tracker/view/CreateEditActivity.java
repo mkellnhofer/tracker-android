@@ -59,7 +59,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     private String mLocationName = "";
     private Date mLocationDate = new Date();
     private LatLng mLocationLatLng = new LatLng();
-    private String mLocationDescription = null;
+    private String mLocationDescription = "";
     private ArrayList<String> mLocationPersonNames = new ArrayList<>();
 
     private boolean mUseGpsLocation = false;
@@ -288,7 +288,8 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
         CreateEditDialogFragment fragment;
         if (mLocationId == 0L) {
-            fragment = CreateEditDialogFragment.newCreateInstance(personNames);
+            fragment = CreateEditDialogFragment.newCreateInstance(mLocationName, mLocationDate,
+                    mLocationDescription, mLocationPersonNames, personNames);
         } else {
             fragment = CreateEditDialogFragment.newEditInstance(mLocationName, mLocationDate,
                     mLocationDescription, mLocationPersonNames, personNames);
@@ -309,8 +310,12 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     }
 
     @Override
-    public void onCreateEditDialogCancel() {
-
+    public void onCreateEditDialogCancel(String locationName, Date locationDate,
+            String locationDescription, ArrayList<String> locationPersonNames) {
+        mLocationName = locationName;
+        mLocationDate = locationDate;
+        mLocationDescription = locationDescription;
+        mLocationPersonNames = locationPersonNames;
     }
 
     // --- Presenter callback methods ---
