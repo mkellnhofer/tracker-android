@@ -266,7 +266,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     private void setOkFabEnabled(boolean status) {
         mOkFab.setEnabled(status);
 
-        int colorId = status ? R.color.color_accent : R.color.fab_bg_color_disabled;
+        int colorId = status ? R.color.accent : R.color.fab_bg_disabled;
         mOkFab.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, colorId)));
     }
 
@@ -275,7 +275,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     public void onMapLocationClicked(LatLng latLng) {
         mPresenter.removeGpsLocationUpdates();
         mUseGpsLocation = false;
-        setGpsFabColor(R.color.color_icon_dark);
+        setGpsFabColor(R.color.icon_dark);
         setOkFabEnabled(true);
         mLocationLatLng = latLng;
     }
@@ -333,7 +333,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     @Override
     public void onGpsLocationChanged(LatLng latLng) {
         mUseGpsLocation = true;
-        setGpsFabColor(R.color.color_accent);
+        setGpsFabColor(R.color.accent);
         setOkFabEnabled(true);
     }
 

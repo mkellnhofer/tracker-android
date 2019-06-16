@@ -20,7 +20,7 @@
             android:text="@string/category_general"
             android:textSize="13.5sp"
             android:textStyle="bold"
-            android:textColor="@color/color_accent" />
+            android:textColor="@color/accent" />
 
         <EditText
             android:id="@+id/view_name"
@@ -52,7 +52,7 @@
             android:text="@string/category_persons"
             android:textSize="13.5sp"
             android:textStyle="bold"
-            android:textColor="@color/color_accent" />
+            android:textColor="@color/accent" />
 
         <LinearLayout
             android:id="@+id/container_persons"
