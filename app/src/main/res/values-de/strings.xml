@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Tracker</string>
+
+    <string name="message_gps_permissions">Die App hat GPS-Berechtigung!</string>
+
+    <string name="activity_title_create">Standort anlegen</string>
+    <string name="activity_title_edit">Standort bearbeiten</string>
+    <string name="activity_title_settings">Einstellungen</string>
+
+    <string name="dialog_title_create">Standort anlegen</string>
+    <string name="dialog_title_edit">Standort bearbeiten</string>
+    <string name="dialog_title_delete">Standort löschen</string>
+    <string name="dialog_title_view">Details</string>
+    <string name="dialog_title_server_url">Server-URL</string>
+    <string name="dialog_title_kml_export">KML-Export</string>
+    <string name="dialog_title_help">Hilfe &amp; Feedback</string>
+    <string name="dialog_title_error">Fehler</string>
+
+    <string name="dialog_message_delete">Willst du diesen Standort wirklich löschen?</string>
+    <string name="dialog_message_help"><b>Tracker</b>. Eine einfache Open-Source-Android-App zum Aufzeichnen besuchter Orte.\n
+        \nTracker wurde nicht zum Aufzeichnen der kompletten Standorthistorie bzw. zum Aufzeichnen der Standorthistorie über eine bestimmte Zeit entwickelt. Es ist vielmehr als kleines Tagebuch - z.B. für deine Urlaubsreise - gedacht. &#x1F642;\n
+        \nEntwickelt von <b>Matthias Kellnhofer</b>.
+        \n<a href='https://github.com/mkellnhofer'>GitHub</a> - <a href='https://stackoverflow.com/users/8253209'>Stack Overflow</a> - <a href='https://www.linkedin.com/in/mkellnhofer'>LinkedIn</a>\n
+        \nDie Server-Software zu Tracker kannst du hier finden: <a href='https://github.com/mkellnhofer/tracker-server'>https://github.com/mkellnhofer/tracker-server</a>\n
+        \nFehler oder Feature-Wünsche kannst du hier melden: <a href='https://github.com/mkellnhofer/tracker-android/issues'>https://github.com/mkellnhofer/tracker-android/issues</a>.</string>
+    <string name="dialog_message_missing_api_key">Der Google-Maps-API-Schlüssel fehlt!\n
+        \nDiese App funktioniert nicht ohne einen gültigen API-Schlüssel. Bitte API-Schlüssel in die Datei \'/app/src/main/res/values/keys.xml\' eintragen.</string>
+
+    <string name="action_create">Erstellen</string>
+    <string name="action_edit">Bearbeiten</string>
+    <string name="action_save">Speichern</string>
+    <string name="action_delete">Löschen</string>
+    <string name="action_search">Suchen</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="action_kml_export">KML-Export</string>
+    <string name="action_help">Hilfe &amp; Feedback</string>
+    <string name="action_ok">OK</string>
+    <string name="action_retry">Nochmal</string>
+    <string name="action_cancel">Abbrechen</string>
+
+    <string name="category_general">Allgemein</string>
+    <string name="category_persons">Personen</string>
+
+    <string name="empty_locations">Keine Standorte.</string>
+    <string name="empty_persons">keine</string>
+
+    <string name="hint_name">Name</string>
+    <string name="hint_date">Datum</string>
+    <string name="hint_description">Beschreibung</string>
+    <string name="hint_person_name">Name</string>
+    <string name="hint_search">Suchbegriff</string>
+    <string name="hint_server_url">Server-URL</string>
+    <string name="hint_server_password">Server-Passwort</string>
+
+    <string name="error_location_name_invalid">Ungültiger Name</string>
+    <string name="error_location_date_invalid">Ungültiges Datum</string>
+    <string name="error_location_description_invalid">Ungültige Beschreibung</string>
+    <string name="error_location_person_name_invalid">Ungültiger Name</string>
+    <string name="error_server_url_invalid">Ungültige Server-URL</string>
+
+    <string name="error_unknown">Ein unbekannter Fehler trat auf!</string>
+    <string name="error_server_communication">Die Server-Kommunikation schlug fehl!</string>
+    <string name="error_server_unauthorized">Die Server-Authentifizierung schlug fehl!</string>
+    <string name="error_server_internal">Ein unbekannter Server-Fehler trat auf!</string>
+    <string name="error_export_file_io">Die Export-Datei konnte nicht geschrieben werden!</string>
+
+    <string name="day_monday">Mo</string>
+    <string name="day_tuesday">Di</string>
+    <string name="day_wednesday">Mi</string>
+    <string name="day_thursday">Do</string>
+    <string name="day_friday">Fr</string>
+    <string name="day_saturday">Sa</string>
+    <string name="day_sunday">So</string>
+
+    <string name="pref_category_sync">Sync</string>
+    <string name="pref_category_info">Info</string>
+    <string name="pref_title_enable_sync">Standorte synchronisieren</string>
+    <string name="pref_title_server_url">Server-URL</string>
+    <string name="pref_title_server_password">Server-Passwort</string>
+    <string name="pref_title_version">Version</string>
+
+</resources>

@@ -126,6 +126,9 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
+            case R.id.action_search:
+                mPresenter.startSearchActivity();
+                return true;
             case R.id.action_settings:
                 mPresenter.startSettingsActivity();
                 return true;

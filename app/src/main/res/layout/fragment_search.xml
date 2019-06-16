@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.LocationsFragment">
+    tools:context=".view.SearchFragment">
 
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:choiceMode="multipleChoiceModal" />
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/container_info"

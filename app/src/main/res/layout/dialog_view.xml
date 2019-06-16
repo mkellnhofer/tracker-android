@@ -19,7 +19,7 @@
             android:text="@string/category_general"
             android:textSize="13.5sp"
             android:textStyle="bold"
-            android:textColor="@color/color_accent" />
+            android:textColor="@color/accent" />
 
         <TextView
             android:id="@+id/view_name"
@@ -29,7 +29,7 @@
             android:layout_marginBottom="2dp"
             android:text="Regensburg"
             android:textSize="18sp"
-            android:textColor="@color/color_text_dark" />
+            android:textColor="@color/text_dark" />
 
         <TextView
             android:id="@+id/view_date"
@@ -39,7 +39,7 @@
             android:layout_marginBottom="2dp"
             android:text="01.01.2018 - 00:00"
             android:textSize="18sp"
-            android:textColor="@color/color_text_dark" />
+            android:textColor="@color/text_dark" />
 
         <TextView
             android:id="@+id/view_description"
@@ -50,7 +50,7 @@
             android:visibility="visible"
             android:text="Regensburg is a city in south-east Germany, at the confluence of the Danube, Naab and Regen rivers."
             android:textSize="18sp"
-            android:textColor="@color/color_text_dark" />
+            android:textColor="@color/text_dark" />
 
         <TextView
             android:id="@+id/view_title_persons"
@@ -60,7 +60,7 @@
             android:text="@string/category_persons"
             android:textSize="13.5sp"
             android:textStyle="bold"
-            android:textColor="@color/color_accent" />
+            android:textColor="@color/accent" />
 
         <TextView
             android:id="@+id/view_no_persons"
@@ -71,7 +71,7 @@
             android:visibility="gone"
             android:text="@string/empty_persons"
             android:textSize="18sp"
-            android:textColor="@color/color_text_dark" />
+            android:textColor="@color/text_dark" />
 
         <LinearLayout
             android:id="@+id/container_persons"

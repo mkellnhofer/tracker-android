@@ -16,6 +16,7 @@ import com.kellnhofer.tracker.service.KmlExportError;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.service.LocationSyncError;
 import com.kellnhofer.tracker.view.CreateEditActivity;
+import com.kellnhofer.tracker.view.SearchActivity;
 import com.kellnhofer.tracker.view.SettingsActivity;
 import com.kellnhofer.tracker.view.ViewActivity;
 
@@ -106,6 +107,11 @@ public class LocationsPresenter implements LocationsContract.Presenter,
         Intent intent = new Intent(mContext, ViewActivity.class);
         intent.putExtra(ViewActivity.EXTRA_LOCATION_ID, locationId);
         mContext.startActivity(intent);
+    }
+
+    @Override
+    public void startSearchActivity() {
+        mContext.startActivity(new Intent(mContext, SearchActivity.class));
     }
 
     @Override

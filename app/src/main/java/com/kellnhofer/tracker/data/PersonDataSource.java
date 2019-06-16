@@ -109,6 +109,36 @@ public class PersonDataSource {
         return persons;
     }
 
+    public ArrayList<Person> findPersonsByName(String name) {
+        if (name == null || name.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String n = DbUtils.escapeString(name);
+
+        if (n.indexOf('*') < 0) {
+            n = "*" + n + "*";
+        }
+
+        n = n.replace('*', '%');
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT " + DbUtils.toColumnsString(PersonEntry.PROJECTION_ALL)
+                        + ", TRIM(" + PersonEntry.COLUMN_FIRST_NAME + " || ' ' || "
+                        + PersonEntry.COLUMN_LAST_NAME + ") AS joined_name"
+                        + " FROM " + PersonEntry.TABLE
+                        + " WHERE joined_name LIKE ?",
+                new String[]{n});
+
+        ArrayList<Person> persons = createPersonsFromCursor(cursor);
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return persons;
+    }
+
     // --- Update methods ---
 
     public int deleteUnusedPersons() {

@@ -18,19 +18,20 @@ import java.util.List;
 
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.model.Location;
-import com.kellnhofer.tracker.presenter.LocationsContract;
-import com.kellnhofer.tracker.service.KmlExportError;
-import com.kellnhofer.tracker.service.LocationSyncError;
+import com.kellnhofer.tracker.presenter.SearchContract;
 
-public class LocationsFragment extends Fragment implements LocationsAdapter.LocationItemListener,
-        LocationsContract.Observer, LoaderManager.LoaderCallbacks<List<Location>> {
+public class SearchFragment extends Fragment implements LocationsAdapter.LocationItemListener,
+        SearchContract.Observer, LoaderManager.LoaderCallbacks<List<Location>> {
 
+    private static final String STATE_SEARCH_STRING = "search_string";
     private static final String STATE_SCROLL_POSITION = "scroll_position";
 
     private static final int LOADER_LOCATIONS = 0;
 
-    private LocationsActivity mActivity;
-    private LocationsContract.Presenter mPresenter;
+    private SearchActivity mActivity;
+    private SearchContract.Presenter mPresenter;
+
+    private String mSearchString = "";
 
     private LocationsLoader mLoader;
     private LocationsAdapter mAdapter;
@@ -40,7 +41,7 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
     private int mScrollPosition = 0;
     private boolean mRestoreScrollPosition = false;
 
-    public void setPresenter(@NonNull LocationsContract.Presenter presenter) {
+    public void setPresenter(@NonNull SearchContract.Presenter presenter) {
         mPresenter = presenter;
     }
 
@@ -49,10 +50,10 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
         super.onAttach(context);
 
         try {
-            mActivity = (LocationsActivity) context;
+            mActivity = (SearchActivity) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
-                    + " must implement " + LocationsActivity.class.getName());
+                    + " must implement " + SearchActivity.class.getName());
         }
     }
 
@@ -61,6 +62,7 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
+            mSearchString = savedInstanceState.getString(STATE_SEARCH_STRING, "");
             mScrollPosition = savedInstanceState.getInt(STATE_SCROLL_POSITION, 0);
         }
     }
@@ -68,7 +70,7 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_locations, container, false);
+        View view = inflater.inflate(R.layout.fragment_search, container, false);
 
         mAdapter = new LocationsAdapter(mActivity, new ArrayList<Location>(0));
         mAdapter.setLocationItemListener(this);
@@ -106,10 +108,10 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(STATE_SCROLL_POSITION, mScrollPosition);
+        outState.putString(STATE_SEARCH_STRING, mSearchString);
     }
 
     @Override
@@ -117,6 +119,15 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
         super.onStop();
 
         getLoaderManager().destroyLoader(LOADER_LOCATIONS);
+    }
+
+    public void onSearchUpdate(String searchString) {
+        if (mLoader == null) {
+            return;
+        }
+
+        mSearchString = searchString;
+        getLoaderManager().restartLoader(LOADER_LOCATIONS, null, this);
     }
 
     // --- Adapter callback methods ---
@@ -140,47 +151,12 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
         mLoader.onContentChanged();
     }
 
-    @Override
-    public void onSyncStarted() {
-
-    }
-
-    @Override
-    public void onSyncFinished() {
-
-    }
-
-    @Override
-    public void onSyncFailed(LocationSyncError error) {
-
-    }
-
-    @Override
-    public void onKmlExportStarted() {
-
-    }
-
-    @Override
-    public void onKmlExportProgress(int current, int total) {
-
-    }
-
-    @Override
-    public void onKmlExportFinished(int total) {
-
-    }
-
-    @Override
-    public void onKmlExportFailed(KmlExportError error) {
-
-    }
-
     // --- Loader methods ---
 
     @Override
     public Loader<List<Location>> onCreateLoader(int id, Bundle args) {
         if (id == LOADER_LOCATIONS) {
-            mLoader = new LocationsLoader(mActivity, mPresenter);
+            mLoader = new LocationsLoader(mActivity, mPresenter, mSearchString);
             return mLoader;
         }
         return null;
@@ -221,13 +197,17 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
 
     private static class LocationsLoader extends AsyncTaskLoader<List<Location>> {
 
-        private LocationsContract.Presenter mPresenter;
+        private SearchContract.Presenter mPresenter;
+
+        private String mSearchString = "";
 
         private List<Location> mData;
 
-        public LocationsLoader(Context context, LocationsContract.Presenter presenter) {
+        public LocationsLoader(Context context, SearchContract.Presenter presenter,
+                String searchString) {
             super(context);
             mPresenter = presenter;
+            mSearchString = searchString;
         }
 
         @Override
@@ -241,7 +221,7 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
 
         @Override
         public List<Location> loadInBackground() {
-            return mPresenter.getNotDeletedLocationsByDateDesc();
+            return mPresenter.searchLocations(mSearchString);
         }
 
         @Override

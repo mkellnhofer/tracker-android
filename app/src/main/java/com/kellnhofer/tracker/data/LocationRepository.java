@@ -65,11 +65,19 @@ public class LocationRepository {
     }
 
     public ArrayList<Location> getNotDeletedLocationsByDateDesc() {
-        return mDataSource.getNotDeletedLocationsByDateDesc();
+        return mDataSource.getNotDeletedLocationsOrderByDateDesc();
+    }
+
+    public ArrayList<Location> getNotDeletedLocationsByPersonIds(ArrayList<Long> personIds) {
+        return mDataSource.getNotDeletedLocationsByPersonIds(personIds);
     }
 
     public ArrayList<Location> getChangedOrDeletedLocations() {
         return mDataSource.getChangedOrDeletedLocations();
+    }
+
+    public ArrayList<Location> findNotDeletedLocationsByName(String name) {
+        return mDataSource.findNotDeletedLocationsByName(name);
     }
 
     // --- Update methods ---

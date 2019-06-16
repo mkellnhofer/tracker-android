@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="color_primary">#43a047</color>
-    <color name="color_primary_dark">#357e38</color>
-    <color name="color_accent">#d50000</color>
+    <color name="launcher_background">#53A856</color>
 
-    <color name="color_text_dark">#333333</color>
-    <color name="color_text_light">#FFFFFF</color>
-    <color name="color_icon_dark">#8A8A8A</color>
-    <color name="color_icon_dark_2">#757575</color>
-    <color name="color_icon_light">#FFFFFF</color>
+    <color name="primary">#43a047</color>
+    <color name="primary_dark">#357e38</color>
+    <color name="accent">#d50000</color>
 
-    <color name="fab_bg_color_white">#FFFFFF</color>
-    <color name="fab_bg_color_disabled">#8A8A8A</color>
+    <color name="text_dark">#333333</color>
+    <color name="text_light">#FFFFFF</color>
+
+    <color name="icon_dark">#8A8A8A</color>
+    <color name="icon_dark_2">#757575</color>
+    <color name="icon_light">#FFFFFF</color>
+
+    <color name="fab_bg_white">#FFFFFF</color>
+    <color name="fab_bg_disabled">#8A8A8A</color>
 
     <color name="day_monday">#80deea</color>
     <color name="day_tuesday">#80cbc4</color>
