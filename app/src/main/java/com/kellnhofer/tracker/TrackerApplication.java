@@ -2,7 +2,6 @@ package com.kellnhofer.tracker;
 
 import android.app.Application;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.util.Log;
 
 import java.lang.reflect.Type;
@@ -118,9 +117,6 @@ public class TrackerApplication extends Application {
     // --- Helper methods ---
 
     public boolean hasGpsPermissions() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
         for (String permission : Constants.GPS_PERMISSIONS) {
             if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 return false;

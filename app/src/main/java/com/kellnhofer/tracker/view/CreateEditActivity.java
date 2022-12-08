@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -146,7 +145,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
         mLocationName = savedInstanceState.getString(STATE_LOCATION_NAME);
@@ -218,9 +217,6 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
             return;
         }
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
         if (!mApplication.hasGpsPermissions()) {
             requestPermissions(Constants.GPS_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }

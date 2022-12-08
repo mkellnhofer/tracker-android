@@ -111,14 +111,6 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_locations_action, menu);
-
-        // Disable export for API < 19
-        // (Storage Access Framework is only available for API >= 19)
-        MenuItem kmlExportItem = menu.findItem(R.id.action_kml_export);
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT) {
-            kmlExportItem.setVisible(false);
-        }
-
         return true;
     }
 
