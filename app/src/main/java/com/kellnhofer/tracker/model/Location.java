@@ -1,10 +1,11 @@
 package com.kellnhofer.tracker.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import java.util.ArrayList;
 import java.util.Date;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+import androidx.annotation.NonNull;
 
 import com.kellnhofer.tracker.util.TypeUtils;
 
@@ -130,7 +131,7 @@ public class Location implements Parcelable {
 
     // --- Parcelable methods ---
 
-    public Location(Parcel source) {
+    public Location(@NonNull Parcel source) {
         mId = source.readLong();
         mRemoteId = source.readLong();
         mChanged = source.readInt() > 0;
@@ -148,7 +149,7 @@ public class Location implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mId);
         dest.writeLong(mRemoteId);
         dest.writeInt(mChanged ? 1 : 0);

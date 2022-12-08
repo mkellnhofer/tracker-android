@@ -1,9 +1,9 @@
 package com.kellnhofer.tracker.view;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.kellnhofer.tracker.BuildConfig;
 import com.kellnhofer.tracker.Injector;
@@ -53,11 +53,12 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         if (savedInstanceState == null) {
             mFragment = new SettingsFragment();
 
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_SETTINGS)
                     .commit();
         } else {
-            mFragment = (SettingsFragment) getFragmentManager().findFragmentByTag(
+            mFragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag(
                     FRAGMENT_TAG_SETTINGS);
             mSyncErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
                     .findFragmentByTag(DIALOG_FRAGMENT_TAG_SYNC_ERROR);

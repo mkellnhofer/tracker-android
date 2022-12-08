@@ -1,24 +1,24 @@
 package com.kellnhofer.tracker.view;
 
+import java.util.ArrayList;
+import java.util.Date;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 
-import java.util.ArrayList;
-import java.util.Date;
-
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.kellnhofer.tracker.Constants;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
@@ -133,7 +133,8 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
             mFragment = new CreateEditFragment();
             mFragment.setArguments(args);
 
-            getSupportFragmentManager().beginTransaction()
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_CREATE_EDIT)
                     .commit();
         } else {
@@ -188,7 +189,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putString(STATE_LOCATION_NAME, mLocationName);
@@ -202,7 +203,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();

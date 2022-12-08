@@ -1,10 +1,10 @@
 package com.kellnhofer.tracker.service;
 
-import android.util.Log;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import android.util.Log;
 
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.TrackerApplication;

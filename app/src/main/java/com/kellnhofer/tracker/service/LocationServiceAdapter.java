@@ -1,13 +1,13 @@
 package com.kellnhofer.tracker.service;
 
+import java.util.ArrayList;
+
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-
-import java.util.ArrayList;
 
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;

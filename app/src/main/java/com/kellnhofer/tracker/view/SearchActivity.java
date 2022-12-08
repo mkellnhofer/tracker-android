@@ -1,13 +1,13 @@
 package com.kellnhofer.tracker.view;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.WindowManager;
 import android.widget.EditText;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
@@ -67,7 +67,8 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
         if (savedInstanceState == null) {
             mFragment = new SearchFragment();
 
-            getSupportFragmentManager().beginTransaction()
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_VIEW)
                     .commit();
         } else {

@@ -1,5 +1,8 @@
 package com.kellnhofer.tracker.presenter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.LocationListener;
@@ -7,9 +10,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;

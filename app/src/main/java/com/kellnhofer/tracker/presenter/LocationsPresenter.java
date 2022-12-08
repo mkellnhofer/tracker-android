@@ -1,12 +1,12 @@
 package com.kellnhofer.tracker.presenter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;

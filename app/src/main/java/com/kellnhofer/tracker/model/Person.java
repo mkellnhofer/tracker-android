@@ -2,6 +2,7 @@ package com.kellnhofer.tracker.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.NonNull;
 
 public class Person implements Parcelable {
 
@@ -54,14 +55,14 @@ public class Person implements Parcelable {
 
     // --- Parcelable methods ---
 
-    public Person(Parcel source) {
+    public Person(@NonNull Parcel source) {
         mId = source.readLong();
         mFirstName = source.readString();
         mLastName = source.readString();
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mId);
         dest.writeString(mFirstName);
         dest.writeString(mLastName);

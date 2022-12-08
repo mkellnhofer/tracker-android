@@ -1,10 +1,10 @@
 package com.kellnhofer.tracker;
 
+import java.lang.reflect.Type;
+
 import android.app.Application;
 import android.content.pm.PackageManager;
 import android.util.Log;
-
-import java.lang.reflect.Type;
 
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.okhttp3.StethoInterceptor;

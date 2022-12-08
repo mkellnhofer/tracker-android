@@ -1,13 +1,14 @@
 package com.kellnhofer.tracker.service;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import android.app.Service;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
-
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import androidx.annotation.NonNull;
 
 import com.kellnhofer.tracker.BuildConfig;
 import com.kellnhofer.tracker.TrackerApplication;
@@ -64,7 +65,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(@NonNull Intent intent, int flags, int startId) {
         String action = intent.getAction();
         if (action == null) {
             return START_NOT_STICKY;

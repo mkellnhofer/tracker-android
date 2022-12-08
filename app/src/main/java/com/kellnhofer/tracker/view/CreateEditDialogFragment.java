@@ -1,11 +1,11 @@
 package com.kellnhofer.tracker.view;
 
+import java.util.ArrayList;
+import java.util.Date;
+
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -19,9 +19,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-
-import java.util.ArrayList;
-import java.util.Date;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.util.DateUtils;
@@ -270,7 +270,7 @@ public class CreateEditDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         int[] personViewsIds = new int[mPersonsContainer.getChildCount()*4];
@@ -283,7 +283,7 @@ public class CreateEditDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
+    public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
 
         notifyCancel();

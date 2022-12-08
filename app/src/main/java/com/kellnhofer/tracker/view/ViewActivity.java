@@ -1,19 +1,20 @@
 package com.kellnhofer.tracker.view;
 
+import java.util.ArrayList;
+import java.util.Date;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
-import java.util.ArrayList;
-import java.util.Date;
-
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.model.Location;
@@ -86,7 +87,8 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
             mFragment = new ViewFragment();
             mFragment.setArguments(args);
 
-            getSupportFragmentManager().beginTransaction()
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_VIEW)
                     .commit();
         } else {
@@ -151,7 +153,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         switch (id) {
             case android.R.id.home:

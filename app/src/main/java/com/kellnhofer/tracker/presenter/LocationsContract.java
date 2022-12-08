@@ -1,8 +1,8 @@
 package com.kellnhofer.tracker.presenter;
 
-import android.net.Uri;
-
 import java.util.ArrayList;
+
+import android.net.Uri;
 
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.service.KmlExportError;

@@ -1,9 +1,5 @@
 package com.kellnhofer.tracker.service;
 
-import android.net.Uri;
-import android.util.Log;
-import android.util.Xml;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
@@ -13,6 +9,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import android.net.Uri;
+import android.util.Log;
+import android.util.Xml;
 
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.TrackerApplication;
