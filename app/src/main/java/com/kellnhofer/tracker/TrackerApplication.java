@@ -23,6 +23,8 @@ public class TrackerApplication extends Application {
 
     private static final String LOG_TAG = TrackerApplication.class.getSimpleName();
 
+    private final FlipperInitializer mFlipperInitializer = new FlipperInitializerImpl();
+
     private TrackerSettings mSettings;
     private TrackerStates mStates;
 
@@ -36,6 +38,8 @@ public class TrackerApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        initFlipper();
+
         mSettings = new TrackerSettings(this, Injector.getLocationService(this));
         mStates = new TrackerStates(this);
 
@@ -44,6 +48,10 @@ public class TrackerApplication extends Application {
         initOkHttp();
         initGson();
         initRetrofit();
+    }
+
+    private void initFlipper() {
+        mFlipperInitializer.init(this);
     }
 
     private void initData() {
@@ -59,6 +67,7 @@ public class TrackerApplication extends Application {
         authInterceptor.setPassword(mSettings.getServerPassword());
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.addNetworkInterceptor(mFlipperInitializer.getOkHttpInterceptor());
         builder.addNetworkInterceptor(authInterceptor);
         mOkHttpClient = builder.build();
     }

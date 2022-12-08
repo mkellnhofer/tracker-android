@@ -5,7 +5,8 @@ import android.content.SharedPreferences;
 
 public class TrackerStates {
 
-    private static final String NAME = BuildConfig.APPLICATION_ID + "_states";
+    // Preferences file name
+    public static final String PREF_FILE_NAME = BuildConfig.APPLICATION_ID + "_states";
     // Keys
     private static final String STATE_KEY_LAST_SYNC_VERSION = "state_last_sync_version";
     // Default values
@@ -16,7 +17,7 @@ public class TrackerStates {
 
     public TrackerStates(TrackerApplication application) {
         mApplication = application;
-        mPreferences = mApplication.getSharedPreferences(NAME, Context.MODE_PRIVATE);
+        mPreferences = mApplication.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     public long getLastSyncVersion() {

@@ -40,4 +40,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    developmentImplementation 'com.facebook.flipper:flipper:0.96.1'
+    developmentImplementation 'com.facebook.flipper:flipper-network-plugin:0.96.1'
+    developmentImplementation 'com.facebook.soloader:soloader:0.10.1'
 }

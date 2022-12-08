@@ -1,12 +1,14 @@
 package com.kellnhofer.tracker;
 
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 
 public class TrackerSettings implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    // Preferences file name
+    public static final String PREF_FILE_NAME = BuildConfig.APPLICATION_ID + "_preferences";
     // Keys
     public static final String PREF_KEY_SYNC_ENABLED = "pref_sync_enabled";
     public static final String PREF_KEY_SERVER_URL = "pref_server_url";
@@ -21,7 +23,7 @@ public class TrackerSettings implements SharedPreferences.OnSharedPreferenceChan
     public TrackerSettings(TrackerApplication application, LocationServiceAdapter locationService) {
         mApplication = application;
 
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(mApplication);
+        mPreferences = mApplication.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
         mPreferences.registerOnSharedPreferenceChangeListener(this);
 
         mService = locationService;
