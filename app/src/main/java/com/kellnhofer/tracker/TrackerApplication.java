@@ -6,8 +6,6 @@ import android.app.Application;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import com.facebook.stetho.Stetho;
-import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -43,8 +41,6 @@ public class TrackerApplication extends Application {
 
         initData();
 
-        initStetho();
-
         initOkHttp();
         initGson();
         initRetrofit();
@@ -56,12 +52,6 @@ public class TrackerApplication extends Application {
         mDbHelper = new DbHelper(this);
     }
 
-    private void initStetho() {
-        if (BuildConfig.DEBUG) {
-            Stetho.initializeWithDefaults(this);
-        }
-    }
-
     public void initOkHttp() {
         Log.d(LOG_TAG, "Init OkHttp.");
 
@@ -69,9 +59,6 @@ public class TrackerApplication extends Application {
         authInterceptor.setPassword(mSettings.getServerPassword());
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        if (BuildConfig.DEBUG) {
-            builder.addNetworkInterceptor(new StethoInterceptor());
-        }
         builder.addNetworkInterceptor(authInterceptor);
         mOkHttpClient = builder.build();
     }
