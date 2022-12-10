@@ -29,9 +29,7 @@ public class LocationRepository {
     }
 
     public void removeContentObserver(LocationRepositoryObserver observer) {
-        if (mObservers.contains(observer)) {
-            mObservers.remove(observer);
-        }
+        mObservers.remove(observer);
     }
 
     // --- CRUD methods ---

@@ -1,8 +1,6 @@
 package com.kellnhofer.tracker.presenter;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -44,9 +42,7 @@ public class SearchPresenter implements SearchContract.Presenter,
 
     @Override
     public void removeObserver(SearchContract.Observer observer) {
-        if (mObservers.contains(observer)) {
-            mObservers.remove(observer);
-        }
+        mObservers.remove(observer);
     }
 
     @Override
@@ -100,12 +96,9 @@ public class SearchPresenter implements SearchContract.Presenter,
 
     @Override
     public void onLocationChanged() {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (SearchContract.Observer observer : mObservers) {
-                    observer.onLocationsChanged();
-                }
+        executeOnMainThread(() -> {
+            for (SearchContract.Observer observer : mObservers) {
+                observer.onLocationsChanged();
             }
         });
     }
@@ -130,19 +123,10 @@ public class SearchPresenter implements SearchContract.Presenter,
     }
 
     private static void sortLocationsByDateDesc(ArrayList<Location> locations) {
-        Collections.sort(locations, new Comparator<Location>() {
-            @Override
-            public int compare(Location l, Location r) {
-                long lt = l.getDate().getTime();
-                long rt = r.getDate().getTime();
-                if (lt > rt) {
-                    return -1;
-                } else if (lt < rt) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
+        locations.sort((l, r) -> {
+            long lt = l.getDate().getTime();
+            long rt = r.getDate().getTime();
+            return Long.compare(rt, lt);
         });
     }
 

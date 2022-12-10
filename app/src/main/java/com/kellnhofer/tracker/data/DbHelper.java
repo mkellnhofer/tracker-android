@@ -2,8 +2,6 @@ package com.kellnhofer.tracker.data;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -71,13 +69,10 @@ public class DbHelper extends SQLiteOpenHelper {
         }
 
         // Sort updates by order
-        Collections.sort(updateMethods, new Comparator<Method>() {
-            @Override
-            public int compare(Method m1, Method m2) {
-                int m1o = m1.getAnnotation(DbUpdate.class).order();
-                int m2o = m2.getAnnotation(DbUpdate.class).order();
-                return m1o - m2o;
-            }
+        updateMethods.sort((m1, m2) -> {
+            int m1o = m1.getAnnotation(DbUpdate.class).order();
+            int m2o = m2.getAnnotation(DbUpdate.class).order();
+            return m1o - m2o;
         });
 
         Log.i(LOG_TAG, String.format("Executing updates from V%d.", oldVersion));

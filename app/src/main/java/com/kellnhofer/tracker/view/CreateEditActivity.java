@@ -9,7 +9,6 @@ import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -107,20 +106,10 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         }
 
         mGpsFab = findViewById(R.id.fab_gps);
-        mGpsFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onGpsFabClicked();
-            }
-        });
+        mGpsFab.setOnClickListener(v -> onGpsFabClicked());
 
         mOkFab = findViewById(R.id.fab_ok);
-        mOkFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onOkFabClicked();
-            }
-        });
+        mOkFab.setOnClickListener(v -> onOkFabClicked());
 
         if (savedInstanceState == null && mLocationId == 0L) {
             setOkFabEnabled(false);

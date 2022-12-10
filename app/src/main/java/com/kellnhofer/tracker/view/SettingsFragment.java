@@ -27,8 +27,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         try {
             mActivity = (SettingsActivity) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement " + SettingsActivity.class.getName());
+            throw new ClassCastException(activity + " must implement " +
+                    SettingsActivity.class.getName() + "!");
         }
     }
 
@@ -46,12 +46,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
     private void initServerUrl() {
         Preference preference = findPreference(TrackerSettings.PREF_KEY_SERVER_URL);
-        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                mActivity.onServerUrlClicked();
-                return true;
-            }
+        preference.setOnPreferenceClickListener(p -> {
+            mActivity.onServerUrlClicked();
+            return true;
         });
     }
 

@@ -28,7 +28,7 @@ public class InfoDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString() + " must implement " +
+            throw new ClassCastException(getActivity() + " must implement " +
                     Listener.class.getName() + "!");
         }
 
@@ -42,12 +42,8 @@ public class InfoDialogFragment extends DialogFragment {
         return new AlertDialog.Builder(getContext())
                 .setTitle(titleResId)
                 .setMessage(messageResId)
-                .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onInfoDialogOk(getFragmentTag());
-                    }
-                }).create();
+                .setPositiveButton(R.string.action_ok, (d, id) ->
+                        mListener.onInfoDialogOk(getFragmentTag())).create();
     }
 
     @Override

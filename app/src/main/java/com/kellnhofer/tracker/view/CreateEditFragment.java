@@ -49,8 +49,8 @@ public class CreateEditFragment extends Fragment implements OnMapReadyCallback, 
         try {
             mActivity = (CreateEditActivity) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement " + CreateEditActivity.class.getName());
+            throw new ClassCastException(context + " must implement " +
+                    CreateEditActivity.class.getName() + "!");
         }
     }
 

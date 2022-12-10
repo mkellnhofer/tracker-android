@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -71,12 +70,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         }
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onFabClicked();
-            }
-        });
+        fab.setOnClickListener(v -> onFabClicked());
 
         ViewFragment fragment = (ViewFragment) getSupportFragmentManager().findFragmentByTag(
                 FRAGMENT_TAG_VIEW);

@@ -28,8 +28,8 @@ public class DecisionDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement " + Listener.class.getName() + "!");
+            throw new ClassCastException(getActivity() + " must implement " +
+                    Listener.class.getName() + "!");
         }
 
         Bundle arguments = getArguments();
@@ -43,16 +43,10 @@ public class DecisionDialogFragment extends DialogFragment {
         return new AlertDialog.Builder(getContext())
                 .setTitle(titleTextId)
                 .setMessage(messageTextId)
-                .setPositiveButton(actionTextId, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onDecisionDialogOk(getFragmentTag());
-                    }
-                })
-                .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onDecisionDialogCancel(getFragmentTag());
-                    }
-                }).create();
+                .setPositiveButton(actionTextId, (d, id) ->
+                        mListener.onDecisionDialogOk(getFragmentTag()))
+                .setNegativeButton(R.string.action_cancel, (d, id) ->
+                        mListener.onDecisionDialogCancel(getFragmentTag())).create();
     }
 
     @Override

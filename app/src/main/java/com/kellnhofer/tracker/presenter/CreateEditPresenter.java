@@ -57,9 +57,7 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     @Override
     public void removeObserver(CreateEditContract.Observer observer) {
-        if (mObservers.contains(observer)) {
-            mObservers.remove(observer);
-        }
+        mObservers.remove(observer);
     }
 
     @Override
@@ -122,24 +120,18 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     @Override
     public void onLocationCreated(long locationId) {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (CreateEditContract.Observer observer : mObservers) {
-                    observer.onLocationCreated();
-                }
+        executeOnMainThread(() -> {
+            for (CreateEditContract.Observer observer : mObservers) {
+                observer.onLocationCreated();
             }
         });
     }
 
     @Override
     public void onLocationUpdated(long locationId) {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (CreateEditContract.Observer observer : mObservers) {
-                    observer.onLocationUpdated();
-                }
+        executeOnMainThread(() -> {
+            for (CreateEditContract.Observer observer : mObservers) {
+                observer.onLocationUpdated();
             }
         });
     }

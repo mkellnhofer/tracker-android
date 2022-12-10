@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,12 +58,7 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.startCreateActivity();
-            }
-        });
+        fab.setOnClickListener(v -> mPresenter.startCreateActivity());
 
         LocationsFragment fragment = (LocationsFragment) getSupportFragmentManager()
                 .findFragmentByTag(FRAGMENT_TAG_LOCATIONS);
@@ -323,12 +317,7 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     private void showSyncErrorSnackBar(LocationSyncError error) {
         Snackbar snackbar = Snackbar.make(mCoordinatorLayout, error.getTextResId(),
                 Snackbar.LENGTH_LONG);
-        snackbar.setAction(R.string.action_retry, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.executeLocationSync();
-            }
-        });
+        snackbar.setAction(R.string.action_retry, v -> mPresenter.executeLocationSync());
         snackbar.show();
     }
 

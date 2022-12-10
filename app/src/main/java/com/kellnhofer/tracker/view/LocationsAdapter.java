@@ -100,12 +100,7 @@ public class LocationsAdapter extends BaseAdapter {
         boolean changed = location.isChanged();
         syncStateView.setVisibility(remoteId != 0L && !changed ? View.VISIBLE : View.INVISIBLE);
 
-        rowView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onLocationClicked(location);
-            }
-        });
+        rowView.setOnClickListener(v -> onLocationClicked(location));
 
         return rowView;
     }

@@ -46,7 +46,7 @@ public class Location implements Parcelable {
         mLatitude = latitude;
         mLongitude = longitude;
         mDescription = description;
-        mPersonIds = personIds != null ? personIds : new ArrayList<Long>();
+        mPersonIds = personIds != null ? personIds : new ArrayList<>();
     }
 
     public long getId() {
@@ -126,7 +126,7 @@ public class Location implements Parcelable {
     }
 
     public void setPersonIds(ArrayList<Long> personIds) {
-        mPersonIds = personIds != null ? personIds : new ArrayList<Long>();
+        mPersonIds = personIds != null ? personIds : new ArrayList<>();
     }
 
     // --- Parcelable methods ---

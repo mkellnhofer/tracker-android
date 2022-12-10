@@ -28,7 +28,7 @@ public class ErrorDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString() + " must implement " +
+            throw new ClassCastException(getActivity() + " must implement " +
                     Listener.class.getName() + "!");
         }
 
@@ -44,23 +44,13 @@ public class ErrorDialogFragment extends DialogFragment {
                 .setTitle(titleResId)
                 .setMessage(messageResId);
         if (isRetryEnabled) {
-            builder.setPositiveButton(R.string.action_retry, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    mListener.onErrorDialogRetry(getFragmentTag());
-                }
-            });
-            builder.setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int id) {
-                    mListener.onErrorDialogCancel(getFragmentTag());
-                }
-            });
+            builder.setPositiveButton(R.string.action_retry, (d, id) ->
+                    mListener.onErrorDialogRetry(getFragmentTag()));
+            builder.setNegativeButton(R.string.action_cancel, (d, id) ->
+                    mListener.onErrorDialogCancel(getFragmentTag()));
         } else {
-            builder.setNegativeButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    mListener.onErrorDialogCancel(getFragmentTag());
-                }
-            });
+            builder.setNegativeButton(R.string.action_ok, (d, id) ->
+                    mListener.onErrorDialogCancel(getFragmentTag()));
         }
 
         return builder.create();

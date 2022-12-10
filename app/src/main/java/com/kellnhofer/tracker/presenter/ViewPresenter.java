@@ -41,9 +41,7 @@ public class ViewPresenter implements ViewContract.Presenter {
 
     @Override
     public void removeObserver(ViewContract.Observer observer) {
-        if (mObservers.contains(observer)) {
-            mObservers.remove(observer);
-        }
+        mObservers.remove(observer);
     }
 
     @Override

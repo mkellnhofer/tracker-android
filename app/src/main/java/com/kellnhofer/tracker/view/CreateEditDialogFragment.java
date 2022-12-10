@@ -112,7 +112,7 @@ public class CreateEditDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString() + " must implement " +
+            throw new ClassCastException(getActivity() + " must implement " +
                     Listener.class.getName() + "!");
         }
 
@@ -172,19 +172,13 @@ public class CreateEditDialogFragment extends DialogFragment {
         AlertDialog dialog = new AlertDialog.Builder(getContext())
                 .setTitle(titleText)
                 .setView(view)
-                .setPositiveButton(actionText, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        notifyOk();
-                        CreateEditDialogFragment.this.getDialog().dismiss();
-                    }
+                .setPositiveButton(actionText, (d, id) -> {
+                    notifyOk();
+                    CreateEditDialogFragment.this.getDialog().dismiss();
                 })
-                .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        notifyCancel();
-                        CreateEditDialogFragment.this.getDialog().dismiss();
-                    }
+                .setNegativeButton(R.string.action_cancel, (d, id) -> {
+                    notifyCancel();
+                    CreateEditDialogFragment.this.getDialog().dismiss();
                 }).create();
 
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -210,24 +204,18 @@ public class CreateEditDialogFragment extends DialogFragment {
         nameView.addTextChangedListener(mPersonNameTextWatcher);
         addButton.setId(viewIds != null ? viewIds[2] : View.generateViewId());
         addButton.setVisibility(isLast ? View.VISIBLE : View.GONE);
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addButton.setVisibility(View.GONE);
-                removeButton.setVisibility(View.VISIBLE);
-                addPersonView(null, "", true);
-            }
+        addButton.setOnClickListener(v -> {
+            addButton.setVisibility(View.GONE);
+            removeButton.setVisibility(View.VISIBLE);
+            addPersonView(null, "", true);
         });
         removeButton.setId(viewIds != null ? viewIds[3] : View.generateViewId());
         removeButton.setVisibility(!isLast ? View.VISIBLE : View.GONE);
-        removeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPersonsContainer.removeView(container);
-                mPersonNameViews.remove(nameView);
-                validatePersonNames();
-                updatePositiveButtonState();
-            }
+        removeButton.setOnClickListener(v -> {
+            mPersonsContainer.removeView(container);
+            mPersonNameViews.remove(nameView);
+            validatePersonNames();
+            updatePositiveButtonState();
         });
 
         mPersonsContainer.addView(container);

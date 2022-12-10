@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,12 +69,7 @@ public class ViewDialogFragment extends DialogFragment {
         return new AlertDialog.Builder(getContext())
                 .setTitle(R.string.dialog_title_view)
                 .setView(view)
-                .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dismiss();
-                    }
-                }).create();
+                .setPositiveButton(R.string.action_ok, (d, id) -> dismiss()).create();
     }
 
     private void addPersonView(LinearLayout personsContainer, String name) {

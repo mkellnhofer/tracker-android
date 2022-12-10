@@ -29,9 +29,7 @@ public class PersonRepository {
     }
 
     public void removeContentObserver(PersonRepositoryObserver observer) {
-        if (mObservers.contains(observer)) {
-            mObservers.remove(observer);
-        }
+        mObservers.remove(observer);
     }
 
     // --- CRUD methods ---

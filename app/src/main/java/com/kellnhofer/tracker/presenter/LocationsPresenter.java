@@ -49,9 +49,7 @@ public class LocationsPresenter implements LocationsContract.Presenter,
 
     @Override
     public void removeObserver(LocationsContract.Observer observer) {
-        if (mObservers.contains(observer)) {
-            mObservers.remove(observer);
-        }
+        mObservers.remove(observer);
     }
 
     @Override
@@ -135,84 +133,63 @@ public class LocationsPresenter implements LocationsContract.Presenter,
 
     @Override
     public void onSyncStarted() {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (LocationsContract.Observer observer : mObservers) {
-                    observer.onSyncStarted();
-                }
+        executeOnMainThread(() -> {
+            for (LocationsContract.Observer observer : mObservers) {
+                observer.onSyncStarted();
             }
         });
     }
 
     @Override
     public void onSyncFinished() {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (LocationsContract.Observer observer : mObservers) {
-                    observer.onSyncFinished();
-                }
+        executeOnMainThread(() -> {
+            for (LocationsContract.Observer observer : mObservers) {
+                observer.onSyncFinished();
             }
         });
     }
 
     @Override
     public void onSyncFailed(final LocationSyncError error) {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (LocationsContract.Observer observer : mObservers) {
-                    observer.onSyncFailed(error);
-                }
+        executeOnMainThread(() -> {
+            for (LocationsContract.Observer observer : mObservers) {
+                observer.onSyncFailed(error);
             }
         });
     }
 
     @Override
     public void onKmlExportStarted() {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (LocationsContract.Observer observer : mObservers) {
-                    observer.onKmlExportStarted();
-                }
+        executeOnMainThread(() -> {
+            for (LocationsContract.Observer observer : mObservers) {
+                observer.onKmlExportStarted();
             }
         });
     }
 
     @Override
     public void onKmlExportProgress(final int current, final int total) {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (LocationsContract.Observer observer : mObservers) {
-                    observer.onKmlExportProgress(current, total);
-                }
+        executeOnMainThread(() -> {
+            for (LocationsContract.Observer observer : mObservers) {
+                observer.onKmlExportProgress(current, total);
             }
         });
     }
 
     @Override
     public void onKmlExportFinished(final int total) {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (LocationsContract.Observer observer : mObservers) {
-                    observer.onKmlExportFinished(total);
-                }
+        executeOnMainThread(() -> {
+            for (LocationsContract.Observer observer : mObservers) {
+                observer.onKmlExportFinished(total);
             }
         });
     }
 
     @Override
     public void onKmlExportFailed(final KmlExportError error) {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (LocationsContract.Observer observer : mObservers) {
-                    observer.onKmlExportFailed(error);
-                }
+        executeOnMainThread(() -> {
+            for (LocationsContract.Observer observer : mObservers) {
+                observer.onKmlExportFailed(error);
             }
         });
     }
@@ -221,12 +198,9 @@ public class LocationsPresenter implements LocationsContract.Presenter,
 
     @Override
     public void onLocationChanged() {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (LocationsContract.Observer observer : mObservers) {
-                    observer.onLocationsChanged();
-                }
+        executeOnMainThread(() -> {
+            for (LocationsContract.Observer observer : mObservers) {
+                observer.onLocationsChanged();
             }
         });
     }

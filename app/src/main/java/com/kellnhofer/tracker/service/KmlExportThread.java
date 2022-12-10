@@ -103,11 +103,7 @@ public class KmlExportThread extends Thread {
         Date currentDate = new Date();
 
         // Try to write file
-        OutputStream os = null;
-        try {
-            // Open file output stream
-            os = mApplication.getContentResolver().openOutputStream(mFileUri);
-
+        try (OutputStream os = mApplication.getContentResolver().openOutputStream(mFileUri)) {
             // Create serializer
             XmlSerializer serializer = Xml.newSerializer();
             serializer.setOutput(os, "UTF-8");
@@ -124,10 +120,6 @@ public class KmlExportThread extends Thread {
 
             // End document
             serializer.endDocument();
-        } finally {
-            if (os != null) {
-                os.close();
-            }
         }
     }
 

@@ -49,8 +49,8 @@ public class ServerUrlDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement " + Listener.class.getName() + "!");
+            throw new ClassCastException(getActivity() + " must implement " +
+                    Listener.class.getName() + "!");
         }
 
         Bundle arguments = getArguments();
@@ -77,18 +77,10 @@ public class ServerUrlDialogFragment extends DialogFragment {
         AlertDialog dialog = new AlertDialog.Builder(getContext())
                 .setTitle(R.string.dialog_title_server_url)
                 .setView(view)
-                .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onServerUrlDialogOk(mUrlView.getText().toString());
-                    }
-                })
-                .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        ServerUrlDialogFragment.this.getDialog().cancel();
-                    }
-                }).create();
+                .setPositiveButton(R.string.action_ok, (d, id) ->
+                        mListener.onServerUrlDialogOk(mUrlView.getText().toString()))
+                .setNegativeButton(R.string.action_cancel, (d, id) ->
+                        ServerUrlDialogFragment.this.getDialog().cancel()).create();
 
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 

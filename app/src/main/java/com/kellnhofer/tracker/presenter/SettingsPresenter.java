@@ -33,9 +33,7 @@ public class SettingsPresenter implements SettingsContract.Presenter,
 
     @Override
     public void removeObserver(SettingsContract.Observer observer) {
-        if (mObservers.contains(observer)) {
-            mObservers.remove(observer);
-        }
+        mObservers.remove(observer);
     }
 
     @Override
@@ -72,36 +70,27 @@ public class SettingsPresenter implements SettingsContract.Presenter,
 
     @Override
     public void onSyncStarted() {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (SettingsContract.Observer observer : mObservers) {
-                    observer.onSyncStarted();
-                }
+        executeOnMainThread(() -> {
+            for (SettingsContract.Observer observer : mObservers) {
+                observer.onSyncStarted();
             }
         });
     }
 
     @Override
     public void onSyncFinished() {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (SettingsContract.Observer observer : mObservers) {
-                    observer.onSyncFinished();
-                }
+        executeOnMainThread(() -> {
+            for (SettingsContract.Observer observer : mObservers) {
+                observer.onSyncFinished();
             }
         });
     }
 
     @Override
     public void onSyncFailed(final LocationSyncError error) {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (SettingsContract.Observer observer : mObservers) {
-                    observer.onSyncFailed(error);
-                }
+        executeOnMainThread(() -> {
+            for (SettingsContract.Observer observer : mObservers) {
+                observer.onSyncFailed(error);
             }
         });
     }

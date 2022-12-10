@@ -118,42 +118,36 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     }
 
     private void createLocation(final Location location, final ArrayList<Person> persons) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                location.setChanged(true);
+        Runnable r = () -> {
+            location.setChanged(true);
 
-                ArrayList<Long> pIds = getPersonIds(persons);
-                location.setPersonIds(pIds);
+            ArrayList<Long> pIds = getPersonIds(persons);
+            location.setPersonIds(pIds);
 
-                long locationId = mLocationRepository.saveLocation(location);
+            long locationId = mLocationRepository.saveLocation(location);
 
-                notifyLocationCreated(locationId);
-            }
+            notifyLocationCreated(locationId);
         };
 
         new Thread(r).start();
     }
 
     private void updateLocation(final Location location, final ArrayList<Person> persons) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                Location existingLocation = mLocationRepository.getLocation(location.getId());
-                if (existingLocation != null) {
-                    location.setRemoteId(existingLocation.getRemoteId());
-                }
-
-                location.setChanged(true);
-
-                ArrayList<Long> pIds = getPersonIds(persons);
-                location.setPersonIds(pIds);
-
-                long locationId = mLocationRepository.saveLocation(location);
-                mPersonRepository.deleteUnusedPersons();
-
-                notifyLocationUpdated(locationId);
+        Runnable r = () -> {
+            Location existingLocation = mLocationRepository.getLocation(location.getId());
+            if (existingLocation != null) {
+                location.setRemoteId(existingLocation.getRemoteId());
             }
+
+            location.setChanged(true);
+
+            ArrayList<Long> pIds = getPersonIds(persons);
+            location.setPersonIds(pIds);
+
+            long locationId = mLocationRepository.saveLocation(location);
+            mPersonRepository.deleteUnusedPersons();
+
+            notifyLocationUpdated(locationId);
         };
 
         new Thread(r).start();
@@ -175,13 +169,10 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     }
 
     private void deleteLocation(final long locationId) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                mLocationRepository.setLocationDeleted(locationId);
+        Runnable r = () -> {
+            mLocationRepository.setLocationDeleted(locationId);
 
-                notifyLocationDeleted(locationId);
-            }
+            notifyLocationDeleted(locationId);
         };
 
         new Thread(r).start();

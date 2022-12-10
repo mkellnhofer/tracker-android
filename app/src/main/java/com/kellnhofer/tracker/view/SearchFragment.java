@@ -52,8 +52,8 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
         try {
             mActivity = (SearchActivity) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement " + SearchActivity.class.getName());
+            throw new ClassCastException(context + " must implement " +
+                    SearchActivity.class.getName() + "!");
         }
     }
 
@@ -72,7 +72,7 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
-        mAdapter = new LocationsAdapter(mActivity, new ArrayList<Location>(0));
+        mAdapter = new LocationsAdapter(mActivity, new ArrayList<>(0));
         mAdapter.setLocationItemListener(this);
 
         mInfoContainer = view.findViewById(R.id.container_info);
@@ -177,19 +177,16 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
             return;
         }
 
-        mListView.post(new Runnable() {
-            @Override
-            public void run() {
-                mListView.setSelection(mScrollPosition);
-                mRestoreScrollPosition = false;
-            }
+        mListView.post(() -> {
+            mListView.setSelection(mScrollPosition);
+            mRestoreScrollPosition = false;
         });
     }
 
     @Override
     public void onLoaderReset(Loader<List<Location>> loader) {
         if (loader.getId() == LOADER_LOCATIONS) {
-            mAdapter.replaceData(new ArrayList<Location>());
+            mAdapter.replaceData(new ArrayList<>());
         }
     }
 
