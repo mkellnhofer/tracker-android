@@ -1,6 +1,5 @@
 package com.kellnhofer.tracker.view;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +23,6 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
 
     public static final String BUNDLE_KEY_LOCATION_ID = "location_id";
 
-    private ViewActivity mActivity;
     private ViewContract.Presenter mPresenter;
 
     private MapView mMapView;
@@ -33,18 +31,6 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
 
     public void setPresenter(@NonNull ViewContract.Presenter presenter) {
         mPresenter = presenter;
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-
-        try {
-            mActivity = (ViewActivity) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement " + ViewActivity.class.getName());
-        }
     }
 
     @Override

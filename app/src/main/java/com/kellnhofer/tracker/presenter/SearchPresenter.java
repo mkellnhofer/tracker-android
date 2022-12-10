@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 
-import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.data.PersonRepository;
 import com.kellnhofer.tracker.model.Location;
@@ -22,7 +21,6 @@ public class SearchPresenter implements SearchContract.Presenter,
         LocationRepository.LocationRepositoryObserver {
 
     private final Context mContext;
-    private final TrackerApplication mApplication;
 
     private final List<SearchContract.Observer> mObservers = new ArrayList<>();
 
@@ -32,7 +30,6 @@ public class SearchPresenter implements SearchContract.Presenter,
     public SearchPresenter(Context context, LocationRepository locationRepository,
             PersonRepository personRepository) {
         mContext = context;
-        mApplication = (TrackerApplication) context.getApplicationContext();
 
         mLocationRepository = locationRepository;
         mPersonRepository = personRepository;

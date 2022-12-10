@@ -12,12 +12,10 @@ public class TrackerStates {
     // Default values
     private static final long STATE_DEFAULT_LAST_SYNC_VERSION = -1L;
 
-    private final TrackerApplication mApplication;
     private final SharedPreferences mPreferences;
 
     public TrackerStates(TrackerApplication application) {
-        mApplication = application;
-        mPreferences = mApplication.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        mPreferences = application.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     public long getLastSyncVersion() {

@@ -21,8 +21,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     private static final String DIALOG_FRAGMENT_TAG_SERVER_URL = "server_url_dialog_fragment";
     private static final String DIALOG_FRAGMENT_TAG_SYNC_ERROR = "sync_error_dialog_fragment";
 
-    private TrackerApplication mApplication;
-
     private TrackerSettings mSettings;
 
     private SettingsContract.Presenter mPresenter;
@@ -34,9 +32,9 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mApplication = (TrackerApplication) getApplication();
+        TrackerApplication application = (TrackerApplication) getApplication();
 
-        mSettings = mApplication.getSettings();
+        mSettings = application.getSettings();
 
         mPresenter = new SettingsPresenter(this, Injector.getLocationService(this));
 
@@ -50,16 +48,17 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (savedInstanceState == null) {
+        mFragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag(
+                FRAGMENT_TAG_SETTINGS);
+        if (mFragment == null) {
             mFragment = new SettingsFragment();
-
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_SETTINGS)
                     .commit();
-        } else {
-            mFragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag(
-                    FRAGMENT_TAG_SETTINGS);
+        }
+
+        if (savedInstanceState != null) {
             mSyncErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
                     .findFragmentByTag(DIALOG_FRAGMENT_TAG_SYNC_ERROR);
         }

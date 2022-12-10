@@ -18,8 +18,6 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
 
     private static final String FRAGMENT_TAG_VIEW = "search_fragment";
 
-    private SearchContract.Presenter mPresenter;
-
     private SearchFragment mFragment;
 
     private EditText mEditText;
@@ -28,8 +26,8 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPresenter = new SearchPresenter(this, Injector.getLocationRepository(this),
-                Injector.getPersonRepository(this));
+        SearchContract.Presenter presenter = new SearchPresenter(this,
+                Injector.getLocationRepository(this), Injector.getPersonRepository(this));
 
         setContentView(R.layout.activity_search);
 
@@ -64,19 +62,17 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
             });
         }
 
-        if (savedInstanceState == null) {
+        mFragment = (SearchFragment) getSupportFragmentManager().findFragmentByTag(
+                FRAGMENT_TAG_VIEW);
+        if (mFragment == null) {
             mFragment = new SearchFragment();
-
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_VIEW)
                     .commit();
-        } else {
-            mFragment = (SearchFragment) getSupportFragmentManager().findFragmentByTag(
-                    FRAGMENT_TAG_VIEW);
         }
 
-        mFragment.setPresenter(mPresenter);
+        mFragment.setPresenter(presenter);
     }
 
     @Override

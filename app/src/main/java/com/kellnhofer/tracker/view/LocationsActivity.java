@@ -38,7 +38,6 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
 
     private LocationsContract.Presenter mPresenter;
 
-    private LocationsFragment mFragment;
     private ErrorDialogFragment mSyncErrorDialogFragment;
     private ProgressBarDialogFragment mKmlExportDialogFragment;
     private ErrorDialogFragment mKmlExportErrorDialogFragment;
@@ -67,16 +66,18 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
             }
         });
 
-        if (savedInstanceState == null) {
-            mFragment = new LocationsFragment();
-
+        LocationsFragment fragment = (LocationsFragment) getSupportFragmentManager()
+                .findFragmentByTag(FRAGMENT_TAG_LOCATIONS);
+        if (fragment == null) {
+            fragment = new LocationsFragment();
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container_content, mFragment, FRAGMENT_TAG_LOCATIONS)
+                    .replace(R.id.container_content, fragment, FRAGMENT_TAG_LOCATIONS)
                     .commit();
-        } else {
-            mFragment = (LocationsFragment) getSupportFragmentManager().findFragmentByTag(
-                    FRAGMENT_TAG_LOCATIONS);
+        }
+        fragment.setPresenter(mPresenter);
+
+        if (savedInstanceState != null) {
             mSyncErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
                     .findFragmentByTag(DIALOG_FRAGMENT_TAG_SYNC_ERROR);
             mKmlExportDialogFragment = (ProgressBarDialogFragment) getSupportFragmentManager()
@@ -84,8 +85,6 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
             mKmlExportErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
                     .findFragmentByTag(DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR);
         }
-
-        mFragment.setPresenter(mPresenter);
 
         if (savedInstanceState == null && isApiKeyMissing()) {
             showApiKeyErrorDialog();

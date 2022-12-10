@@ -12,7 +12,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import com.kellnhofer.tracker.data.DbHelper;
 import com.kellnhofer.tracker.rest.AuthInterceptor;
 import com.kellnhofer.tracker.rest.LocationApi;
 import okhttp3.OkHttpClient;
@@ -28,8 +27,6 @@ public class TrackerApplication extends Application {
     private TrackerSettings mSettings;
     private TrackerStates mStates;
 
-    private DbHelper mDbHelper;
-
     private OkHttpClient mOkHttpClient;
     private Gson mGson;
     private Retrofit mRetrofit;
@@ -43,8 +40,6 @@ public class TrackerApplication extends Application {
         mSettings = new TrackerSettings(this, Injector.getLocationService(this));
         mStates = new TrackerStates(this);
 
-        initData();
-
         initOkHttp();
         initGson();
         initRetrofit();
@@ -52,12 +47,6 @@ public class TrackerApplication extends Application {
 
     private void initFlipper() {
         mFlipperInitializer.init(this);
-    }
-
-    private void initData() {
-        Log.d(LOG_TAG, "Init data.");
-
-        mDbHelper = new DbHelper(this);
     }
 
     public void initOkHttp() {

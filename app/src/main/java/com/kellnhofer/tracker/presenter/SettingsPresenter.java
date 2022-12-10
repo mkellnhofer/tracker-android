@@ -6,7 +6,6 @@ import java.util.List;
 import android.content.Context;
 import android.os.Handler;
 
-import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
@@ -14,7 +13,6 @@ public class SettingsPresenter implements SettingsContract.Presenter,
         LocationServiceAdapter.Listener {
 
     private final Context mContext;
-    private final TrackerApplication mApplication;
 
     private final List<SettingsContract.Observer> mObservers = new ArrayList<>();
 
@@ -22,7 +20,6 @@ public class SettingsPresenter implements SettingsContract.Presenter,
 
     public SettingsPresenter(Context context, LocationServiceAdapter locationService) {
         mContext = context;
-        mApplication = (TrackerApplication) context.getApplicationContext();
 
         mService = locationService;
     }

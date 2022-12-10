@@ -126,9 +126,11 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
             setOkFabEnabled(false);
         }
 
-        if (savedInstanceState == null) {
+        mFragment = (CreateEditFragment) getSupportFragmentManager().findFragmentByTag(
+                FRAGMENT_TAG_CREATE_EDIT);
+        if (mFragment == null) {
             Bundle args = new Bundle();
-            args.putLong(ViewFragment.BUNDLE_KEY_LOCATION_ID, mLocationId);
+            args.putLong(CreateEditFragment.BUNDLE_KEY_LOCATION_ID, mLocationId);
 
             mFragment = new CreateEditFragment();
             mFragment.setArguments(args);
@@ -137,9 +139,6 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
                     .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_CREATE_EDIT)
                     .commit();
-        } else {
-            mFragment = (CreateEditFragment) getSupportFragmentManager().findFragmentByTag(
-                    FRAGMENT_TAG_CREATE_EDIT);
         }
 
         mFragment.setPresenter(mPresenter);

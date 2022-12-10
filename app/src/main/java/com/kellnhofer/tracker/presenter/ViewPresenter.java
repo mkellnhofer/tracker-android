@@ -6,7 +6,6 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 
-import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.data.PersonRepository;
 import com.kellnhofer.tracker.model.Location;
@@ -17,7 +16,6 @@ import com.kellnhofer.tracker.view.CreateEditActivity;
 public class ViewPresenter implements ViewContract.Presenter {
 
     private final Context mContext;
-    private final TrackerApplication mApplication;
 
     private final List<ViewContract.Observer> mObservers = new ArrayList<>();
 
@@ -28,7 +26,6 @@ public class ViewPresenter implements ViewContract.Presenter {
     public ViewPresenter(Context context, LocationRepository locationRepository,
             PersonRepository personRepository, LocationServiceAdapter locationService) {
         mContext = context;
-        mApplication = (TrackerApplication) context.getApplicationContext();
 
         mLocationRepository = locationRepository;
         mPersonRepository = personRepository;

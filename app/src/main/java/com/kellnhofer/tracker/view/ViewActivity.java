@@ -36,8 +36,6 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
 
     private TextView mNameTextView;
     private TextView mDateTextView;
-    private FloatingActionButton mFab;
-    private ViewFragment mFragment;
 
     private long mLocationId;
     private String mLocationName;
@@ -72,31 +70,30 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mFab = findViewById(R.id.fab);
-        mFab.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onFabClicked();
             }
         });
 
-        if (savedInstanceState == null) {
+        ViewFragment fragment = (ViewFragment) getSupportFragmentManager().findFragmentByTag(
+                FRAGMENT_TAG_VIEW);
+        if (fragment == null) {
             Bundle args = new Bundle();
             args.putLong(ViewFragment.BUNDLE_KEY_LOCATION_ID, mLocationId);
 
-            mFragment = new ViewFragment();
-            mFragment.setArguments(args);
+            fragment = new ViewFragment();
+            fragment.setArguments(args);
 
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container_content, mFragment, FRAGMENT_TAG_VIEW)
+                    .replace(R.id.container_content, fragment, FRAGMENT_TAG_VIEW)
                     .commit();
-        } else {
-            mFragment = (ViewFragment) getSupportFragmentManager().findFragmentByTag(
-                    FRAGMENT_TAG_VIEW);
         }
 
-        mFragment.setPresenter(mPresenter);
+        fragment.setPresenter(mPresenter);
     }
 
     @Override

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 
-import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.data.LocationRepository;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.service.ExportServiceAdapter;
@@ -25,7 +24,6 @@ public class LocationsPresenter implements LocationsContract.Presenter,
         ExportServiceAdapter.Listener {
 
     private final Context mContext;
-    private final TrackerApplication mApplication;
 
     private final List<LocationsContract.Observer> mObservers = new ArrayList<>();
 
@@ -36,7 +34,6 @@ public class LocationsPresenter implements LocationsContract.Presenter,
     public LocationsPresenter(Context context, LocationRepository locationRepository,
             LocationServiceAdapter locationService, ExportServiceAdapter exportService) {
         mContext = context;
-        mApplication = (TrackerApplication) context.getApplicationContext();
 
         mRepository = locationRepository;
         mLocationService = locationService;
