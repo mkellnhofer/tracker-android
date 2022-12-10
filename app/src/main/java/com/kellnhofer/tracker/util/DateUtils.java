@@ -10,7 +10,7 @@ import java.util.TimeZone;
 
 import com.kellnhofer.tracker.Constants;
 
-public class DateUtils {
+public final class DateUtils {
 
     private DateUtils() {
 

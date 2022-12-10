@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.kellnhofer.tracker.Constants;
 
-public class ExportUtils {
+public final class ExportUtils {
 
     private ExportUtils() {
 

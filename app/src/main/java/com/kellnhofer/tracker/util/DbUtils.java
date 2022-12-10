@@ -1,6 +1,6 @@
 package com.kellnhofer.tracker.util;
 
-public class DbUtils {
+public final class DbUtils {
 
     private DbUtils() {
 

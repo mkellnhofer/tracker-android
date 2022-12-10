@@ -3,7 +3,7 @@ package com.kellnhofer.tracker.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TypeUtils {
+public final class TypeUtils {
 
     private TypeUtils() {
 

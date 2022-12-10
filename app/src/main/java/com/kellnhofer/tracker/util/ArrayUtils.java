@@ -2,7 +2,7 @@ package com.kellnhofer.tracker.util;
 
 import java.util.ArrayList;
 
-public class ArrayUtils {
+public final class ArrayUtils {
 
     private ArrayUtils() {
 
