@@ -12,8 +12,8 @@ public class TrackerStates {
     // Default values
     private static final long STATE_DEFAULT_LAST_SYNC_VERSION = -1L;
 
-    private TrackerApplication mApplication;
-    private SharedPreferences mPreferences;
+    private final TrackerApplication mApplication;
+    private final SharedPreferences mPreferences;
 
     public TrackerStates(TrackerApplication application) {
         mApplication = application;

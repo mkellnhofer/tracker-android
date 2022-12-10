@@ -16,14 +16,14 @@ import com.kellnhofer.tracker.view.CreateEditActivity;
 
 public class ViewPresenter implements ViewContract.Presenter {
 
-    private Context mContext;
-    private TrackerApplication mApplication;
+    private final Context mContext;
+    private final TrackerApplication mApplication;
 
-    private List<ViewContract.Observer> mObservers = new ArrayList<>();
+    private final List<ViewContract.Observer> mObservers = new ArrayList<>();
 
-    private LocationRepository mLocationRepository;
-    private PersonRepository mPersonRepository;
-    private LocationServiceAdapter mService;
+    private final LocationRepository mLocationRepository;
+    private final PersonRepository mPersonRepository;
+    private final LocationServiceAdapter mService;
 
     public ViewPresenter(Context context, LocationRepository locationRepository,
             PersonRepository personRepository, LocationServiceAdapter locationService) {

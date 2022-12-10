@@ -42,7 +42,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
     private Callback mCallback;
 
     private KmlExportThread mKmlExportThread = null;
-    private Queue<KmlExportState> mLastKmlExportStates = new ConcurrentLinkedQueue<>();
+    private final Queue<KmlExportState> mLastKmlExportStates = new ConcurrentLinkedQueue<>();
 
     @Override
     public void onCreate() {

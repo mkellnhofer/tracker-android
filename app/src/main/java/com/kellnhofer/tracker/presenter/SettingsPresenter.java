@@ -13,12 +13,12 @@ import com.kellnhofer.tracker.service.LocationSyncError;
 public class SettingsPresenter implements SettingsContract.Presenter,
         LocationServiceAdapter.Listener {
 
-    private Context mContext;
-    private TrackerApplication mApplication;
+    private final Context mContext;
+    private final TrackerApplication mApplication;
 
-    private List<SettingsContract.Observer> mObservers = new ArrayList<>();
+    private final List<SettingsContract.Observer> mObservers = new ArrayList<>();
 
-    private LocationServiceAdapter mService;
+    private final LocationServiceAdapter mService;
 
     public SettingsPresenter(Context context, LocationServiceAdapter locationService) {
         mContext = context;

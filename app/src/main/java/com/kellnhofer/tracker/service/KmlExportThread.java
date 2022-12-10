@@ -48,14 +48,14 @@ public class KmlExportThread extends Thread {
         void onKmlExportFailed(KmlExportError error);
     }
 
-    private TrackerApplication mApplication;
+    private final TrackerApplication mApplication;
 
-    private Uri mFileUri;
+    private final Uri mFileUri;
 
-    private LocationRepository mLocationRepository;
-    private PersonRepository mPersonRepository;
+    private final LocationRepository mLocationRepository;
+    private final PersonRepository mPersonRepository;
 
-    private DateFormat mContentDateFormat;
+    private final DateFormat mContentDateFormat;
 
     private Callback mCallback;
 

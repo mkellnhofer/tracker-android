@@ -24,14 +24,14 @@ public class LocationsPresenter implements LocationsContract.Presenter,
         LocationRepository.LocationRepositoryObserver, LocationServiceAdapter.Listener,
         ExportServiceAdapter.Listener {
 
-    private Context mContext;
-    private TrackerApplication mApplication;
+    private final Context mContext;
+    private final TrackerApplication mApplication;
 
-    private List<LocationsContract.Observer> mObservers = new ArrayList<>();
+    private final List<LocationsContract.Observer> mObservers = new ArrayList<>();
 
-    private LocationRepository mRepository;
-    private LocationServiceAdapter mLocationService;
-    private ExportServiceAdapter mExportService;
+    private final LocationRepository mRepository;
+    private final LocationServiceAdapter mLocationService;
+    private final ExportServiceAdapter mExportService;
 
     public LocationsPresenter(Context context, LocationRepository locationRepository,
             LocationServiceAdapter locationService, ExportServiceAdapter exportService) {

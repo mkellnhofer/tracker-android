@@ -46,11 +46,11 @@ public class LocationSyncThread extends Thread {
 
     }
 
-    private TrackerApplication mApplication;
+    private final TrackerApplication mApplication;
 
-    private LocationRepository mLocationRepository;
-    private PersonRepository mPersonRepository;
-    private LocationApi mApi;
+    private final LocationRepository mLocationRepository;
+    private final PersonRepository mPersonRepository;
+    private final LocationApi mApi;
 
     private Callback mCallback;
 

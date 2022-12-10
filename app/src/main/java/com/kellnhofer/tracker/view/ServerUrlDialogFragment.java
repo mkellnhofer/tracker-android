@@ -20,14 +20,14 @@ import com.kellnhofer.tracker.util.ValidationUtils;
 
 public class ServerUrlDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_URL = "url";
+    private static final String BUNDLE_KEY_URL = "url";
 
     public interface Listener {
         void onServerUrlDialogOk(String url);
         void onServerUrlDialogCancel();
     }
 
-    private TextWatcher mUrlTextWatcher = new ValidationWatcher() {
+    private final TextWatcher mUrlTextWatcher = new ValidationWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
             validateUrl();

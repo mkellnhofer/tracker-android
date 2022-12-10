@@ -197,13 +197,13 @@ public class SearchFragment extends Fragment implements LocationsAdapter.Locatio
 
     private static class LocationsLoader extends AsyncTaskLoader<List<Location>> {
 
-        private SearchContract.Presenter mPresenter;
+        private final SearchContract.Presenter mPresenter;
 
-        private String mSearchString = "";
+        private final String mSearchString;
 
         private List<Location> mData;
 
-        public LocationsLoader(Context context, SearchContract.Presenter presenter,
+        LocationsLoader(Context context, SearchContract.Presenter presenter,
                 String searchString) {
             super(context);
             mPresenter = presenter;

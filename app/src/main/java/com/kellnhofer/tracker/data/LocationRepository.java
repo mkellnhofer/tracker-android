@@ -16,7 +16,7 @@ public class LocationRepository {
 
     private final LocationDataSource mDataSource;
 
-    private List<LocationRepositoryObserver> mObservers = new ArrayList<>();
+    private final List<LocationRepositoryObserver> mObservers = new ArrayList<>();
 
     public LocationRepository(LocationDataSource dataSource) {
         mDataSource = dataSource;

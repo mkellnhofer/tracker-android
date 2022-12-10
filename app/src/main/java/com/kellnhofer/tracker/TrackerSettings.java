@@ -15,10 +15,10 @@ public class TrackerSettings implements SharedPreferences.OnSharedPreferenceChan
     public static final String PREF_KEY_SERVER_PASSWORD = "pref_server_password";
     public static final String PREF_KEY_VERSION = "pref_version";
 
-    private TrackerApplication mApplication;
-    private SharedPreferences mPreferences;
+    private final TrackerApplication mApplication;
+    private final SharedPreferences mPreferences;
 
-    private LocationServiceAdapter mService;
+    private final LocationServiceAdapter mService;
 
     public TrackerSettings(TrackerApplication application, LocationServiceAdapter locationService) {
         mApplication = application;

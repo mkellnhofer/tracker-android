@@ -18,11 +18,11 @@ import com.kellnhofer.tracker.util.DateUtils;
 
 public class LocationsAdapter extends BaseAdapter {
 
-    private static final int WEEK_DAY_TEXT_ID[] = new int[] {
+    private static final int[] WEEK_DAY_TEXT_ID = new int[] {
             R.string.day_monday, R.string.day_tuesday, R.string.day_wednesday, R.string.day_thursday,
             R.string.day_friday, R.string.day_saturday, R.string.day_sunday};
 
-    private static final int WEEK_DAY_COLOR_ID[] = new int[] {
+    private static final int[] WEEK_DAY_COLOR_ID = new int[] {
             R.color.day_monday, R.color.day_tuesday, R.color.day_wednesday, R.color.day_thursday,
             R.color.day_friday, R.color.day_saturday, R.color.day_sunday};
 
@@ -30,7 +30,7 @@ public class LocationsAdapter extends BaseAdapter {
         void onLocationClick(Location location);
     }
 
-    private Context mContext;
+    private final Context mContext;
 
     private List<Location> mLocations;
     private LocationItemListener mItemListener;

@@ -37,15 +37,15 @@ public class CreateEditDialogFragment extends DialogFragment {
     private static final int LENGTH_MIN_PERSON_NAME = 0;
     private static final int LENGTH_MAX_PERSON_NAME = 100;
 
-    public static final int MODE_CREATE = 1;
-    public static final int MODE_EDIT = 2;
+    private static final int MODE_CREATE = 1;
+    private static final int MODE_EDIT = 2;
 
-    public static final String BUNDLE_KEY_MODE = "mode";
-    public static final String BUNDLE_KEY_LOCATION_NAME = "location_name";
-    public static final String BUNDLE_KEY_LOCATION_DATE = "location_date";
-    public static final String BUNDLE_KEY_LOCATION_DESCRIPTION = "location_description";
-    public static final String BUNDLE_KEY_LOCATION_PERSON_NAMES = "location_person_names";
-    public static final String BUNDLE_KEY_PERSON_NAMES = "person_names";
+    private static final String BUNDLE_KEY_MODE = "mode";
+    private static final String BUNDLE_KEY_LOCATION_NAME = "location_name";
+    private static final String BUNDLE_KEY_LOCATION_DATE = "location_date";
+    private static final String BUNDLE_KEY_LOCATION_DESCRIPTION = "location_description";
+    private static final String BUNDLE_KEY_LOCATION_PERSON_NAMES = "location_person_names";
+    private static final String BUNDLE_KEY_PERSON_NAMES = "person_names";
 
     public interface Listener {
         void onCreateEditDialogOk(String locationName, Date locationDate, String locationDescription,
@@ -55,7 +55,7 @@ public class CreateEditDialogFragment extends DialogFragment {
                 String locationDescription, ArrayList<String> locationPersonNames);
     }
 
-    private TextWatcher mNameTextWatcher = new ValidationWatcher() {
+    private final TextWatcher mNameTextWatcher = new ValidationWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
             validateName();
@@ -63,7 +63,7 @@ public class CreateEditDialogFragment extends DialogFragment {
         }
     };
 
-    private TextWatcher mDateTextWatcher = new ValidationWatcher() {
+    private final TextWatcher mDateTextWatcher = new ValidationWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
             validateDate();
@@ -71,7 +71,7 @@ public class CreateEditDialogFragment extends DialogFragment {
         }
     };
 
-    private TextWatcher mDescriptionTextWatcher = new ValidationWatcher() {
+    private final TextWatcher mDescriptionTextWatcher = new ValidationWatcher() {
 
         @Override
         public void afterTextChanged(Editable s) {
@@ -81,7 +81,7 @@ public class CreateEditDialogFragment extends DialogFragment {
 
     };
 
-    private TextWatcher mPersonNameTextWatcher = new ValidationWatcher() {
+    private final TextWatcher mPersonNameTextWatcher = new ValidationWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
             validatePersonNames();

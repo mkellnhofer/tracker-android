@@ -221,11 +221,11 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
 
     private static class LocationsLoader extends AsyncTaskLoader<List<Location>> {
 
-        private LocationsContract.Presenter mPresenter;
+        private final LocationsContract.Presenter mPresenter;
 
         private List<Location> mData;
 
-        public LocationsLoader(Context context, LocationsContract.Presenter presenter) {
+        LocationsLoader(Context context, LocationsContract.Presenter presenter) {
             super(context);
             mPresenter = presenter;
         }

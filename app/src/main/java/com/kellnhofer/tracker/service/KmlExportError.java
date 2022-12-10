@@ -6,7 +6,7 @@ public enum KmlExportError {
 
     FILE_IO_ERROR(R.string.error_export_file_io);
 
-    private int mTextResId;
+    private final int mTextResId;
 
     KmlExportError(int textResId) {
         mTextResId = textResId;

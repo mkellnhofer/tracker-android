@@ -6,9 +6,9 @@ public class KmlExportState {
     public static final int STATE_FINISHED = 2;
     public static final int STATE_FAILED = 3;
 
-    private int mState;
-    private Integer mTotal;
-    private KmlExportError mError;
+    private final int mState;
+    private final Integer mTotal;
+    private final KmlExportError mError;
 
     private KmlExportState(int state, Integer total, KmlExportError error) {
         mState = state;

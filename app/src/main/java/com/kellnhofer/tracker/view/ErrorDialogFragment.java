@@ -11,9 +11,9 @@ import com.kellnhofer.tracker.R;
 
 public class ErrorDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_TITLE = "title";
-    public static final String BUNDLE_KEY_MESSAGE = "message";
-    public static final String BUNDLE_KEY_IS_RETRY_ENABLED = "retry";
+    private static final String BUNDLE_KEY_TITLE = "title";
+    private static final String BUNDLE_KEY_MESSAGE = "message";
+    private static final String BUNDLE_KEY_IS_RETRY_ENABLED = "retry";
 
     public interface Listener {
         void onErrorDialogRetry(String tag);

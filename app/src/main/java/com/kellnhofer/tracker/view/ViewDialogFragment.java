@@ -20,10 +20,10 @@ import com.kellnhofer.tracker.util.DateUtils;
 
 public class ViewDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_NAME = "name";
-    public static final String BUNDLE_KEY_DATE = "date";
-    public static final String BUNDLE_KEY_DESCRIPTION = "description";
-    public static final String BUNDLE_KEY_PERSONS = "persons";
+    private static final String BUNDLE_KEY_NAME = "name";
+    private static final String BUNDLE_KEY_DATE = "date";
+    private static final String BUNDLE_KEY_DESCRIPTION = "description";
+    private static final String BUNDLE_KEY_PERSONS = "persons";
 
     public ViewDialogFragment() {
         super();

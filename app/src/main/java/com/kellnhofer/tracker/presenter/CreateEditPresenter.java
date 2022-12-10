@@ -24,16 +24,16 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     private static final String LOG_TAG = CreateEditPresenter.class.getSimpleName();
 
-    private Context mContext;
-    private TrackerApplication mApplication;
+    private final Context mContext;
+    private final TrackerApplication mApplication;
 
-    private List<CreateEditContract.Observer> mObservers = new ArrayList<>();
+    private final List<CreateEditContract.Observer> mObservers = new ArrayList<>();
 
-    private LocationRepository mLocationRepository;
-    private PersonRepository mPersonRepository;
-    private LocationServiceAdapter mService;
+    private final LocationRepository mLocationRepository;
+    private final PersonRepository mPersonRepository;
+    private final LocationServiceAdapter mService;
 
-    private LocationManager mLocationManager;
+    private final LocationManager mLocationManager;
     private android.location.Location mGpsLocation;
 
     public CreateEditPresenter(Context context, LocationRepository locationRepository,

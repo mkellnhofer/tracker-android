@@ -13,8 +13,8 @@ import com.kellnhofer.tracker.R;
 
 public class InfoDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_TITLE = "title";
-    public static final String BUNDLE_KEY_MESSAGE = "message";
+    private static final String BUNDLE_KEY_TITLE = "title";
+    private static final String BUNDLE_KEY_MESSAGE = "message";
 
     public interface Listener {
         void onInfoDialogOk(String tag);

@@ -16,7 +16,7 @@ public class PersonRepository {
 
     private final PersonDataSource mDataSource;
 
-    private List<PersonRepositoryObserver> mObservers = new ArrayList<>();
+    private final List<PersonRepositoryObserver> mObservers = new ArrayList<>();
 
     public PersonRepository(PersonDataSource dataSource) {
         mDataSource = dataSource;

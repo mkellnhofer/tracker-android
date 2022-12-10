@@ -11,9 +11,9 @@ import com.kellnhofer.tracker.R;
 
 public class DecisionDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_TITLE_TEXT_ID = "title_text_id";
-    public static final String BUNDLE_KEY_MESSAGE_TEXT_ID = "message_text_id";
-    public static final String BUNDLE_KEY_ACTION_TEXT_ID = "action_text_id";
+    private static final String BUNDLE_KEY_TITLE_TEXT_ID = "title_text_id";
+    private static final String BUNDLE_KEY_MESSAGE_TEXT_ID = "message_text_id";
+    private static final String BUNDLE_KEY_ACTION_TEXT_ID = "action_text_id";
 
     public interface Listener {
         void onDecisionDialogOk(String tag);

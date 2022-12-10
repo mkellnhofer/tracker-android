@@ -21,13 +21,13 @@ import com.kellnhofer.tracker.view.ViewActivity;
 public class SearchPresenter implements SearchContract.Presenter,
         LocationRepository.LocationRepositoryObserver {
 
-    private Context mContext;
-    private TrackerApplication mApplication;
+    private final Context mContext;
+    private final TrackerApplication mApplication;
 
-    private List<SearchContract.Observer> mObservers = new ArrayList<>();
+    private final List<SearchContract.Observer> mObservers = new ArrayList<>();
 
-    private LocationRepository mLocationRepository;
-    private PersonRepository mPersonRepository;
+    private final LocationRepository mLocationRepository;
+    private final PersonRepository mPersonRepository;
 
     public SearchPresenter(Context context, LocationRepository locationRepository,
             PersonRepository personRepository) {
