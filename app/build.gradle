@@ -1,13 +1,17 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
+
+def rootExt = rootProject.ext
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion '31.0.0'
+    compileSdkVersion rootExt.compileSdkVersion
+    buildToolsVersion rootExt.buildToolsVersion
     defaultConfig {
-        minSdkVersion 24
-        targetSdkVersion 31
-        versionCode 3
-        versionName "1.1.1-SNAPSHOT"
+        minSdkVersion rootExt.minSdkVersion
+        targetSdkVersion rootExt.targetSdkVersion
+        versionCode rootExt.appVersionCode
+        versionName rootExt.appVersionName
     }
     buildTypes {
         release {
@@ -19,29 +23,32 @@ android {
     productFlavors {
         production {
             dimension "env"
-            applicationId "com.kellnhofer.tracker"
+            applicationId rootExt.appId
         }
         development {
             dimension "env"
-            applicationId "com.kellnhofer.develop.tracker"
+            applicationId rootExt.appId + '.develop'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility rootExt.javaVersion
+        targetCompatibility rootExt.javaVersion
     }
 }
 
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.4.2'
-    implementation 'androidx.preference:preference:1.2.0'
-    implementation 'com.google.android.material:material:1.6.1'
-    implementation 'com.google.android.gms:play-services-maps:18.1.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+def depVersions = rootExt.depVersions
 
-    developmentImplementation 'com.facebook.flipper:flipper:0.96.1'
-    developmentImplementation 'com.facebook.flipper:flipper-network-plugin:0.96.1'
-    developmentImplementation 'com.facebook.soloader:soloader:0.10.1'
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation "androidx.appcompat:appcompat:$depVersions.androidxAppcompat"
+    implementation "androidx.preference:preference:$depVersions.androidxPreference"
+    implementation "com.google.android.gms:play-services-maps:$depVersions.googleMaps"
+    implementation "com.google.android.material:material:$depVersions.googleMaterial"
+    implementation "com.squareup.retrofit2:retrofit:$depVersions.squareRetrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$depVersions.squareRetrofit"
+
+    developmentImplementation "com.facebook.flipper:flipper:$depVersions.facebookFlipper"
+    developmentImplementation "com.facebook.flipper:flipper-network-plugin:$depVersions.facebookFlipper"
+    developmentImplementation "com.facebook.soloader:soloader:$depVersions.facebookSoloader"
 }
