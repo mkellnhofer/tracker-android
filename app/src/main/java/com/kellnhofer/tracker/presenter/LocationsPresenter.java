@@ -7,8 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
+import androidx.lifecycle.LiveData;
 
-import com.kellnhofer.tracker.data.LocationRepository;
+import com.kellnhofer.tracker.data.dao.LocationDao;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.service.ExportServiceAdapter;
 import com.kellnhofer.tracker.service.KmlExportError;
@@ -20,22 +21,21 @@ import com.kellnhofer.tracker.view.SettingsActivity;
 import com.kellnhofer.tracker.view.ViewActivity;
 
 public class LocationsPresenter implements LocationsContract.Presenter,
-        LocationRepository.LocationRepositoryObserver, LocationServiceAdapter.Listener,
-        ExportServiceAdapter.Listener {
+        LocationServiceAdapter.Listener, ExportServiceAdapter.Listener {
 
     private final Context mContext;
 
     private final List<LocationsContract.Observer> mObservers = new ArrayList<>();
 
-    private final LocationRepository mRepository;
+    private final LocationDao mLocationDao;
     private final LocationServiceAdapter mLocationService;
     private final ExportServiceAdapter mExportService;
 
-    public LocationsPresenter(Context context, LocationRepository locationRepository,
+    public LocationsPresenter(Context context, LocationDao locationDao,
             LocationServiceAdapter locationService, ExportServiceAdapter exportService) {
         mContext = context;
 
-        mRepository = locationRepository;
+        mLocationDao = locationDao;
         mLocationService = locationService;
         mExportService = exportService;
     }
@@ -54,8 +54,6 @@ public class LocationsPresenter implements LocationsContract.Presenter,
 
     @Override
     public void onResume() {
-        mRepository.addContentObserver(this);
-
         mLocationService.setListener(this);
         mLocationService.startSync(false);
 
@@ -64,16 +62,14 @@ public class LocationsPresenter implements LocationsContract.Presenter,
 
     @Override
     public void onPause() {
-        mRepository.removeContentObserver(this);
-
         mLocationService.removeListener();
 
         mExportService.removeListener();
     }
 
     @Override
-    public ArrayList<Location> getNotDeletedLocationsByDateDesc() {
-        return mRepository.getNotDeletedLocationsByDateDesc();
+    public LiveData<List<Location>> getLocations() {
+        return mLocationDao.getNotDeletedLocationsOrderedByDateDescLiveData();
     }
 
     @Override
@@ -190,17 +186,6 @@ public class LocationsPresenter implements LocationsContract.Presenter,
         executeOnMainThread(() -> {
             for (LocationsContract.Observer observer : mObservers) {
                 observer.onKmlExportFailed(error);
-            }
-        });
-    }
-
-    // --- Repository callback methods ---
-
-    @Override
-    public void onLocationChanged() {
-        executeOnMainThread(() -> {
-            for (LocationsContract.Observer observer : mObservers) {
-                observer.onLocationsChanged();
             }
         });
     }

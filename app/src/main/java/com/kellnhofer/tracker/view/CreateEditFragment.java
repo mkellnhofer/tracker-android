@@ -13,15 +13,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.kellnhofer.tracker.R;
-import com.kellnhofer.tracker.model.Location;
-import com.kellnhofer.tracker.presenter.CreateEditContract;
-import com.kellnhofer.tracker.presenter.LatLng;
 
-public class CreateEditFragment extends Fragment implements OnMapReadyCallback, OnMapClickListener,
-        CreateEditContract.Observer {
+public class CreateEditFragment extends Fragment implements OnMapReadyCallback, OnMapClickListener {
 
+    private static final String STATE_POS = "pos";
     private static final String STATE_MAP_VIEW = "map_view";
     private static final String STATE_MAP_VIEW_INITIALIZED = "map_view_initialized";
     private static final String STATE_MAP_VIEW_CENTERED = "map_view_centered";
@@ -29,18 +27,13 @@ public class CreateEditFragment extends Fragment implements OnMapReadyCallback, 
     public static final String BUNDLE_KEY_LOCATION_ID = "location_id";
 
     private CreateEditActivity mActivity;
-    private CreateEditContract.Presenter mPresenter;
 
     private MapView mMapView;
     private GoogleMap mMap;
     private boolean mMapInitialized = false;
     private boolean mMapCentered = false;
 
-    private long mLocationId;
-
-    public void setPresenter(@NonNull CreateEditContract.Presenter presenter) {
-        mPresenter = presenter;
-    }
+    private LatLng mPos;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -55,20 +48,13 @@ public class CreateEditFragment extends Fragment implements OnMapReadyCallback, 
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        Bundle arguments = getArguments();
-        mLocationId = arguments.getLong(BUNDLE_KEY_LOCATION_ID);
-    }
-
-    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_create_edit, container, false);
 
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
+            mPos = savedInstanceState.getParcelable(STATE_POS);
             mapViewBundle = savedInstanceState.getBundle(STATE_MAP_VIEW);
             mMapInitialized = savedInstanceState.getBoolean(STATE_MAP_VIEW_INITIALIZED);
             mMapCentered = savedInstanceState.getBoolean(STATE_MAP_VIEW_CENTERED);
@@ -93,15 +79,11 @@ public class CreateEditFragment extends Fragment implements OnMapReadyCallback, 
 
         mMapView.onResume();
         mMapView.getMapAsync(this);
-
-        mPresenter.addObserver(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        mPresenter.removeObserver(this);
 
         mMap = null;
         mMapView.onPause();
@@ -118,6 +100,7 @@ public class CreateEditFragment extends Fragment implements OnMapReadyCallback, 
 
         mMapView.onSaveInstanceState(mapViewBundle);
 
+        outState.putParcelable(STATE_POS, mPos);
         outState.putBundle(STATE_MAP_VIEW, mapViewBundle);
         outState.putBoolean(STATE_MAP_VIEW_INITIALIZED, mMapInitialized);
         outState.putBoolean(STATE_MAP_VIEW_CENTERED, mMapCentered);
@@ -144,6 +127,22 @@ public class CreateEditFragment extends Fragment implements OnMapReadyCallback, 
         super.onLowMemory();
     }
 
+    // --- Activity methods ---
+
+    public void setLatLng(double latitude, double longitude) {
+        mPos = new LatLng(latitude, longitude);
+        if (mMap != null) {
+            initializeMap();
+        }
+    }
+
+    public void updateLatLng(double latitude, double longitude, boolean center) {
+        mPos = new LatLng(latitude, longitude);
+        if (mMap != null) {
+            updateMap(center);
+        }
+    }
+
     // --- Map callback methods ---
 
     @Override
@@ -152,80 +151,47 @@ public class CreateEditFragment extends Fragment implements OnMapReadyCallback, 
 
         map.setOnMapClickListener(this);
 
+        if (mPos != null) {
+            initializeMap();
+        }
+    }
+
+    @Override
+    public void onMapClick(@NonNull LatLng pos) {
+        if (mMap == null) {
+            return;
+        }
+
+        mPos = pos;
+
+        updateMap(false);
+
+        mActivity.onMapLocationClicked(pos.latitude, pos.longitude);
+    }
+
+    private void initializeMap() {
         if (mMapInitialized) {
             return;
         }
 
-        if (mLocationId == 0L) {
-            return;
-        }
-
-        Location location = mPresenter.getLocation(mLocationId);
-
-        com.google.android.gms.maps.model.LatLng pos = new com.google.android.gms.maps.model.LatLng(
-                location.getLatitude(), location.getLongitude());
-
-        map.addMarker(new MarkerOptions().position(pos));
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14));
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(mPos));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mPos, 14));
 
         mMapInitialized = true;
-        mMapCentered = true;
     }
 
-    @Override
-    public void onMapClick(com.google.android.gms.maps.model.LatLng pos) {
-        if (mMap == null) {
-            return;
-        }
-
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(pos));
-
-        mActivity.onMapLocationClicked(new LatLng(pos.latitude, pos.longitude));
-    }
-
-    // --- Activity methods ---
-
-    public void recenterMap() {
-        mMapCentered = false;
-    }
-
-    // --- Presenter callback methods ---
-
-    @Override
-    public void onLocationCreated() {
-
-    }
-
-    @Override
-    public void onLocationUpdated() {
-
-    }
-
-    @Override
-    public void onGpsLocationChanged(LatLng latLng) {
-        if (mMap == null) {
-            return;
-        }
-
-        com.google.android.gms.maps.model.LatLng pos = new com.google.android.gms.maps.model.LatLng(
-                latLng.lat, latLng.lng);
-
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(pos));
-
-        if (mMapInitialized && mMapCentered) {
-            return;
-        }
-
+    private void updateMap(boolean center) {
         if (!mMapInitialized) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14));
-        } else {
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
+            initializeMap();
+            return;
         }
 
-        mMapInitialized = true;
-        mMapCentered = true;
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(mPos));
+        if (center) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(mPos));
+        }
     }
 
 }

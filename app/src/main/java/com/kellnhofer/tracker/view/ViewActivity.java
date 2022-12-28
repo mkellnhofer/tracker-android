@@ -1,7 +1,7 @@
 package com.kellnhofer.tracker.view;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,25 +29,28 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     private static final String DIALOG_FRAGMENT_TAG_VIEW = "view_dialog_fragment";
     private static final String DIALOG_FRAGMENT_TAG_DELETE = "delete_dialog_fragment";
 
+    private static final String STATE_LOCATION = "location";
+    private static final String STATE_LOCATION_PERSONS = "location_persons";
+
     public static final String EXTRA_LOCATION_ID = "location_id";
 
     private ViewContract.Presenter mPresenter;
+
+    private ViewFragment mFragment;
 
     private TextView mNameTextView;
     private TextView mDateTextView;
 
     private long mLocationId;
-    private String mLocationName;
-    private Date mLocationDate;
-    private String mLocationDescription;
-    private ArrayList<String> mLocationPersons;
+    private Location mLocation;
+    private List<Person> mLocationPersons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPresenter = new ViewPresenter(this, Injector.getLocationRepository(this),
-                Injector.getPersonRepository(this), Injector.getLocationService(this));
+        mPresenter = new ViewPresenter(this, Injector.getLocationDao(this),
+                Injector.getPersonDao(this), Injector.getLocationService(this));
 
         Intent intent = getIntent();
         if (!intent.hasExtra(EXTRA_LOCATION_ID)) {
@@ -72,47 +75,39 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(v -> onFabClicked());
 
-        ViewFragment fragment = (ViewFragment) getSupportFragmentManager().findFragmentByTag(
+        mFragment = (ViewFragment) getSupportFragmentManager().findFragmentByTag(
                 FRAGMENT_TAG_VIEW);
-        if (fragment == null) {
-            Bundle args = new Bundle();
-            args.putLong(ViewFragment.BUNDLE_KEY_LOCATION_ID, mLocationId);
-
-            fragment = new ViewFragment();
-            fragment.setArguments(args);
+        if (mFragment == null) {
+            mFragment = new ViewFragment();
 
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container_content, fragment, FRAGMENT_TAG_VIEW)
+                    .replace(R.id.container_content, mFragment, FRAGMENT_TAG_VIEW)
                     .commit();
         }
+    }
 
-        fragment.setPresenter(mPresenter);
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mLocation = savedInstanceState.getParcelable(STATE_LOCATION);
+        mLocationPersons = savedInstanceState.getParcelableArrayList(STATE_LOCATION_PERSONS);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        Location location = mPresenter.getLocation(mLocationId);
-        ArrayList<Person> locationPersons = mPresenter.getLocationPersons(mLocationId);
-
-        mLocationName = location.getName();
-        mLocationDate = location.getDate();
-        mLocationDescription = location.getDescription();
-        mLocationPersons = new ArrayList<>();
-        for (Person locationPerson : locationPersons) {
-            String name;
-            if (!locationPerson.getFirstName().isEmpty() &&
-                    !locationPerson.getLastName().isEmpty()) {
-                name = locationPerson.getFirstName() + " " + locationPerson.getLastName();
-            } else {
-                name = locationPerson.getFirstName() + locationPerson.getLastName();
+        mPresenter.getLocation(mLocationId).observe(this, (location) -> {
+            mLocation = location;
+            if (location != null) {
+                mPresenter.getLocationPersons(mLocationId).observe(this, (locationPersons) ->
+                        mLocationPersons = locationPersons);
+                updateToolbar();
+                updateFragment();
             }
-            mLocationPersons.add(name);
-        }
-
-        updateToolbar(mLocationName, mLocationDate);
+        });
 
         mPresenter.addObserver(this);
         mPresenter.onResume();
@@ -126,9 +121,21 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         mPresenter.removeObserver(this);
     }
 
-    private void updateToolbar(String name, Date date) {
-        mNameTextView.setText(name);
-        mDateTextView.setText(DateUtils.toUiFormat(date));
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(STATE_LOCATION, mLocation);
+        outState.putParcelableArrayList(STATE_LOCATION_PERSONS, new ArrayList<>(mLocationPersons));
+    }
+
+    private void updateToolbar() {
+        mNameTextView.setText(mLocation.getName());
+        mDateTextView.setText(DateUtils.toUiFormat(mLocation.getDate()));
+    }
+
+    private void updateFragment() {
+        mFragment.setLatLng(mLocation.getLatitude(), mLocation.getLongitude());
     }
 
     private void onFabClicked() {
@@ -164,8 +171,11 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     // --- Dialog methods ---
 
     private void showViewDialog() {
-        ViewDialogFragment fragment = ViewDialogFragment.newInstance(mLocationName, mLocationDate,
-                mLocationDescription, mLocationPersons);
+        if (mLocation == null || mLocationPersons == null) {
+            return;
+        }
+        ViewDialogFragment fragment = ViewDialogFragment.newInstance(mLocation.getName(),
+                mLocation.getDate(), mLocation.getDescription(), toPersonNameList(mLocationPersons));
         fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_VIEW);
     }
 
@@ -189,6 +199,22 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     @Override
     public void onDecisionDialogCancel(String tag) {
 
+    }
+
+    // --- Helper methods ---
+
+    private static List<String> toPersonNameList(List<Person> persons) {
+        ArrayList<String> personNames = new ArrayList<>();
+        for (Person person : persons) {
+            String personName;
+            if (!person.getFirstName().isEmpty() && !person.getLastName().isEmpty()) {
+                personName = person.getFirstName() + " " + person.getLastName();
+            } else {
+                personName = person.getFirstName() + person.getLastName();
+            }
+            personNames.add(personName);
+        }
+        return personNames;
     }
 
 }

@@ -2,6 +2,7 @@ package com.kellnhofer.tracker.view;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -307,29 +308,28 @@ public class CreateEditDialogFragment extends DialogFragment {
     // --- Factory methods ---
 
     public static CreateEditDialogFragment newCreateInstance(String locationName, Date locationDate,
-            String locationDescription, ArrayList<String> locationPersonNames,
-            ArrayList<String> personNames) {
+            String locationDescription, List<String> locationPersonNames, List<String> personNames) {
         return newInstance(MODE_CREATE, locationName, locationDate, locationDescription,
                 locationPersonNames, personNames);
     }
 
     public static CreateEditDialogFragment newEditInstance(String locationName, Date locationDate,
-            String locationDescription, ArrayList<String> locationPersonNames,
-            ArrayList<String> personNames) {
+            String locationDescription, List<String> locationPersonNames, List<String> personNames) {
         return newInstance(MODE_EDIT, locationName, locationDate, locationDescription,
                 locationPersonNames, personNames);
     }
 
     private static CreateEditDialogFragment newInstance(int mode, String locationName,
-            Date locationDate, String locationDescription, ArrayList<String> locationPersonNames,
-            ArrayList<String> personNames) {
+            Date locationDate, String locationDescription, List<String> locationPersonNames,
+            List<String> personNames) {
         Bundle args = new Bundle();
         args.putInt(BUNDLE_KEY_MODE, mode);
         args.putString(BUNDLE_KEY_LOCATION_NAME, locationName);
         args.putLong(BUNDLE_KEY_LOCATION_DATE, locationDate.getTime());
         args.putString(BUNDLE_KEY_LOCATION_DESCRIPTION, locationDescription);
-        args.putStringArrayList(BUNDLE_KEY_LOCATION_PERSON_NAMES, locationPersonNames);
-        args.putStringArrayList(BUNDLE_KEY_PERSON_NAMES, personNames);
+        args.putStringArrayList(BUNDLE_KEY_LOCATION_PERSON_NAMES, new ArrayList<>(
+                locationPersonNames));
+        args.putStringArrayList(BUNDLE_KEY_PERSON_NAMES, new ArrayList<>(personNames));
 
         CreateEditDialogFragment fragment = new CreateEditDialogFragment();
         fragment.setArguments(args);

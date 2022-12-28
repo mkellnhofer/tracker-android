@@ -12,6 +12,11 @@ android {
         targetSdkVersion rootExt.targetSdkVersion
         versionCode rootExt.appVersionCode
         versionName rootExt.appVersionName
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ['room.schemaLocation': getProjectDir().toString() + '/schemas']
+            }
+        }
     }
     buildTypes {
         release {
@@ -42,7 +47,9 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation "androidx.appcompat:appcompat:$depVersions.androidxAppcompat"
+    implementation "androidx.lifecycle:lifecycle-extensions:$depVersions.androidxLifecycle"
     implementation "androidx.preference:preference:$depVersions.androidxPreference"
+    implementation "androidx.room:room-runtime:$depVersions.androidxRoom"
     implementation "com.google.android.gms:play-services-maps:$depVersions.googleMaps"
     implementation "com.google.android.material:material:$depVersions.googleMaterial"
     implementation "com.squareup.retrofit2:retrofit:$depVersions.squareRetrofit"
@@ -51,4 +58,6 @@ dependencies {
     developmentImplementation "com.facebook.flipper:flipper:$depVersions.facebookFlipper"
     developmentImplementation "com.facebook.flipper:flipper-network-plugin:$depVersions.facebookFlipper"
     developmentImplementation "com.facebook.soloader:soloader:$depVersions.facebookSoloader"
+
+    annotationProcessor "androidx.room:room-compiler:$depVersions.androidxRoom"
 }

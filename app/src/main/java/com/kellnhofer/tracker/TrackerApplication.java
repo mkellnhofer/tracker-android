@@ -7,6 +7,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
+import com.kellnhofer.tracker.data.TrackerDatabase;
 import com.kellnhofer.tracker.rest.AuthInterceptor;
 import com.kellnhofer.tracker.rest.LocationApi;
 import okhttp3.OkHttpClient;
@@ -22,6 +23,8 @@ public class TrackerApplication extends Application {
     private TrackerSettings mSettings;
     private TrackerStates mStates;
 
+    private TrackerDatabase mDatabase;
+
     private OkHttpClient mOkHttpClient;
     private Gson mGson;
     private Retrofit mRetrofit;
@@ -35,6 +38,8 @@ public class TrackerApplication extends Application {
         mSettings = new TrackerSettings(this, Injector.getLocationService(this));
         mStates = new TrackerStates(this);
 
+        initDatabase();
+
         initOkHttp();
         initGson();
         initRetrofit();
@@ -42,6 +47,12 @@ public class TrackerApplication extends Application {
 
     private void initFlipper() {
         mFlipperInitializer.init(this);
+    }
+
+    private void initDatabase() {
+        Log.d(LOG_TAG, "Init database.");
+
+        mDatabase = TrackerDatabase.getDatabase(this);
     }
 
     public void initOkHttp() {

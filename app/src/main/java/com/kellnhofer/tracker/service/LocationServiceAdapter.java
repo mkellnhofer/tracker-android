@@ -1,6 +1,7 @@
 package com.kellnhofer.tracker.service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Service;
 import android.content.ComponentName;
@@ -98,19 +99,19 @@ public class LocationServiceAdapter {
         mListener = null;
     }
 
-    public void createLocation(Location location, ArrayList<Person> persons) {
+    public void createLocation(Location location, List<Person> persons) {
         Intent intent = new Intent(mContext, LocationService.class);
         intent.setAction(LocationService.ACTION_CREATE);
         intent.putExtra(LocationService.EXTRA_LOCATION, location);
-        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, persons);
+        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, new ArrayList<>(persons));
         mContext.startService(intent);
     }
 
-    public void updateLocation(Location location, ArrayList<Person> persons) {
+    public void updateLocation(Location location, List<Person> persons) {
         Intent intent = new Intent(mContext, LocationService.class);
         intent.setAction(LocationService.ACTION_UPDATE);
         intent.putExtra(LocationService.EXTRA_LOCATION, location);
-        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, persons);
+        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, new ArrayList<>(persons));
         mContext.startService(intent);
     }
 

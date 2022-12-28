@@ -6,8 +6,9 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 
-import com.kellnhofer.tracker.data.LocationRepository;
-import com.kellnhofer.tracker.data.PersonRepository;
+import com.kellnhofer.tracker.data.AsyncResult;
+import com.kellnhofer.tracker.data.dao.LocationDao;
+import com.kellnhofer.tracker.data.dao.PersonDao;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
@@ -19,16 +20,16 @@ public class ViewPresenter implements ViewContract.Presenter {
 
     private final List<ViewContract.Observer> mObservers = new ArrayList<>();
 
-    private final LocationRepository mLocationRepository;
-    private final PersonRepository mPersonRepository;
+    private final LocationDao mLocationDao;
+    private final PersonDao mPersonDao;
     private final LocationServiceAdapter mService;
 
-    public ViewPresenter(Context context, LocationRepository locationRepository,
-            PersonRepository personRepository, LocationServiceAdapter locationService) {
+    public ViewPresenter(Context context, LocationDao locationDao, PersonDao personDao,
+            LocationServiceAdapter locationService) {
         mContext = context;
 
-        mLocationRepository = locationRepository;
-        mPersonRepository = personRepository;
+        mLocationDao = locationDao;
+        mPersonDao = personDao;
         mService = locationService;
     }
 
@@ -55,13 +56,13 @@ public class ViewPresenter implements ViewContract.Presenter {
     }
 
     @Override
-    public Location getLocation(long locationId) {
-        return mLocationRepository.getLocation(locationId);
+    public AsyncResult<Location> getLocation(long locationId) {
+        return mLocationDao.getLocationAsync(locationId);
     }
 
     @Override
-    public ArrayList<Person> getLocationPersons(long locationId) {
-        return mPersonRepository.getPersonsByLocationId(locationId);
+    public AsyncResult<List<Person>> getLocationPersons(long locationId) {
+        return mPersonDao.getPersonsByLocationIdAsync(locationId);
     }
 
     @Override

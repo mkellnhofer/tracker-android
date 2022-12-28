@@ -35,22 +35,6 @@ public final class DateUtils {
         }
     }
 
-    public static String toDbFormat(Date date) {
-        DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_DB, Locale.getDefault());
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return df.format(date);
-    }
-
-    public static Date fromDbFormat(String date) {
-        try {
-            DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_DB, Locale.getDefault());
-            df.setTimeZone(TimeZone.getTimeZone("UTC"));
-            return df.parse(date);
-        } catch (ParseException e) {
-            throw new RuntimeException("Invalid DB date string!", e);
-        }
-    }
-
     public static String toFileFormat(Date date) {
         DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_FILE, Locale.getDefault());
         df.setTimeZone(TimeZone.getTimeZone("UTC"));

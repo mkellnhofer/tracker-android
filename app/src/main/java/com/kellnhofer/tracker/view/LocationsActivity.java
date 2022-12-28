@@ -47,7 +47,7 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPresenter = new LocationsPresenter(this, Injector.getLocationRepository(this),
+        mPresenter = new LocationsPresenter(this, Injector.getLocationDao(this),
                 Injector.getLocationService(this), Injector.getExportService(this));
 
         setContentView(R.layout.activity_locations);
@@ -161,11 +161,6 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     }
 
     // --- Presenter callback methods ---
-
-    @Override
-    public void onLocationsChanged() {
-
-    }
 
     @Override
     public void onSyncStarted() {

@@ -14,7 +14,7 @@ import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.presenter.SearchContract;
 import com.kellnhofer.tracker.presenter.SearchPresenter;
 
-public class SearchActivity extends AppCompatActivity implements SearchContract.Observer {
+public class SearchActivity extends AppCompatActivity {
 
     private static final String FRAGMENT_TAG_VIEW = "search_fragment";
 
@@ -26,8 +26,8 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SearchContract.Presenter presenter = new SearchPresenter(this,
-                Injector.getLocationRepository(this), Injector.getPersonRepository(this));
+        SearchContract.Presenter presenter = new SearchPresenter(this, Injector.getLocationDao(this),
+                Injector.getPersonDao(this));
 
         setContentView(R.layout.activity_search);
 
@@ -81,13 +81,6 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
 
         mEditText.requestFocus();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-    }
-
-    // --- Presenter callback methods ---
-
-    @Override
-    public void onLocationsChanged() {
-
     }
 
 }

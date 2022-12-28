@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -16,8 +15,8 @@ import android.util.Xml;
 
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.TrackerApplication;
-import com.kellnhofer.tracker.data.LocationRepository;
-import com.kellnhofer.tracker.data.PersonRepository;
+import com.kellnhofer.tracker.data.dao.LocationDao;
+import com.kellnhofer.tracker.data.dao.PersonDao;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import org.xmlpull.v1.XmlSerializer;
@@ -52,8 +51,8 @@ public class KmlExportThread extends Thread {
 
     private final Uri mFileUri;
 
-    private final LocationRepository mLocationRepository;
-    private final PersonRepository mPersonRepository;
+    private final LocationDao mLocationDao;
+    private final PersonDao mPersonDao;
 
     private final DateFormat mContentDateFormat;
 
@@ -64,8 +63,8 @@ public class KmlExportThread extends Thread {
 
         mFileUri = fileUri;
 
-        mLocationRepository = Injector.getLocationRepository(mApplication);
-        mPersonRepository = Injector.getPersonRepository(mApplication);
+        mLocationDao = Injector.getLocationDao(mApplication);
+        mPersonDao = Injector.getPersonDao(mApplication);
 
         mContentDateFormat = new SimpleDateFormat(CONTENT_DATE_FORMAT, Locale.getDefault());
         mContentDateFormat.setTimeZone(TimeZone.getDefault());
@@ -82,7 +81,7 @@ public class KmlExportThread extends Thread {
             notifyStarted();
 
             // Get not deleted locations
-            List<Location> locations = mLocationRepository.getNotDeletedLocationsByDateDesc();
+            List<Location> locations = mLocationDao.getNotDeletedLocationsOrderedByDateDesc();
             // Export locations
             export(locations);
 
@@ -179,7 +178,7 @@ public class KmlExportThread extends Thread {
 
     private void writePlacemark(XmlSerializer serializer, Location location) throws IOException {
         // Get persons
-        ArrayList<Person> persons = getPersons(location.getPersonIds());
+        List<Person> persons = mPersonDao.getPersonsByLocationId(location.getId());
 
         serializer.startTag("", "Placemark");
 
@@ -191,14 +190,6 @@ public class KmlExportThread extends Thread {
         writeStyleUrl(serializer, location, persons);
 
         serializer.endTag("", "Placemark");
-    }
-
-    private ArrayList<Person> getPersons(ArrayList<Long> personIds) {
-        ArrayList<Person> persons = new ArrayList<>();
-        for (Long personId : personIds) {
-            persons.add(mPersonRepository.getPerson(personId));
-        }
-        return persons;
     }
 
     private void writeName(XmlSerializer serializer, String name) throws IOException {
@@ -237,7 +228,7 @@ public class KmlExportThread extends Thread {
     }
 
     private void writeExtendedData(XmlSerializer serializer, Location location,
-            ArrayList<Person> persons) throws IOException {
+            List<Person> persons) throws IOException {
         serializer.startTag("", "ExtendedData");
         writeData(serializer, "locDate", mContentDateFormat.format(location.getDate()));
         if (location.getDescription() != null) {
@@ -258,8 +249,8 @@ public class KmlExportThread extends Thread {
         serializer.endTag("", "Data");
     }
 
-    private void writeStyleUrl(XmlSerializer serializer, Location location,
-            ArrayList<Person> persons) throws IOException {
+    private void writeStyleUrl(XmlSerializer serializer, Location location, List<Person> persons)
+            throws IOException {
         serializer.startTag("", "styleUrl");
         if (!location.getDescription().isEmpty() && !persons.isEmpty()) {
             serializer.text("#" + STYLE_DESCRIPTION_PERSONS);
@@ -310,7 +301,7 @@ public class KmlExportThread extends Thread {
         }
     }
 
-    private static String toPersonsString(ArrayList<Person> persons) {
+    private static String toPersonsString(List<Person> persons) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < persons.size(); i++) {
             Person person = persons.get(i);

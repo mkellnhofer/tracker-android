@@ -4,33 +4,33 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 
-import com.kellnhofer.tracker.data.LocationRepository;
-import com.kellnhofer.tracker.data.PersonRepository;
+import com.kellnhofer.tracker.data.dao.LocationDao;
+import com.kellnhofer.tracker.data.dao.PersonDao;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.view.ViewActivity;
 
-public class SearchPresenter implements SearchContract.Presenter,
-        LocationRepository.LocationRepositoryObserver {
+public class SearchPresenter implements SearchContract.Presenter {
 
     private final Context mContext;
 
     private final List<SearchContract.Observer> mObservers = new ArrayList<>();
 
-    private final LocationRepository mLocationRepository;
-    private final PersonRepository mPersonRepository;
+    private final LocationDao mLocationDao;
+    private final PersonDao mPersonDao;
 
-    public SearchPresenter(Context context, LocationRepository locationRepository,
-            PersonRepository personRepository) {
+    public SearchPresenter(Context context, LocationDao locationDao, PersonDao personDao) {
         mContext = context;
 
-        mLocationRepository = locationRepository;
-        mPersonRepository = personRepository;
+        mLocationDao = locationDao;
+        mPersonDao = personDao;
     }
 
     @Override
@@ -47,18 +47,25 @@ public class SearchPresenter implements SearchContract.Presenter,
 
     @Override
     public void onResume() {
-        mLocationRepository.addContentObserver(this);
+
     }
 
     @Override
     public void onPause() {
-        mLocationRepository.removeContentObserver(this);
+
     }
 
     @Override
-    public ArrayList<Location> searchLocations(String search) {
-        ArrayList<Location> l1 = searchLocationsByLocationName(search);
-        ArrayList<Location> l2 = searchLocationsByPersonName(search);
+    public LiveData<List<Location>> searchLocations(String search) {
+        MediatorLiveData<List<Location>> searchLocations = new MediatorLiveData<>();
+        searchLocations.addSource(mLocationDao.getLocationsCntLiveData(), o ->
+                new Thread(() -> searchLocations.postValue(searchLocationsByName(search))).start());
+        return searchLocations;
+    }
+
+    private List<Location> searchLocationsByName(String name) {
+        List<Location> l1 = searchLocationsByLocationName(name);
+        List<Location> l2 = searchLocationsByPersonName(name);
 
         ArrayList<Location> l = new ArrayList<>();
         l.addAll(l1);
@@ -70,19 +77,16 @@ public class SearchPresenter implements SearchContract.Presenter,
         return l;
     }
 
-    private ArrayList<Location> searchLocationsByLocationName(String name) {
-        return mLocationRepository.findNotDeletedLocationsByName(name);
+    private List<Location> searchLocationsByLocationName(String name) {
+        return mLocationDao.findNotDeletedLocationsByNameWithWildcards(name);
     }
 
-    private ArrayList<Location> searchLocationsByPersonName(String name) {
-        ArrayList<Person> persons = mPersonRepository.findPersonsByName(name);
-
-        ArrayList<Long> personIds = new ArrayList<>();
-        for (Person person : persons) {
-            personIds.add(person.getId());
-        }
-
-        return mLocationRepository.getNotDeletedLocationsByPersonIds(personIds);
+    private List<Location> searchLocationsByPersonName(String name) {
+        List<Person> persons = mPersonDao.findPersonsByNameWithWildcards(name);
+        List<Long> personIds = persons.stream()
+                .map(Person::getId)
+                .collect(Collectors.toList());
+        return mLocationDao.getNotDeletedLocationsByPersonIds(personIds);
     }
 
     @Override
@@ -92,23 +96,7 @@ public class SearchPresenter implements SearchContract.Presenter,
         mContext.startActivity(intent);
     }
 
-    // --- Repository callback methods ---
-
-    @Override
-    public void onLocationChanged() {
-        executeOnMainThread(() -> {
-            for (SearchContract.Observer observer : mObservers) {
-                observer.onLocationsChanged();
-            }
-        });
-    }
-
     // --- Helper methods ---
-
-    private void executeOnMainThread(Runnable runnable) {
-        Handler mainHandler = new Handler(mContext.getMainLooper());
-        mainHandler.post(runnable);
-    }
 
     private static void removeLocationsDuplicates(ArrayList<Location> locations) {
         HashSet<Long> locationIds = new HashSet<>();

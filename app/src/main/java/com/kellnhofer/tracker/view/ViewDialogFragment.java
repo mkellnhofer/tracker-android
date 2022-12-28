@@ -86,12 +86,12 @@ public class ViewDialogFragment extends DialogFragment {
     // --- Factory methods ---
 
     public static ViewDialogFragment newInstance(String name, Date date, String description,
-            ArrayList<String> persons) {
+            List<String> persons) {
         Bundle args = new Bundle();
         args.putString(BUNDLE_KEY_NAME, name);
         args.putLong(BUNDLE_KEY_DATE, date.getTime());
         args.putString(BUNDLE_KEY_DESCRIPTION, description);
-        args.putStringArrayList(BUNDLE_KEY_PERSONS, persons);
+        args.putStringArrayList(BUNDLE_KEY_PERSONS, new ArrayList<>(persons));
 
         ViewDialogFragment fragment = new ViewDialogFragment();
         fragment.setArguments(args);
