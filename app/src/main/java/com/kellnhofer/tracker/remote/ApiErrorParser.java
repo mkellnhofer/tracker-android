@@ -1,4 +1,4 @@
-package com.kellnhofer.tracker.rest;
+package com.kellnhofer.tracker.remote;
 
 import com.kellnhofer.tracker.service.LocationSyncError;
 

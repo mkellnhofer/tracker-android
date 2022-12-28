@@ -14,10 +14,10 @@ import com.kellnhofer.tracker.data.dao.PersonDao;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.LocationWithPersonRefs;
 import com.kellnhofer.tracker.model.Person;
-import com.kellnhofer.tracker.rest.ApiErrorParser;
-import com.kellnhofer.tracker.rest.ApiLocation;
-import com.kellnhofer.tracker.rest.ApiPerson;
-import com.kellnhofer.tracker.rest.LocationApi;
+import com.kellnhofer.tracker.remote.ApiErrorParser;
+import com.kellnhofer.tracker.remote.ApiLocation;
+import com.kellnhofer.tracker.remote.ApiPerson;
+import com.kellnhofer.tracker.remote.LocationApi;
 import retrofit2.Call;
 import retrofit2.Response;
 
