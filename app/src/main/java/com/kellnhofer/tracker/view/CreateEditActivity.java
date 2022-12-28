@@ -19,10 +19,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.kellnhofer.tracker.Constants;
 import com.kellnhofer.tracker.Injector;
+import com.kellnhofer.tracker.PermissionsHelper;
 import com.kellnhofer.tracker.R;
-import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.presenter.CreateEditContract;
@@ -44,7 +43,6 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
     public static final String EXTRA_LOCATION_ID = "location_id";
 
-    private TrackerApplication mApplication;
     private CreateEditContract.Presenter mPresenter;
 
     private FloatingActionButton mGpsFab;
@@ -61,8 +59,6 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mApplication = (TrackerApplication) getApplication();
 
         mPresenter = new CreateEditPresenter(this, Injector.getLocationDao(this),
                 Injector.getPersonDao(this), Injector.getLocationService(this));
@@ -286,8 +282,8 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
             return;
         }
 
-        if (!mApplication.hasGpsPermissions()) {
-            requestPermissions(Constants.GPS_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        if (!PermissionsHelper.hasGpsPermissions(this)) {
+            requestPermissions(PermissionsHelper.GPS_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
 
         mRequestedPermissions = true;
@@ -295,7 +291,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode != REQUEST_CODE_PERMISSIONS) {

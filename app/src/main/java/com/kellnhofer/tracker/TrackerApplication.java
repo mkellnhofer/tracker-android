@@ -1,7 +1,6 @@
 package com.kellnhofer.tracker;
 
 import android.app.Application;
-import android.content.pm.PackageManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -96,17 +95,6 @@ public class TrackerApplication extends Application {
 
     public LocationApi getLocationApi() {
         return mRetrofit.create(LocationApi.class);
-    }
-
-    // --- Helper methods ---
-
-    public boolean hasGpsPermissions() {
-        for (String permission : Constants.GPS_PERMISSIONS) {
-            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                return false;
-            }
-        }
-        return true;
     }
 
 }

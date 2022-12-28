@@ -10,7 +10,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.kellnhofer.tracker.TrackerApplication;
+import com.kellnhofer.tracker.PermissionsHelper;
 import com.kellnhofer.tracker.data.AsyncResult;
 import com.kellnhofer.tracker.data.dao.LocationDao;
 import com.kellnhofer.tracker.data.dao.PersonDao;
@@ -24,8 +24,6 @@ public class CreateEditPresenter extends BasePresenter implements CreateEditCont
 
     private static final String LOG_TAG = CreateEditPresenter.class.getSimpleName();
 
-    private final TrackerApplication mApplication;
-
     private final List<CreateEditContract.Observer> mObservers = new ArrayList<>();
 
     private final LocationDao mLocationDao;
@@ -38,8 +36,6 @@ public class CreateEditPresenter extends BasePresenter implements CreateEditCont
     public CreateEditPresenter(Context context, LocationDao locationDao, PersonDao personDao,
             LocationServiceAdapter locationService) {
         super(context);
-
-        mApplication = (TrackerApplication) context.getApplicationContext();
 
         mLocationDao = locationDao;
         mPersonDao = personDao;
@@ -100,7 +96,7 @@ public class CreateEditPresenter extends BasePresenter implements CreateEditCont
     @SuppressLint("MissingPermission")
     @Override
     public void requestGpsLocationUpdates() {
-        if (mApplication.hasGpsPermissions()) {
+        if (PermissionsHelper.hasGpsPermissions(mContext)) {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
         }
