@@ -8,12 +8,9 @@ import com.kellnhofer.tracker.model.Person;
 
 public interface CreateEditContract {
 
-    interface Presenter {
+    interface Presenter extends BaseContract.Presenter {
         void addObserver(Observer observer);
         void removeObserver(Observer observer);
-
-        void onResume();
-        void onPause();
 
         AsyncResult<Location> getLocation(long locationId);
         AsyncResult<List<Person>> getLocationPersons(long locationId);
@@ -27,7 +24,7 @@ public interface CreateEditContract {
         LatLng getGpsLocation();
     }
 
-    interface Observer {
+    interface Observer extends BaseContract.Observer {
         void onGpsLocationChanged(LatLng latLng);
     }
 

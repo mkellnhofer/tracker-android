@@ -19,7 +19,7 @@ import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
-public class CreateEditPresenter implements CreateEditContract.Presenter,
+public class CreateEditPresenter extends BasePresenter implements CreateEditContract.Presenter,
         LocationServiceAdapter.Listener, LocationListener {
 
     private static final String LOG_TAG = CreateEditPresenter.class.getSimpleName();
@@ -37,6 +37,8 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     public CreateEditPresenter(Context context, LocationDao locationDao, PersonDao personDao,
             LocationServiceAdapter locationService) {
+        super(context);
+
         mApplication = (TrackerApplication) context.getApplicationContext();
 
         mLocationDao = locationDao;

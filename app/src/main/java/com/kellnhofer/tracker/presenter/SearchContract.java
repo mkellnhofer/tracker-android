@@ -8,19 +8,16 @@ import com.kellnhofer.tracker.model.Location;
 
 public interface SearchContract {
 
-    interface Presenter {
+    interface Presenter extends BaseContract.Presenter {
         void addObserver(Observer observer);
         void removeObserver(Observer observer);
-
-        void onResume();
-        void onPause();
 
         LiveData<List<Location>> searchLocations(String search);
 
         void startViewActivity(long locationId);
     }
 
-    interface Observer {
+    interface Observer extends BaseContract.Observer {
 
     }
 

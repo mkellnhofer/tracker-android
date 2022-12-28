@@ -4,22 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
-import android.os.Handler;
 
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
-public class SettingsPresenter implements SettingsContract.Presenter,
+public class SettingsPresenter extends BasePresenter implements SettingsContract.Presenter,
         LocationServiceAdapter.Listener {
-
-    private final Context mContext;
 
     private final List<SettingsContract.Observer> mObservers = new ArrayList<>();
 
     private final LocationServiceAdapter mService;
 
     public SettingsPresenter(Context context, LocationServiceAdapter locationService) {
-        mContext = context;
+        super(context);
 
         mService = locationService;
     }
@@ -78,13 +75,6 @@ public class SettingsPresenter implements SettingsContract.Presenter,
                 observer.onSyncFailed(error);
             }
         });
-    }
-
-    // --- Helper methods ---
-
-    private void executeOnMainThread(Runnable runnable) {
-        Handler mainHandler = new Handler(mContext.getMainLooper());
-        mainHandler.post(runnable);
     }
 
 }

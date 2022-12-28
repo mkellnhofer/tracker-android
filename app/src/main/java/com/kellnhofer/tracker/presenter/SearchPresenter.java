@@ -17,9 +17,7 @@ import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.view.ViewActivity;
 
-public class SearchPresenter implements SearchContract.Presenter {
-
-    private final Context mContext;
+public class SearchPresenter extends BasePresenter implements SearchContract.Presenter {
 
     private final List<SearchContract.Observer> mObservers = new ArrayList<>();
 
@@ -27,7 +25,7 @@ public class SearchPresenter implements SearchContract.Presenter {
     private final PersonDao mPersonDao;
 
     public SearchPresenter(Context context, LocationDao locationDao, PersonDao personDao) {
-        mContext = context;
+        super(context);
 
         mLocationDao = locationDao;
         mPersonDao = personDao;
@@ -43,16 +41,6 @@ public class SearchPresenter implements SearchContract.Presenter {
     @Override
     public void removeObserver(SearchContract.Observer observer) {
         mObservers.remove(observer);
-    }
-
-    @Override
-    public void onResume() {
-
-    }
-
-    @Override
-    public void onPause() {
-
     }
 
     @Override

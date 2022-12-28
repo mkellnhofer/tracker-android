@@ -14,9 +14,7 @@ import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.view.CreateEditActivity;
 
-public class ViewPresenter implements ViewContract.Presenter {
-
-    private final Context mContext;
+public class ViewPresenter extends BasePresenter implements ViewContract.Presenter {
 
     private final List<ViewContract.Observer> mObservers = new ArrayList<>();
 
@@ -26,7 +24,7 @@ public class ViewPresenter implements ViewContract.Presenter {
 
     public ViewPresenter(Context context, LocationDao locationDao, PersonDao personDao,
             LocationServiceAdapter locationService) {
-        mContext = context;
+        super(context);
 
         mLocationDao = locationDao;
         mPersonDao = personDao;
@@ -43,16 +41,6 @@ public class ViewPresenter implements ViewContract.Presenter {
     @Override
     public void removeObserver(ViewContract.Observer observer) {
         mObservers.remove(observer);
-    }
-
-    @Override
-    public void onResume() {
-
-    }
-
-    @Override
-    public void onPause() {
-
     }
 
     @Override

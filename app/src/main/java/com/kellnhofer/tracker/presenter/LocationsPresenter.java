@@ -6,7 +6,6 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Handler;
 import androidx.lifecycle.LiveData;
 
 import com.kellnhofer.tracker.data.dao.LocationDao;
@@ -20,10 +19,8 @@ import com.kellnhofer.tracker.view.SearchActivity;
 import com.kellnhofer.tracker.view.SettingsActivity;
 import com.kellnhofer.tracker.view.ViewActivity;
 
-public class LocationsPresenter implements LocationsContract.Presenter,
+public class LocationsPresenter extends BasePresenter implements LocationsContract.Presenter,
         LocationServiceAdapter.Listener, ExportServiceAdapter.Listener {
-
-    private final Context mContext;
 
     private final List<LocationsContract.Observer> mObservers = new ArrayList<>();
 
@@ -33,7 +30,7 @@ public class LocationsPresenter implements LocationsContract.Presenter,
 
     public LocationsPresenter(Context context, LocationDao locationDao,
             LocationServiceAdapter locationService, ExportServiceAdapter exportService) {
-        mContext = context;
+        super(context);
 
         mLocationDao = locationDao;
         mLocationService = locationService;
@@ -173,13 +170,6 @@ public class LocationsPresenter implements LocationsContract.Presenter,
                 observer.onKmlExportFailed(error);
             }
         });
-    }
-
-    // --- Helper methods ---
-
-    private void executeOnMainThread(Runnable runnable) {
-        Handler mainHandler = new Handler(mContext.getMainLooper());
-        mainHandler.post(runnable);
     }
 
 }
