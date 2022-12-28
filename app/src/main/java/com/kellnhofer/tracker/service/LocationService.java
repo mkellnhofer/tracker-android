@@ -41,10 +41,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     }
 
     public interface Callback {
-        void onLocationCreated(long locationId);
-        void onLocationUpdated(long locationId);
-        void onLocationDeleted(long locationId);
-
         void onSyncStarted();
         void onSyncFinished();
         void onSyncFailed(LocationSyncError error);
@@ -121,9 +117,7 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     private void createLocation(final Location location, final ArrayList<Person> persons) {
         executeInThread(() -> {
             location.setChanged(true);
-            long locationId = saveLocationAndPersons(location, persons);
-
-            notifyLocationCreated(locationId);
+            saveLocationAndPersons(location, persons);
         });
     }
 
@@ -135,16 +129,14 @@ public class LocationService extends Service implements LocationSyncThread.Callb
             }
 
             location.setChanged(true);
-            long locationId = saveLocationAndPersons(location, persons);
+            saveLocationAndPersons(location, persons);
             deleteUnusedPersons();
-
-            notifyLocationUpdated(locationId);
         });
     }
 
-    private long saveLocationAndPersons(Location location, ArrayList<Person> persons) {
+    private void saveLocationAndPersons(Location location, ArrayList<Person> persons) {
         ArrayList<Long> personIds = savePersons(persons);
-        return mLocationDao.saveLocationWithPersonRefs(new LocationWithPersonRefs(location,
+        mLocationDao.saveLocationWithPersonRefs(new LocationWithPersonRefs(location,
                 personIds));
     }
 
@@ -168,11 +160,7 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     }
 
     private void deleteLocation(final long locationId) {
-        executeInThread(() -> {
-            mLocationDao.setLocationDeleted(locationId);
-
-            notifyLocationDeleted(locationId);
-        });
+        executeInThread(() -> mLocationDao.setLocationDeleted(locationId));
     }
 
     private void startSync(boolean restart) {
@@ -256,24 +244,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
 
     private ArrayList<Person> getPersonsFromIntent(Intent intent) {
         return intent.getParcelableArrayListExtra(EXTRA_PERSONS);
-    }
-
-    private void notifyLocationCreated(long locationId) {
-        if (mCallback != null) {
-            mCallback.onLocationCreated(locationId);
-        }
-    }
-
-    private void notifyLocationUpdated(long locationId) {
-        if (mCallback != null) {
-            mCallback.onLocationUpdated(locationId);
-        }
-    }
-
-    private void notifyLocationDeleted(long locationId) {
-        if (mCallback != null) {
-            mCallback.onLocationDeleted(locationId);
-        }
     }
 
     private void notifySyncStarted() {

@@ -16,10 +16,6 @@ import com.kellnhofer.tracker.model.Person;
 public class LocationServiceAdapter {
 
     public interface Listener {
-        void onLocationCreated(long locationId);
-        void onLocationUpdated(long locationId);
-        void onLocationDeleted(long locationId);
-
         void onSyncStarted();
         void onSyncFinished();
         void onSyncFailed(LocationSyncError error);
@@ -31,21 +27,6 @@ public class LocationServiceAdapter {
             LocationService.Binder binder = (LocationService.Binder) service;
             mService = binder.getService();
             mService.setCallback(new LocationService.Callback() {
-                @Override
-                public void onLocationCreated(long locationId) {
-                    mListener.onLocationCreated(locationId);
-                }
-
-                @Override
-                public void onLocationUpdated(long locationId) {
-                    mListener.onLocationUpdated(locationId);
-                }
-
-                @Override
-                public void onLocationDeleted(long locationId) {
-                    mListener.onLocationDeleted(locationId);
-                }
-
                 @Override
                 public void onSyncStarted() {
                     mListener.onSyncStarted();

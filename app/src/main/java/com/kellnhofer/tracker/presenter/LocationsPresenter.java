@@ -113,21 +113,6 @@ public class LocationsPresenter implements LocationsContract.Presenter,
     // --- Service callback methods ---
 
     @Override
-    public void onLocationCreated(long locationId) {
-
-    }
-
-    @Override
-    public void onLocationUpdated(long locationId) {
-
-    }
-
-    @Override
-    public void onLocationDeleted(long locationId) {
-
-    }
-
-    @Override
     public void onSyncStarted() {
         executeOnMainThread(() -> {
             for (LocationsContract.Observer observer : mObservers) {

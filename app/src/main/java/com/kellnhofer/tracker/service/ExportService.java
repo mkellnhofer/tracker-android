@@ -74,10 +74,10 @@ public class ExportService extends Service implements KmlExportThread.Callback {
         switch(action) {
             case ACTION_START_KML_EXPORT:
                 Uri fileUri = intent.getData();
-                startSync(fileUri);
+                startExport(fileUri);
                 break;
             case ACTION_STOP_KML_EXPORT:
-                stopSync();
+                stopExport();
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported action '" + action + "'!");
@@ -86,7 +86,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
         return START_NOT_STICKY;
     }
 
-    private void startSync(Uri fileUri) {
+    private void startExport(Uri fileUri) {
         if (mKmlExportThread != null) {
             Log.d(LOG_TAG, "KML export is already running.");
             return;
@@ -99,7 +99,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
         mKmlExportThread.start();
     }
 
-    private void stopSync() {
+    private void stopExport() {
         if (mKmlExportThread == null) {
             return;
         }
@@ -113,8 +113,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
         mKmlExportThread = null;
     }
 
-    // --- Sync callbacks ---
-
+    // --- Export callbacks ---
 
     @Override
     public void onKmlExportStarted() {

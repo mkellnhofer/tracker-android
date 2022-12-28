@@ -8,7 +8,6 @@ import android.content.Context;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 
 import com.kellnhofer.tracker.TrackerApplication;
@@ -25,7 +24,6 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     private static final String LOG_TAG = CreateEditPresenter.class.getSimpleName();
 
-    private final Context mContext;
     private final TrackerApplication mApplication;
 
     private final List<CreateEditContract.Observer> mObservers = new ArrayList<>();
@@ -39,7 +37,6 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     public CreateEditPresenter(Context context, LocationDao locationDao, PersonDao personDao,
             LocationServiceAdapter locationService) {
-        mContext = context;
         mApplication = (TrackerApplication) context.getApplicationContext();
 
         mLocationDao = locationDao;
@@ -120,29 +117,6 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
     // --- Service callback methods ---
 
     @Override
-    public void onLocationCreated(long locationId) {
-        executeOnMainThread(() -> {
-            for (CreateEditContract.Observer observer : mObservers) {
-                observer.onLocationCreated();
-            }
-        });
-    }
-
-    @Override
-    public void onLocationUpdated(long locationId) {
-        executeOnMainThread(() -> {
-            for (CreateEditContract.Observer observer : mObservers) {
-                observer.onLocationUpdated();
-            }
-        });
-    }
-
-    @Override
-    public void onLocationDeleted(long locationId) {
-
-    }
-
-    @Override
     public void onSyncStarted() {
 
     }
@@ -183,13 +157,6 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
     @Override
     public void onProviderDisabled(String provider) {
         Log.d(LOG_TAG, "Provider disabled.");
-    }
-
-    // --- Helper methods ---
-
-    private void executeOnMainThread(Runnable runnable) {
-        Handler mainHandler = new Handler(mContext.getMainLooper());
-        mainHandler.post(runnable);
     }
 
 }

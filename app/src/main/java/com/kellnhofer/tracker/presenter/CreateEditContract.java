@@ -28,8 +28,6 @@ public interface CreateEditContract {
     }
 
     interface Observer {
-        void onLocationCreated();
-        void onLocationUpdated();
         void onGpsLocationChanged(LatLng latLng);
     }
 
