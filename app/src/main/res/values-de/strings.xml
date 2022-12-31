@@ -14,6 +14,7 @@
     <string name="dialog_title_delete">Standort löschen</string>
     <string name="dialog_title_view">Details</string>
     <string name="dialog_title_server_url">Server-URL</string>
+    <string name="dialog_title_server_password">Server-Passwort</string>
     <string name="dialog_title_kml_export">KML-Export</string>
     <string name="dialog_title_help">Hilfe &amp; Feedback</string>
     <string name="dialog_title_error">Fehler</string>

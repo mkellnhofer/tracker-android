@@ -5,15 +5,13 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.model.Location;
@@ -22,7 +20,7 @@ import com.kellnhofer.tracker.presenter.ViewContract;
 import com.kellnhofer.tracker.presenter.ViewPresenter;
 import com.kellnhofer.tracker.util.DateUtils;
 
-public class ViewActivity extends AppCompatActivity implements ViewContract.Observer,
+public class ViewActivity extends BaseActivity implements ViewContract.Observer,
         DecisionDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_VIEW = "view_fragment";
@@ -36,10 +34,8 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
 
     private ViewContract.Presenter mPresenter;
 
+    private MaterialToolbar mTopAppBar;
     private ViewFragment mFragment;
-
-    private TextView mNameTextView;
-    private TextView mDateTextView;
 
     private long mLocationId;
     private Location mLocation;
@@ -60,17 +56,12 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
 
         setContentView(R.layout.activity_view);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        AppBarLayout appBarLayout = findViewById(R.id.container_app_bar);
+        appBarLayout.setStatusBarForeground(MaterialShapeDrawable.createWithElevationOverlay(this));
 
-        mNameTextView = toolbar.findViewById(R.id.view_location_name);
-        mDateTextView = toolbar.findViewById(R.id.view_location_date);
-
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        mTopAppBar = findViewById(R.id.top_app_bar);
+        mTopAppBar.setNavigationOnClickListener(v -> finish());
+        mTopAppBar.setOnMenuItemClickListener(this::onTopAppBarMenuItemClicked);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(v -> onFabClicked());
@@ -104,7 +95,7 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
             if (location != null) {
                 mPresenter.getLocationPersons(mLocationId).observe(this, (locationPersons) ->
                         mLocationPersons = locationPersons);
-                updateToolbar();
+                updateTopAppBarTitle();
                 updateFragment();
             }
         });
@@ -129,34 +120,9 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         outState.putParcelableArrayList(STATE_LOCATION_PERSONS, new ArrayList<>(mLocationPersons));
     }
 
-    private void updateToolbar() {
-        mNameTextView.setText(mLocation.getName());
-        mDateTextView.setText(DateUtils.toUiFormat(mLocation.getDate()));
-    }
-
-    private void updateFragment() {
-        mFragment.setLatLng(mLocation.getLatitude(), mLocation.getLongitude());
-    }
-
-    private void onFabClicked() {
-        showViewDialog();
-    }
-
-    // --- Action bar callback methods ---
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_view_action, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    private boolean onTopAppBarMenuItemClicked(@NonNull MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case android.R.id.home:
-                finish();
-                return true;
             case R.id.action_edit:
                 mPresenter.startEditActivity(mLocationId);
                 return true;
@@ -166,6 +132,19 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void updateTopAppBarTitle() {
+        mTopAppBar.setTitle(mLocation.getName());
+        mTopAppBar.setSubtitle(DateUtils.toUiFormat(mLocation.getDate()));
+    }
+
+    private void updateFragment() {
+        mFragment.setLatLng(mLocation.getLatitude(), mLocation.getLongitude());
+    }
+
+    private void onFabClicked() {
+        showViewDialog();
     }
 
     // --- Dialog methods ---

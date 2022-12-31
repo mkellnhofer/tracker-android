@@ -4,9 +4,9 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 
 public class DecisionDialogFragment extends DialogFragment {
@@ -40,13 +40,14 @@ public class DecisionDialogFragment extends DialogFragment {
         int messageTextId = arguments.getInt(BUNDLE_KEY_MESSAGE_TEXT_ID, 0);
         int actionTextId = arguments.getInt(BUNDLE_KEY_ACTION_TEXT_ID, 0);
 
-        return new AlertDialog.Builder(getContext())
+        return new MaterialAlertDialogBuilder(getContext())
                 .setTitle(titleTextId)
                 .setMessage(messageTextId)
                 .setPositiveButton(actionTextId, (d, id) ->
                         mListener.onDecisionDialogOk(getFragmentTag()))
                 .setNegativeButton(R.string.action_cancel, (d, id) ->
-                        mListener.onDecisionDialogCancel(getFragmentTag())).create();
+                        mListener.onDecisionDialogCancel(getFragmentTag()))
+                .create();
     }
 
     @Override

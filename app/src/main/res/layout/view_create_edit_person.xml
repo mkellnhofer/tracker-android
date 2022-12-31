@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container_person"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <AutoCompleteTextView
+    <com.google.android.material.textfield.MaterialAutoCompleteTextView
         android:id="@+id/view_person_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,9 +24,8 @@
         android:layout_alignParentRight="true"
         android:visibility="gone"
         android:background="?android:selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_add_black_24dp"
-        android:scaleType="centerCrop"
-        app:tint="@color/icon_dark_2" />
+        android:src="@drawable/ic_add"
+        android:scaleType="centerCrop" />
 
     <ImageButton
         android:id="@+id/button_person_remove"
@@ -38,8 +36,7 @@
         android:layout_alignParentRight="true"
         android:visibility="gone"
         android:background="?android:selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_remove_black_24dp"
-        android:scaleType="centerCrop"
-        app:tint="@color/icon_dark_2" />
+        android:src="@drawable/ic_remove"
+        android:scaleType="centerCrop" />
 
 </RelativeLayout>

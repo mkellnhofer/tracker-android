@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 
 public class InfoDialogFragment extends DialogFragment {
@@ -39,11 +40,11 @@ public class InfoDialogFragment extends DialogFragment {
         int titleResId = arguments.getInt(BUNDLE_KEY_TITLE, R.string.dialog_title_error);
         int messageResId = arguments.getInt(BUNDLE_KEY_MESSAGE, R.string.error_unknown);
 
-        return new AlertDialog.Builder(getContext())
+        return new MaterialAlertDialogBuilder(getContext())
                 .setTitle(titleResId)
                 .setMessage(messageResId)
-                .setPositiveButton(R.string.action_ok, (d, id) ->
-                        mListener.onInfoDialogOk(getFragmentTag())).create();
+                .setPositiveButton(R.string.action_ok, (d, id) -> mListener.onInfoDialogOk(getFragmentTag()))
+                .create();
     }
 
     @Override

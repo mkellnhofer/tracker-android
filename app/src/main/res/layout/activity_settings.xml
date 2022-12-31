@@ -9,15 +9,16 @@
     tools:context=".view.SettingsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/container_app_bar"
         android:layout_height="wrap_content"
         android:layout_width="match_parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/top_app_bar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:navigationIcon="@drawable/ic_back"
+            app:title="@string/activity_title_settings" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -3,15 +3,14 @@ package com.kellnhofer.tracker.view;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.google.android.material.snackbar.Snackbar;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
@@ -21,7 +20,7 @@ import com.kellnhofer.tracker.service.KmlExportError;
 import com.kellnhofer.tracker.service.LocationSyncError;
 import com.kellnhofer.tracker.util.ExportUtils;
 
-public class LocationsActivity extends AppCompatActivity implements LocationsContract.Observer,
+public class LocationsActivity extends BaseActivity implements LocationsContract.Observer,
         ProgressBarDialogFragment.Listener, ErrorDialogFragment.Listener,
         InfoDialogFragment.Listener {
 
@@ -41,8 +40,6 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     private ProgressBarDialogFragment mKmlExportDialogFragment;
     private ErrorDialogFragment mKmlExportErrorDialogFragment;
 
-    private CoordinatorLayout mCoordinatorLayout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,10 +49,11 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
 
         setContentView(R.layout.activity_locations);
 
-        mCoordinatorLayout = findViewById(R.id.container_coordinator);
+        AppBarLayout appBarLayout = findViewById(R.id.container_app_bar);
+        appBarLayout.setStatusBarForeground(MaterialShapeDrawable.createWithElevationOverlay(this));
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        MaterialToolbar topAppBar = findViewById(R.id.top_app_bar);
+        topAppBar.setOnMenuItemClickListener(this::onTopAppBarMenuItemClicked);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(v -> mPresenter.startCreateActivity());
@@ -101,16 +99,7 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
         mPresenter.removeObserver(this);
     }
 
-    // --- Action bar callback methods ---
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_locations_action, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    private boolean onTopAppBarMenuItemClicked(@NonNull MenuItem item) {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_search:
@@ -126,19 +115,8 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
                 showHelpDialog();
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return false;
         }
-    }
-
-    private void createKmlExportFile() {
-        String fileName = ExportUtils.generateKmlExportFileName();
-        String fileMimeType = ExportUtils.getKmlExportMimeType();
-
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.putExtra(Intent.EXTRA_TITLE, fileName);
-        intent.setType(fileMimeType);
-        startActivityForResult(intent, REQUEST_CODE_CREATE_KML_EXPORT_FILE);
     }
 
     // --- Activity result callback methods ---
@@ -310,8 +288,7 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     // --- SnackBar methods ---
 
     private void showSyncErrorSnackBar(LocationSyncError error) {
-        Snackbar snackbar = Snackbar.make(mCoordinatorLayout, error.getTextResId(),
-                Snackbar.LENGTH_LONG);
+        Snackbar snackbar = Snackbar.make(mRootView, error.getTextResId(), Snackbar.LENGTH_LONG);
         snackbar.setAction(R.string.action_retry, v -> mPresenter.executeLocationSync());
         snackbar.show();
     }
@@ -321,6 +298,17 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     private boolean isApiKeyMissing() {
         String key = getString(R.string.google_maps_api_key);
         return key == null || key.isEmpty();
+    }
+
+    private void createKmlExportFile() {
+        String fileName = ExportUtils.generateKmlExportFileName();
+        String fileMimeType = ExportUtils.getKmlExportMimeType();
+
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_TITLE, fileName);
+        intent.setType(fileMimeType);
+        startActivityForResult(intent, REQUEST_CODE_CREATE_KML_EXPORT_FILE);
     }
 
 }

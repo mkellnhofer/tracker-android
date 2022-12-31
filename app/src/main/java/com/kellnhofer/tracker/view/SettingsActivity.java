@@ -1,10 +1,10 @@
 package com.kellnhofer.tracker.view;
 
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.kellnhofer.tracker.BuildConfig;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
@@ -14,11 +14,13 @@ import com.kellnhofer.tracker.presenter.SettingsContract;
 import com.kellnhofer.tracker.presenter.SettingsPresenter;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
-public class SettingsActivity extends AppCompatActivity implements SettingsContract.Observer,
-        ServerUrlDialogFragment.Listener, ErrorDialogFragment.Listener {
+public class SettingsActivity extends BaseActivity implements SettingsContract.Observer,
+        ServerUrlDialogFragment.Listener, ServerPasswordDialogFragment.Listener,
+        ErrorDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_SETTINGS = "settings_fragment";
     private static final String DIALOG_FRAGMENT_TAG_SERVER_URL = "server_url_dialog_fragment";
+    private static final String DIALOG_FRAGMENT_TAG_SERVER_PW = "server_pw_dialog_fragment";
     private static final String DIALOG_FRAGMENT_TAG_SYNC_ERROR = "sync_error_dialog_fragment";
 
     private TrackerSettings mSettings;
@@ -40,13 +42,11 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
         setContentView(R.layout.activity_settings);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        AppBarLayout appBarLayout = findViewById(R.id.container_app_bar);
+        appBarLayout.setStatusBarForeground(MaterialShapeDrawable.createWithElevationOverlay(this));
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        MaterialToolbar topAppBar = findViewById(R.id.top_app_bar);
+        topAppBar.setNavigationOnClickListener(v -> finish());
 
         mFragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag(
                 FRAGMENT_TAG_SETTINGS);
@@ -69,6 +69,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         super.onStart();
 
         initServerUrlPreference();
+        initServerPasswordPreference();
         initVersionPreference();
     }
 
@@ -93,6 +94,11 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
         mFragment.updatePreferenceSummary(TrackerSettings.PREF_KEY_SERVER_URL, url);
     }
 
+    private void initServerPasswordPreference() {
+        String password = mSettings.getServerPassword();
+        mFragment.updatePreferenceSummary(TrackerSettings.PREF_KEY_SERVER_PASSWORD, password);
+    }
+
     private void initVersionPreference() {
         String version = BuildConfig.VERSION_NAME;
         mFragment.updatePreferenceSummary(TrackerSettings.PREF_KEY_VERSION, version);
@@ -102,6 +108,10 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     public void onServerUrlClicked() {
         showServerUrlDialog();
+    }
+
+    public void onServerPasswordClicked() {
+        showServerPasswordDialog();
     }
 
     // --- Presenter callback methods ---
@@ -137,6 +147,23 @@ public class SettingsActivity extends AppCompatActivity implements SettingsContr
 
     @Override
     public void onServerUrlDialogCancel() {
+
+    }
+
+    private void showServerPasswordDialog() {
+        String password = mSettings.getServerPassword();
+        ServerPasswordDialogFragment fragment = ServerPasswordDialogFragment.newInstance(password);
+        fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_SERVER_PW);
+    }
+
+    @Override
+    public void onServerPasswordDialogOk(String password) {
+        mSettings.setServerPassword(password);
+        mFragment.updatePreferenceSummary(TrackerSettings.PREF_KEY_SERVER_PASSWORD, password);
+    }
+
+    @Override
+    public void onServerPasswordDialogCancel() {
 
     }
 

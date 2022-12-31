@@ -42,12 +42,21 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         super.onCreate(savedInstanceState);
 
         initServerUrl();
+        initServerPassword();
     }
 
     private void initServerUrl() {
         Preference preference = findPreference(TrackerSettings.PREF_KEY_SERVER_URL);
         preference.setOnPreferenceClickListener(p -> {
             mActivity.onServerUrlClicked();
+            return true;
+        });
+    }
+
+    private void initServerPassword() {
+        Preference preference = findPreference(TrackerSettings.PREF_KEY_SERVER_PASSWORD);
+        preference.setOnPreferenceClickListener(p -> {
+            mActivity.onServerPasswordClicked();
             return true;
         });
     }

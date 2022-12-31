@@ -4,9 +4,9 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 
 public class ErrorDialogFragment extends DialogFragment {
@@ -40,7 +40,7 @@ public class ErrorDialogFragment extends DialogFragment {
         int messageResId = arguments.getInt(BUNDLE_KEY_MESSAGE, R.string.error_unknown);
         boolean isRetryEnabled = arguments.getBoolean(BUNDLE_KEY_IS_RETRY_ENABLED, false);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
                 .setTitle(titleResId)
                 .setMessage(messageResId);
         if (isRetryEnabled) {

@@ -17,32 +17,31 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
-import com.kellnhofer.tracker.util.ValidationUtils;
 
-public class ServerUrlDialogFragment extends DialogFragment {
+public class ServerPasswordDialogFragment extends DialogFragment {
 
-    private static final String BUNDLE_KEY_URL = "url";
+    private static final String BUNDLE_KEY_PASSWORD = "password";
 
     public interface Listener {
-        void onServerUrlDialogOk(String url);
-        void onServerUrlDialogCancel();
+        void onServerPasswordDialogOk(String password);
+        void onServerPasswordDialogCancel();
     }
 
-    private final TextWatcher mUrlTextWatcher = new ValidationWatcher() {
+    private final TextWatcher mPasswordTextWatcher = new ValidationWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
-            validateUrl();
+            validatePassword();
             updatePositiveButtonState();
         }
     };
 
     private Listener mListener;
 
-    private EditText mUrlView;
+    private EditText mPasswordView;
 
     private Button mPositiveButton;
 
-    private boolean mIsValidUrl = false;
+    private boolean mIsValidPassword = false;
 
     @NonNull
     @Override
@@ -59,27 +58,27 @@ public class ServerUrlDialogFragment extends DialogFragment {
             throw new IllegalStateException("Arguments missing!");
         }
 
-        String url = arguments.getString(BUNDLE_KEY_URL, "");
+        String password = arguments.getString(BUNDLE_KEY_PASSWORD, "");
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         FrameLayout view = (FrameLayout) inflater.inflate(R.layout.dialog_name, null);
 
-        mUrlView = view.findViewById(R.id.view_name);
+        mPasswordView = view.findViewById(R.id.view_name);
 
         if (savedInstanceState == null) {
-            mUrlView.setText(url);
-            mUrlView.setSelection(url.length());
-            mUrlView.setHint(R.string.hint_server_url);
-            mUrlView.setInputType(EditorInfo.TYPE_TEXT_VARIATION_URI);
+            mPasswordView.setText(password);
+            mPasswordView.setSelection(password.length());
+            mPasswordView.setHint(R.string.hint_server_password);
+            mPasswordView.setInputType(EditorInfo.TYPE_TEXT_VARIATION_URI);
         }
 
-        mUrlView.addTextChangedListener(mUrlTextWatcher);
+        mPasswordView.addTextChangedListener(mPasswordTextWatcher);
 
         AlertDialog dialog = new MaterialAlertDialogBuilder(getContext())
-                .setTitle(R.string.dialog_title_server_url)
+                .setTitle(R.string.dialog_title_server_password)
                 .setView(view)
                 .setPositiveButton(R.string.action_ok, (d, id) ->
-                        mListener.onServerUrlDialogOk(mUrlView.getText().toString()))
+                        mListener.onServerPasswordDialogOk(mPasswordView.getText().toString()))
                 .setNegativeButton(R.string.action_cancel, (d, id) -> {})
                 .create();
 
@@ -102,7 +101,7 @@ public class ServerUrlDialogFragment extends DialogFragment {
     public void onResume() {
         super.onResume();
 
-        validateUrl();
+        validatePassword();
 
         updatePositiveButtonState();
     }
@@ -111,36 +110,30 @@ public class ServerUrlDialogFragment extends DialogFragment {
     public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
 
-        mListener.onServerUrlDialogCancel();
+        mListener.onServerPasswordDialogCancel();
     }
 
     private void updatePositiveButtonState() {
         if (mPositiveButton != null) {
-            mPositiveButton.setEnabled(mIsValidUrl);
+            mPositiveButton.setEnabled(mIsValidPassword);
         }
     }
 
     // --- Factory methods ---
 
-    public static ServerUrlDialogFragment newInstance(String url) {
+    public static ServerPasswordDialogFragment newInstance(String password) {
         Bundle args = new Bundle();
-        args.putString(ServerUrlDialogFragment.BUNDLE_KEY_URL, url);
-        ServerUrlDialogFragment fragment = new ServerUrlDialogFragment();
+        args.putString(BUNDLE_KEY_PASSWORD, password);
+        ServerPasswordDialogFragment fragment = new ServerPasswordDialogFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
     // --- Helper methods ---
 
-    private void validateUrl() {
-        String url = mUrlView.getText().toString();
-        mIsValidUrl = ValidationUtils.checkIsValidServerUrl(url);
-
-        if (url.length() > 0 && !mIsValidUrl) {
-            mUrlView.setError(getResources().getString(R.string.error_server_url_invalid));
-        } else {
-            mUrlView.setError(null);
-        }
+    private void validatePassword() {
+        String password = mPasswordView.getText().toString();
+        mIsValidPassword = !password.isEmpty();
     }
 
 }

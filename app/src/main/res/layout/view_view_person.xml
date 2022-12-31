@@ -6,5 +6,4 @@
     android:paddingTop="10dp"
     android:paddingBottom="2dp"
     android:text="Max Mustermann"
-    android:textSize="18sp"
-    android:textColor="@color/text_dark" />
+    android:textSize="18sp" />

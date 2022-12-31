@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.util.DateUtils;
 
@@ -170,17 +171,12 @@ public class CreateEditDialogFragment extends DialogFragment {
         int titleText = mode == MODE_CREATE ? R.string.dialog_title_create : R.string.dialog_title_edit;
         int actionText = mode == MODE_CREATE ? R.string.action_create : R.string.action_save;
 
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
+        AlertDialog dialog = new MaterialAlertDialogBuilder(getContext())
                 .setTitle(titleText)
                 .setView(view)
-                .setPositiveButton(actionText, (d, id) -> {
-                    notifyOk();
-                    CreateEditDialogFragment.this.getDialog().dismiss();
-                })
-                .setNegativeButton(R.string.action_cancel, (d, id) -> {
-                    notifyCancel();
-                    CreateEditDialogFragment.this.getDialog().dismiss();
-                }).create();
+                .setPositiveButton(actionText, (d, id) -> notifyOk())
+                .setNegativeButton(R.string.action_cancel, (d, id) -> notifyCancel())
+                .create();
 
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 

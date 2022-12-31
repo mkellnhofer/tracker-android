@@ -6,19 +6,14 @@ import java.util.List;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.PermissionsHelper;
 import com.kellnhofer.tracker.R;
@@ -28,7 +23,7 @@ import com.kellnhofer.tracker.presenter.CreateEditContract;
 import com.kellnhofer.tracker.presenter.CreateEditPresenter;
 import com.kellnhofer.tracker.presenter.LatLng;
 
-public class CreateEditActivity extends AppCompatActivity implements CreateEditContract.Observer,
+public class CreateEditActivity extends BaseActivity implements CreateEditContract.Observer,
         CreateEditDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_CREATE_EDIT = "create_edit_fragment";
@@ -77,18 +72,15 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
         setContentView(R.layout.activity_create_edit);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        AppBarLayout appBarLayout = findViewById(R.id.container_app_bar);
+        appBarLayout.setStatusBarForeground(MaterialShapeDrawable.createWithElevationOverlay(this));
+
+        MaterialToolbar topAppBar = findViewById(R.id.top_app_bar);
+        topAppBar.setNavigationOnClickListener(v -> finish());
         if (savedInstanceState == null) {
             String createTile = getString(R.string.activity_title_create);
             String editTile = getString(R.string.activity_title_edit);
-            toolbar.setTitle(mLocationId == 0L ? createTile : editTile);
-        }
-
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            topAppBar.setTitle(mLocationId == 0L ? createTile : editTile);
         }
 
         mGpsFab = findViewById(R.id.fab_gps);
@@ -182,9 +174,9 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         requestGpsPermissions();
     }
 
-    private void setGpsFabColor(int color) {
-        Drawable d = mGpsFab.getDrawable();
-        DrawableCompat.setTint(d, getResources().getColor(color));
+    private void setGpsFabActive(boolean active) {
+        int resourceId = active ? R.drawable.ic_gps_fixed : R.drawable.ic_gps;
+        mGpsFab.setImageResource(resourceId);
     }
 
     private void onOkFabClicked() {
@@ -195,24 +187,8 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         showCreateEditDialog();
     }
 
-    private void setOkFabEnabled(boolean status) {
-        mOkFab.setEnabled(status);
-
-        int colorId = status ? R.color.accent : R.color.fab_bg_disabled;
-        mOkFab.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, colorId)));
-    }
-
-    // --- Action bar callback methods ---
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+    private void setOkFabEnabled(boolean enabled) {
+        mOkFab.setEnabled(enabled);
     }
 
     // --- Fragment callback methods ---
@@ -220,7 +196,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     public void onMapLocationClicked(double lat, double lng) {
         mPresenter.removeGpsLocationUpdates();
         mUseGpsLocation = false;
-        setGpsFabColor(R.color.icon_dark);
+        setGpsFabActive(false);
         setOkFabEnabled(true);
         saveLocationLatLngChanges(lat, lng);
     }
@@ -230,7 +206,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     @Override
     public void onGpsLocationChanged(LatLng latLng) {
         mFragment.updateLatLng(latLng.lat, latLng.lng, !mUseGpsLocation);
-        setGpsFabColor(R.color.accent);
+        setGpsFabActive(true);
         setOkFabEnabled(true);
         mUseGpsLocation = true;
     }

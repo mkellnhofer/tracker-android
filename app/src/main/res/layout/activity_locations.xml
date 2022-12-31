@@ -3,21 +3,22 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".view.LocationsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/container_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/top_app_bar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:title="@string/app_name"
+            app:menu="@menu/activity_locations_action" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -43,7 +44,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp"
-        android:src="@drawable/ic_add_white_24dp"
+        android:src="@drawable/ic_add"
         app:layout_anchor="@+id/container_content"
         app:layout_anchorGravity="bottom|right" />
 

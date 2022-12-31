@@ -9,21 +9,21 @@
     tools:context=".view.SearchActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/container_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/top_app_bar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+            app:navigationIcon="@drawable/ic_back"
+            app:menu="@menu/activity_search_action">
 
             <EditText
                 android:id="@+id/view_search_string"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginRight="12dp"
                 android:inputType="text"
                 android:maxLines="1"
                 android:hint="@string/hint_search"
@@ -32,7 +32,7 @@
                 android:imeActionLabel="@string/action_search"
                 android:imeOptions="actionUnspecified" />
 
-        </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.MaterialToolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 

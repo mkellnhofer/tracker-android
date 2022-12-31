@@ -11,9 +11,9 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.util.DateUtils;
 
@@ -66,10 +66,11 @@ public class ViewDialogFragment extends DialogFragment {
             personsContainer.setVisibility(View.GONE);
         }
 
-        return new AlertDialog.Builder(getContext())
+        return new MaterialAlertDialogBuilder(getContext())
                 .setTitle(R.string.dialog_title_view)
                 .setView(view)
-                .setPositiveButton(R.string.action_ok, (d, id) -> dismiss()).create();
+                .setPositiveButton(R.string.action_ok, (d, id) -> {})
+                .create();
     }
 
     private void addPersonView(LinearLayout personsContainer, String name) {

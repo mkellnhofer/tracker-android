@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 
 public class ProgressBarDialogFragment extends DialogFragment {
@@ -77,7 +78,7 @@ public class ProgressBarDialogFragment extends DialogFragment {
         mPercentTextView = view.findViewById(R.id.view_progress_percent);
         mAbsoluteTextView = view.findViewById(R.id.view_progress_absolute);
 
-        return new AlertDialog.Builder(getContext())
+        return new MaterialAlertDialogBuilder(getContext())
                 .setTitle(titleResId)
                 .setView(view)
                 .setPositiveButton(R.string.action_ok, (d, id) ->
