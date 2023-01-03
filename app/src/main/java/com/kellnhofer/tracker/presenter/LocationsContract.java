@@ -1,8 +1,9 @@
 package com.kellnhofer.tracker.presenter;
 
-import android.net.Uri;
+import java.util.List;
 
-import java.util.ArrayList;
+import android.net.Uri;
+import androidx.lifecycle.LiveData;
 
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.service.KmlExportError;
@@ -10,14 +11,11 @@ import com.kellnhofer.tracker.service.LocationSyncError;
 
 public interface LocationsContract {
 
-    interface Presenter {
+    interface Presenter extends BaseContract.Presenter {
         void addObserver(Observer observer);
         void removeObserver(Observer observer);
 
-        void onResume();
-        void onPause();
-
-        ArrayList<Location> getNotDeletedLocationsByDateDesc();
+        LiveData<List<Location>> getLocations();
 
         void executeLocationSync();
         void executeKmlExport(Uri fileUri);
@@ -29,8 +27,7 @@ public interface LocationsContract {
         void startSettingsActivity();
     }
 
-    interface Observer {
-        void onLocationsChanged();
+    interface Observer extends BaseContract.Observer {
         void onSyncStarted();
         void onSyncFinished();
         void onSyncFailed(LocationSyncError error);

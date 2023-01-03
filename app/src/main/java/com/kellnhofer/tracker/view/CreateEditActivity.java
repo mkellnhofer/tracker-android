@@ -1,44 +1,40 @@
 package com.kellnhofer.tracker.view;
 
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import com.kellnhofer.tracker.Constants;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.kellnhofer.tracker.Injector;
+import com.kellnhofer.tracker.PermissionsHelper;
 import com.kellnhofer.tracker.R;
-import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.presenter.CreateEditContract;
 import com.kellnhofer.tracker.presenter.CreateEditPresenter;
 import com.kellnhofer.tracker.presenter.LatLng;
+import com.kellnhofer.tracker.util.DateUtils;
 
-public class CreateEditActivity extends AppCompatActivity implements CreateEditContract.Observer,
+public class CreateEditActivity extends BaseActivity implements CreateEditContract.Observer,
         CreateEditDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_CREATE_EDIT = "create_edit_fragment";
     private static final String DIALOG_FRAGMENT_TAG_CREATE_EDIT = "create_edit_dialog_fragment";
 
+    private static final String STATE_LOCATION = "location";
     private static final String STATE_LOCATION_NAME = "location_name";
     private static final String STATE_LOCATION_DATE = "location_date";
-    private static final String STATE_LAT_LNG = "lat_lng";
+    private static final String STATE_LOCATION_LAT = "location_lat";
+    private static final String STATE_LOCATION_LNG = "location_lng";
     private static final String STATE_LOCATION_DESCRIPTION = "location_description";
     private static final String STATE_LOCATION_PERSONS = "location_persons";
     private static final String STATE_USE_GPS_LOCATION = "use_gps_location";
@@ -48,7 +44,6 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
     public static final String EXTRA_LOCATION_ID = "location_id";
 
-    private TrackerApplication mApplication;
     private CreateEditContract.Presenter mPresenter;
 
     private FloatingActionButton mGpsFab;
@@ -56,11 +51,14 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     private CreateEditFragment mFragment;
 
     private long mLocationId;
-    private String mLocationName = "";
-    private Date mLocationDate = new Date();
-    private LatLng mLocationLatLng = new LatLng();
-    private String mLocationDescription = "";
-    private ArrayList<String> mLocationPersonNames = new ArrayList<>();
+    private Location mLocation;
+
+    private String mLocationName;
+    private String mLocationDate;
+    private double mLocationLat;
+    private double mLocationLng;
+    private String mLocationDescription;
+    private ArrayList<String> mLocationPersonNames;
 
     private boolean mUseGpsLocation = false;
     private boolean mRequestedPermissions = false;
@@ -69,22 +67,18 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mApplication = (TrackerApplication) getApplication();
-
-        mPresenter = new CreateEditPresenter(this, Injector.getLocationRepository(this),
-                Injector.getPersonRepository(this), Injector.getLocationService(this));
+        mPresenter = new CreateEditPresenter(this, Injector.getLocationDao(this),
+                Injector.getPersonDao(this), Injector.getLocationService(this));
 
         Intent intent = getIntent();
         mLocationId = intent.getLongExtra(EXTRA_LOCATION_ID, 0L);
 
-        if (savedInstanceState == null && mLocationId != 0L) {
-            Location location = mPresenter.getLocation(mLocationId);
-            mLocationName = location.getName();
-            mLocationDate = location.getDate();
-            mLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-            mLocationDescription = location.getDescription();
-            ArrayList<Person> locationPersons = mPresenter.getLocationPersons(mLocationId);
-            mLocationPersonNames = toPersonNameList(locationPersons);
+        if (savedInstanceState == null && mLocationId == 0L) {
+            mLocation = new Location(0L, 0L, false, false, "", new Date(), 0.0, 0.0, "");
+            mLocationName = "";
+            mLocationDate = DateUtils.toUiFormat(new Date());
+            mLocationDescription = "";
+            mLocationPersonNames = new ArrayList<>();
         }
 
         if (savedInstanceState == null && mLocationId == 0L) {
@@ -93,71 +87,53 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
 
         setContentView(R.layout.activity_create_edit);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        AppBarLayout appBarLayout = findViewById(R.id.container_app_bar);
+        appBarLayout.setStatusBarForeground(MaterialShapeDrawable.createWithElevationOverlay(this));
+
+        MaterialToolbar topAppBar = findViewById(R.id.top_app_bar);
+        topAppBar.setNavigationOnClickListener(v -> finish());
         if (savedInstanceState == null) {
             String createTile = getString(R.string.activity_title_create);
             String editTile = getString(R.string.activity_title_edit);
-            toolbar.setTitle(mLocationId == 0L ? createTile : editTile);
-        }
-
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            topAppBar.setTitle(mLocationId == 0L ? createTile : editTile);
         }
 
         mGpsFab = findViewById(R.id.fab_gps);
-        mGpsFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onGpsFabClicked();
-            }
-        });
+        mGpsFab.setOnClickListener(v -> onGpsFabClicked());
 
         mOkFab = findViewById(R.id.fab_ok);
-        mOkFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onOkFabClicked();
-            }
-        });
+        mOkFab.setOnClickListener(v -> onOkFabClicked());
 
         if (savedInstanceState == null && mLocationId == 0L) {
             setOkFabEnabled(false);
         }
 
-        if (savedInstanceState == null) {
+        mFragment = (CreateEditFragment) getSupportFragmentManager().findFragmentByTag(
+                FRAGMENT_TAG_CREATE_EDIT);
+        if (mFragment == null) {
             Bundle args = new Bundle();
-            args.putLong(ViewFragment.BUNDLE_KEY_LOCATION_ID, mLocationId);
+            args.putLong(CreateEditFragment.BUNDLE_KEY_LOCATION_ID, mLocationId);
 
             mFragment = new CreateEditFragment();
             mFragment.setArguments(args);
 
-            getSupportFragmentManager().beginTransaction()
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_CREATE_EDIT)
                     .commit();
-        } else {
-            mFragment = (CreateEditFragment) getSupportFragmentManager().findFragmentByTag(
-                    FRAGMENT_TAG_CREATE_EDIT);
         }
-
-        mFragment.setPresenter(mPresenter);
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        mLocationName = savedInstanceState.getString(STATE_LOCATION_NAME);
-        mLocationDate = new Date(savedInstanceState.getLong(STATE_LOCATION_DATE));
-        double[] pos = savedInstanceState.getDoubleArray(STATE_LAT_LNG);
-        if (pos != null && pos.length >= 2) {
-            mLocationLatLng = new LatLng(pos[0], pos[1]);
-        } else {
-            mLocationLatLng = new LatLng();
-        }
-        mLocationDescription = savedInstanceState.getString(STATE_LOCATION_DESCRIPTION);
+        mLocation = savedInstanceState.getParcelable(STATE_LOCATION);
+        mLocationName = savedInstanceState.getString(STATE_LOCATION_NAME, "");
+        mLocationDate = savedInstanceState.getString(STATE_LOCATION_DATE, "");
+        mLocationLat = savedInstanceState.getDouble(STATE_LOCATION_LAT, 0.0);
+        mLocationLng = savedInstanceState.getDouble(STATE_LOCATION_LNG, 0.0);
+        mLocationDescription = savedInstanceState.getString(STATE_LOCATION_DESCRIPTION, "");
         mLocationPersonNames = savedInstanceState.getStringArrayList(STATE_LOCATION_PERSONS);
         mUseGpsLocation = savedInstanceState.getBoolean(STATE_USE_GPS_LOCATION);
         mRequestedPermissions = savedInstanceState.getBoolean(STATE_REQUESTED_PERMISSIONS);
@@ -166,6 +142,22 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (mLocationId != 0L && mLocation == null) {
+            mPresenter.getLocation(mLocationId).observe(this, (location) -> {
+                mLocation = location;
+                if (location != null) {
+                    mLocationName = location.getName();
+                    mLocationDate = DateUtils.toUiFormat(location.getDate());
+                    mLocationLat = location.getLatitude();
+                    mLocationLng = location.getLongitude();
+                    mLocationDescription = location.getDescription();
+                    mPresenter.getLocationPersons(mLocationId).observe(this, (locationPersons) ->
+                            mLocationPersonNames = toPersonNameList(locationPersons));
+                    updateFragment();
+                }
+            });
+        }
 
         mPresenter.addObserver(this);
         mPresenter.onResume();
@@ -189,40 +181,121 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
+        outState.putParcelable(STATE_LOCATION, mLocation);
         outState.putString(STATE_LOCATION_NAME, mLocationName);
-        outState.putLong(STATE_LOCATION_DATE, mLocationDate.getTime());
-        double[] pos = new double[]{mLocationLatLng.lng, mLocationLatLng.lat};
-        outState.putDoubleArray(STATE_LAT_LNG, pos);
+        outState.putString(STATE_LOCATION_DATE, mLocationDate);
+        outState.putDouble(STATE_LOCATION_LAT, mLocationLat);
+        outState.putDouble(STATE_LOCATION_LNG, mLocationLng);
         outState.putString(STATE_LOCATION_DESCRIPTION, mLocationDescription);
         outState.putStringArrayList(STATE_LOCATION_PERSONS, mLocationPersonNames);
         outState.putBoolean(STATE_USE_GPS_LOCATION, mUseGpsLocation);
         outState.putBoolean(STATE_REQUESTED_PERMISSIONS, mRequestedPermissions);
     }
 
+    private void updateFragment() {
+        mFragment.setLatLng(mLocation.getLatitude(), mLocation.getLongitude());
+    }
+
+    private void onGpsFabClicked() {
+        mPresenter.requestGpsLocationUpdates();
+        requestGpsPermissions();
+    }
+
+    private void setGpsFabActive(boolean active) {
+        int resourceId = active ? R.drawable.ic_gps_fixed : R.drawable.ic_gps;
+        mGpsFab.setImageResource(resourceId);
+    }
+
+    private void onOkFabClicked() {
+        if (mUseGpsLocation) {
+            LatLng latLng = mPresenter.getGpsLocation();
+            saveLocationLatLngChanges(latLng.lat, latLng.lng);
+        }
+        showCreateEditDialog();
+    }
+
+    private void setOkFabEnabled(boolean enabled) {
+        mOkFab.setEnabled(enabled);
+    }
+
+    // --- Fragment callback methods ---
+
+    public void onMapLocationClicked(double lat, double lng) {
+        mPresenter.removeGpsLocationUpdates();
+        mUseGpsLocation = false;
+        setGpsFabActive(false);
+        setOkFabEnabled(true);
+        saveLocationLatLngChanges(lat, lng);
+    }
+
+    // --- Presenter callback methods ---
+
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+    public void onGpsLocationChanged(LatLng latLng) {
+        mFragment.updateLatLng(latLng.lat, latLng.lng, !mUseGpsLocation);
+        setGpsFabActive(true);
+        setOkFabEnabled(true);
+        mUseGpsLocation = true;
+    }
+
+    // --- Dialog methods ---
+
+    private void showCreateEditDialog() {
+        mPresenter.getPersons().observe(this, (persons -> {
+            List<String> personNames = toPersonNameList(persons);
+
+            CreateEditDialogFragment fragment;
+            if (mLocationId == 0L) {
+                fragment = CreateEditDialogFragment.newCreateInstance(mLocationName, mLocationDate,
+                        mLocationDescription, mLocationPersonNames, personNames);
+            } else {
+                fragment = CreateEditDialogFragment.newEditInstance(mLocationName, mLocationDate,
+                        mLocationDescription, mLocationPersonNames, personNames);
+            }
+            fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_CREATE_EDIT);
+        }));
+    }
+
+    @Override
+    public void onCreateEditDialogOk(String name, String date, String description,
+            ArrayList<String> personNames) {
+        saveLocationChanges(name, date, description, personNames);
+
+        Location location = mLocation.copy();
+        location.setName(mLocationName);
+        location.setDate(DateUtils.fromUiFormat(mLocationDate));
+        location.setLatitude(mLocationLat);
+        location.setLongitude(mLocationLng);
+        location.setDescription(mLocationDescription);
+        ArrayList<Person> locationPersons = toPersonList(mLocationPersonNames);
+
+        if (mLocationId == 0L) {
+            mPresenter.createLocation(location, locationPersons);
+            finish();
+        } else {
+            mPresenter.updateLocation(location, locationPersons);
+            finish();
         }
     }
+
+    @Override
+    public void onCreateEditDialogCancel(String name, String date, String description,
+            ArrayList<String> personNames) {
+        saveLocationChanges(name, date, description, personNames);
+    }
+
+    // --- GPS permission methods ---
 
     private void requestGpsPermissions() {
         if (mRequestedPermissions) {
             return;
         }
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
-        if (!mApplication.hasGpsPermissions()) {
-            requestPermissions(Constants.GPS_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        if (!PermissionsHelper.hasGpsPermissions(this)) {
+            requestPermissions(PermissionsHelper.GPS_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
 
         mRequestedPermissions = true;
@@ -245,132 +318,22 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         }
     }
 
-    private void onGpsFabClicked() {
-        mFragment.recenterMap();
-        mPresenter.requestGpsLocationUpdates();
-        requestGpsPermissions();
-    }
-
-    private void setGpsFabColor(int color) {
-        Drawable d = mGpsFab.getDrawable();
-        DrawableCompat.setTint(d, getResources().getColor(color));
-    }
-
-    private void onOkFabClicked() {
-        if (mUseGpsLocation) {
-            mLocationLatLng = mPresenter.getGpsLocation();
-        }
-        showCreateEditDialog();
-    }
-
-    private void setOkFabEnabled(boolean status) {
-        mOkFab.setEnabled(status);
-
-        int colorId = status ? R.color.accent : R.color.fab_bg_disabled;
-        mOkFab.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, colorId)));
-    }
-
-    // --- Fragment callback methods ---
-
-    public void onMapLocationClicked(LatLng latLng) {
-        mPresenter.removeGpsLocationUpdates();
-        mUseGpsLocation = false;
-        setGpsFabColor(R.color.icon_dark);
-        setOkFabEnabled(true);
-        mLocationLatLng = latLng;
-    }
-
-    // --- Dialog methods ---
-
-    private void showCreateEditDialog() {
-        ArrayList<Person> persons = mPresenter.getPersons();
-        ArrayList<String> personNames = toPersonNameList(persons);
-
-        CreateEditDialogFragment fragment;
-        if (mLocationId == 0L) {
-            fragment = CreateEditDialogFragment.newCreateInstance(mLocationName, mLocationDate,
-                    mLocationDescription, mLocationPersonNames, personNames);
-        } else {
-            fragment = CreateEditDialogFragment.newEditInstance(mLocationName, mLocationDate,
-                    mLocationDescription, mLocationPersonNames, personNames);
-        }
-        fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_CREATE_EDIT);
-    }
-
-    @Override
-    public void onCreateEditDialogOk(String locationName, Date locationDate,
-            String locationDescription, ArrayList<String> locationPersonNames) {
-        if (mLocationId == 0L) {
-            createLocation(locationName, locationDate, mLocationLatLng, locationDescription,
-                    locationPersonNames);
-        } else {
-            updateLocation(locationName, locationDate, mLocationLatLng, locationDescription,
-                    locationPersonNames);
-        }
-    }
-
-    @Override
-    public void onCreateEditDialogCancel(String locationName, Date locationDate,
-            String locationDescription, ArrayList<String> locationPersonNames) {
-        mLocationName = locationName;
-        mLocationDate = locationDate;
-        mLocationDescription = locationDescription;
-        mLocationPersonNames = locationPersonNames;
-    }
-
-    // --- Presenter callback methods ---
-
-    @Override
-    public void onLocationCreated() {
-        finish();
-    }
-
-    @Override
-    public void onLocationUpdated() {
-        finish();
-    }
-
-    @Override
-    public void onGpsLocationChanged(LatLng latLng) {
-        mUseGpsLocation = true;
-        setGpsFabColor(R.color.accent);
-        setOkFabEnabled(true);
-    }
-
-    // --- Executor methods ---
-
-    private void createLocation(String name, Date date, LatLng latLng, String description,
-            ArrayList<String> personNames) {
-        Location location = new Location();
-        location.setName(name);
-        location.setDate(date);
-        location.setLatitude(latLng.lat);
-        location.setLongitude(latLng.lng);
-        location.setDescription(description);
-
-        ArrayList<Person> persons = toPersonList(personNames);
-
-        mPresenter.createLocation(location, persons);
-    }
-
-    private void updateLocation(String name, Date date, LatLng latLng, String description,
-            ArrayList<String> personNames) {
-        Location location = new Location();
-        location.setId(mLocationId);
-        location.setName(name);
-        location.setDate(date);
-        location.setLatitude(latLng.lat);
-        location.setLongitude(latLng.lng);
-        location.setDescription(description);
-
-        ArrayList<Person> persons = toPersonList(personNames);
-
-        mPresenter.updateLocation(location, persons);
-    }
-
     // --- Helper methods ---
 
-    private static ArrayList<String> toPersonNameList(ArrayList<Person> persons) {
+    private void saveLocationChanges(String name, String date, String description,
+            ArrayList<String> personNames) {
+        mLocationName = name;
+        mLocationDate = date;
+        mLocationDescription = description;
+        mLocationPersonNames = personNames;
+    }
+
+    private void saveLocationLatLngChanges(double lat, double lng) {
+        mLocationLat = lat;
+        mLocationLng = lng;
+    }
+
+    private static ArrayList<String> toPersonNameList(List<Person> persons) {
         ArrayList<String> personNames = new ArrayList<>();
         for (Person person : persons) {
             String personName;
@@ -384,7 +347,7 @@ public class CreateEditActivity extends AppCompatActivity implements CreateEditC
         return personNames;
     }
 
-    private static ArrayList<Person> toPersonList(ArrayList<String> personNames) {
+    private static ArrayList<Person> toPersonList(List<String> personNames) {
         if (personNames == null) {
             return null;
         }

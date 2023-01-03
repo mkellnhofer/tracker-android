@@ -6,8 +6,8 @@ public class LocationSyncState {
     public static final int STATE_FINISHED = 2;
     public static final int STATE_FAILED = 3;
 
-    private int mState;
-    private LocationSyncError mError;
+    private final int mState;
+    private final LocationSyncError mError;
 
     private LocationSyncState(int state, LocationSyncError error) {
         mState = state;

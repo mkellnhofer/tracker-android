@@ -1,20 +1,19 @@
 package com.kellnhofer.tracker.view;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-
-import java.util.ArrayList;
-import java.util.List;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.model.Location;
@@ -23,16 +22,13 @@ import com.kellnhofer.tracker.service.KmlExportError;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
 public class LocationsFragment extends Fragment implements LocationsAdapter.LocationItemListener,
-        LocationsContract.Observer, LoaderManager.LoaderCallbacks<List<Location>> {
+        LocationsContract.Observer {
 
     private static final String STATE_SCROLL_POSITION = "scroll_position";
-
-    private static final int LOADER_LOCATIONS = 0;
 
     private LocationsActivity mActivity;
     private LocationsContract.Presenter mPresenter;
 
-    private LocationsLoader mLoader;
     private LocationsAdapter mAdapter;
 
     private LinearLayout mInfoContainer;
@@ -40,19 +36,22 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
     private int mScrollPosition = 0;
     private boolean mRestoreScrollPosition = false;
 
+    private LiveData<List<Location>> mLocations;
+    private final Observer<List<Location>> mLocationsObserver = this::onLocationsLoaded;
+
     public void setPresenter(@NonNull LocationsContract.Presenter presenter) {
         mPresenter = presenter;
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
         try {
             mActivity = (LocationsActivity) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement " + LocationsActivity.class.getName());
+            throw new ClassCastException(context + " must implement " +
+                    LocationsActivity.class.getName() + "!");
         }
     }
 
@@ -66,11 +65,11 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_locations, container, false);
 
-        mAdapter = new LocationsAdapter(mActivity, new ArrayList<Location>(0));
+        mAdapter = new LocationsAdapter(mActivity, new ArrayList<>(0));
         mAdapter.setLocationItemListener(this);
 
         mInfoContainer = view.findViewById(R.id.container_info);
@@ -85,8 +84,11 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
     public void onStart() {
         super.onStart();
 
+        loadLocations();
+
         mRestoreScrollPosition = true;
-        getLoaderManager().initLoader(LOADER_LOCATIONS, null, this);
+
+        registerObservers();
     }
 
     @Override
@@ -106,7 +108,7 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putInt(STATE_SCROLL_POSITION, mScrollPosition);
@@ -116,7 +118,7 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
     public void onStop() {
         super.onStop();
 
-        getLoaderManager().destroyLoader(LOADER_LOCATIONS);
+        unregisterObservers();
     }
 
     // --- Adapter callback methods ---
@@ -127,18 +129,6 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
     }
 
     // --- Presenter callback methods ---
-
-    @Override
-    public void onLocationsChanged() {
-        if (mLoader == null) {
-            return;
-        }
-
-        mScrollPosition = mListView.getFirstVisiblePosition();
-        mRestoreScrollPosition = true;
-
-        mLoader.onContentChanged();
-    }
 
     @Override
     public void onSyncStarted() {
@@ -177,23 +167,23 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
 
     // --- Loader methods ---
 
-    @Override
-    public Loader<List<Location>> onCreateLoader(int id, Bundle args) {
-        if (id == LOADER_LOCATIONS) {
-            mLoader = new LocationsLoader(mActivity, mPresenter);
-            return mLoader;
-        }
-        return null;
+    private void registerObservers() {
+        mLocations.observe(this, mLocationsObserver);
     }
 
-    @Override
-    public void onLoadFinished(Loader<List<Location>> loader, List<Location> data) {
-        if (loader.getId() == LOADER_LOCATIONS) {
-            mAdapter.replaceData(data);
-            restoreScrollPosition();
-            mListView.setVisibility(!data.isEmpty() ? View.VISIBLE : View.GONE);
-            mInfoContainer.setVisibility(data.isEmpty() ? View.VISIBLE : View.GONE);
-        }
+    private void unregisterObservers() {
+        mLocations.removeObserver(mLocationsObserver);
+    }
+
+    private void loadLocations() {
+        mLocations = mPresenter.getLocations();
+    }
+
+    private void onLocationsLoaded(List<Location> locations) {
+        mAdapter.replaceData(locations);
+        restoreScrollPosition();
+        mListView.setVisibility(!locations.isEmpty() ? View.VISIBLE : View.GONE);
+        mInfoContainer.setVisibility(locations.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void restoreScrollPosition() {
@@ -201,67 +191,8 @@ public class LocationsFragment extends Fragment implements LocationsAdapter.Loca
             return;
         }
 
-        mListView.post(new Runnable() {
-            @Override
-            public void run() {
-                mListView.setSelection(mScrollPosition);
-                mRestoreScrollPosition = false;
-            }
-        });
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Location>> loader) {
-        if (loader.getId() == LOADER_LOCATIONS) {
-            mAdapter.replaceData(new ArrayList<Location>());
-        }
-    }
-
-    // --- Locations loader ---
-
-    private static class LocationsLoader extends AsyncTaskLoader<List<Location>> {
-
-        private LocationsContract.Presenter mPresenter;
-
-        private List<Location> mData;
-
-        public LocationsLoader(Context context, LocationsContract.Presenter presenter) {
-            super(context);
-            mPresenter = presenter;
-        }
-
-        @Override
-        protected void onStartLoading() {
-            if (mData != null) {
-                deliverResult(mData);
-            } else {
-                forceLoad();
-            }
-        }
-
-        @Override
-        public List<Location> loadInBackground() {
-            return mPresenter.getNotDeletedLocationsByDateDesc();
-        }
-
-        @Override
-        public void deliverResult(List<Location> data) {
-            mData = data;
-            if (isStarted()) {
-                super.deliverResult(data);
-            }
-        }
-
-        @Override
-        protected void onStopLoading() {
-            cancelLoad();
-        }
-
-        @Override
-        protected void onReset() {
-            cancelLoad();
-        }
-
+        mListView.setSelection(mScrollPosition);
+        mRestoreScrollPosition = false;
     }
 
 }

@@ -1,25 +1,24 @@
 package com.kellnhofer.tracker.presenter;
 
-import java.util.ArrayList;
+import java.util.List;
+
+import androidx.lifecycle.LiveData;
 
 import com.kellnhofer.tracker.model.Location;
 
 public interface SearchContract {
 
-    interface Presenter {
+    interface Presenter extends BaseContract.Presenter {
         void addObserver(Observer observer);
         void removeObserver(Observer observer);
 
-        void onResume();
-        void onPause();
-
-        ArrayList<Location> searchLocations(String search);
+        LiveData<List<Location>> searchLocations(String search);
 
         void startViewActivity(long locationId);
     }
 
-    interface Observer {
-        void onLocationsChanged();
+    interface Observer extends BaseContract.Observer {
+
     }
 
 }

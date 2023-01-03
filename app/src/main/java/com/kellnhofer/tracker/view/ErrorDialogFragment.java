@@ -3,17 +3,17 @@ package com.kellnhofer.tracker.view;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 
 public class ErrorDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_TITLE = "title";
-    public static final String BUNDLE_KEY_MESSAGE = "message";
-    public static final String BUNDLE_KEY_IS_RETRY_ENABLED = "retry";
+    private static final String BUNDLE_KEY_TITLE = "title";
+    private static final String BUNDLE_KEY_MESSAGE = "message";
+    private static final String BUNDLE_KEY_IS_RETRY_ENABLED = "retry";
 
     public interface Listener {
         void onErrorDialogRetry(String tag);
@@ -28,7 +28,7 @@ public class ErrorDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString() + " must implement " +
+            throw new ClassCastException(getActivity() + " must implement " +
                     Listener.class.getName() + "!");
         }
 
@@ -40,34 +40,24 @@ public class ErrorDialogFragment extends DialogFragment {
         int messageResId = arguments.getInt(BUNDLE_KEY_MESSAGE, R.string.error_unknown);
         boolean isRetryEnabled = arguments.getBoolean(BUNDLE_KEY_IS_RETRY_ENABLED, false);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext())
                 .setTitle(titleResId)
                 .setMessage(messageResId);
         if (isRetryEnabled) {
-            builder.setPositiveButton(R.string.action_retry, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    mListener.onErrorDialogRetry(getFragmentTag());
-                }
-            });
-            builder.setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int id) {
-                    mListener.onErrorDialogCancel(getFragmentTag());
-                }
-            });
+            builder.setPositiveButton(R.string.action_retry, (d, id) ->
+                    mListener.onErrorDialogRetry(getFragmentTag()));
+            builder.setNegativeButton(R.string.action_cancel, (d, id) ->
+                    mListener.onErrorDialogCancel(getFragmentTag()));
         } else {
-            builder.setNegativeButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    mListener.onErrorDialogCancel(getFragmentTag());
-                }
-            });
+            builder.setNegativeButton(R.string.action_ok, (d, id) ->
+                    mListener.onErrorDialogCancel(getFragmentTag()));
         }
 
         return builder.create();
     }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
+    public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
 
         mListener.onErrorDialogCancel(getFragmentTag());

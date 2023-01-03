@@ -3,16 +3,17 @@ package com.kellnhofer.tracker.view;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 
 public class ProgressBarDialogFragment extends DialogFragment {
@@ -54,7 +55,7 @@ public class ProgressBarDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString() + " must implement" +
+            throw new ClassCastException(getActivity() + " must implement " +
                     Listener.class.getName() + "!");
         }
 
@@ -77,21 +78,13 @@ public class ProgressBarDialogFragment extends DialogFragment {
         mPercentTextView = view.findViewById(R.id.view_progress_percent);
         mAbsoluteTextView = view.findViewById(R.id.view_progress_absolute);
 
-        return new AlertDialog.Builder(getContext())
+        return new MaterialAlertDialogBuilder(getContext())
                 .setTitle(titleResId)
                 .setView(view)
-                .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onProgressBarDialogOk(getFragmentTag());
-                    }
-                })
-                .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onProgressBarDialogCancel(getFragmentTag());
-                    }
-                })
+                .setPositiveButton(R.string.action_ok, (d, id) ->
+                        mListener.onProgressBarDialogOk(getFragmentTag()))
+                .setNegativeButton(R.string.action_cancel, (d, id) ->
+                        mListener.onProgressBarDialogCancel(getFragmentTag()))
                 .create();
     }
 
@@ -122,7 +115,7 @@ public class ProgressBarDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putString(STATE_PROGRESS_FORMAT, mProgressFormatAbsolute);
         outState.putInt(STATE_PROGRESS_CURRENT, mProgressCurrent);
         outState.putInt(STATE_PROGRESS_TOTAL, mProgressTotal);
@@ -131,7 +124,7 @@ public class ProgressBarDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
+    public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
 
         // If progress wasn't set yet or progress wasn't completed: Handle as cancel

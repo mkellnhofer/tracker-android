@@ -2,10 +2,10 @@ package com.kellnhofer.tracker.view;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 
 public class ApiKeyErrorDialogFragment extends DialogFragment {
@@ -13,7 +13,7 @@ public class ApiKeyErrorDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getContext())
+        return new MaterialAlertDialogBuilder(getContext())
                 .setTitle(R.string.dialog_title_error)
                 .setMessage(R.string.dialog_message_missing_api_key)
                 .setCancelable(false)

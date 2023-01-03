@@ -17,7 +17,7 @@ public class ExportServiceAdapter {
         void onKmlExportFailed(KmlExportError error);
     }
 
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             ExportService.Binder binder = (ExportService.Binder) service;
@@ -51,7 +51,7 @@ public class ExportServiceAdapter {
         }
     };
 
-    private Context mContext;
+    private final Context mContext;
 
     private ExportService mService;
 

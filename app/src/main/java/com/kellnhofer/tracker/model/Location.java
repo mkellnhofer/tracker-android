@@ -1,13 +1,18 @@
 package com.kellnhofer.tracker.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import java.util.ArrayList;
 import java.util.Date;
 
-import com.kellnhofer.tracker.util.TypeUtils;
+import android.os.Parcel;
+import android.os.Parcelable;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
+import com.kellnhofer.tracker.data.DbContract.LocationTbl;
+
+@Entity(tableName = LocationTbl.NAME)
 public class Location implements Parcelable {
 
     public static final Parcelable.Creator<Location> CREATOR = new Parcelable.Creator<Location>() {
@@ -19,23 +24,33 @@ public class Location implements Parcelable {
         }
     };
 
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = LocationTbl._ID)
     private long mId;
+    @ColumnInfo(name = LocationTbl.COLUMN_REMOTE_ID)
     private long mRemoteId;
+    @ColumnInfo(name = LocationTbl.COLUMN_CHANGED, defaultValue = "0")
     private boolean mChanged;
+    @ColumnInfo(name = LocationTbl.COLUMN_DELETED, defaultValue = "0")
     private boolean mDeleted;
+    @ColumnInfo(name = LocationTbl.COLUMN_NAME, collate = ColumnInfo.LOCALIZED)
     private String mName;
+    @ColumnInfo(name = LocationTbl.COLUMN_DATE)
     private Date mDate;
+    @ColumnInfo(name = LocationTbl.COLUMN_LATITUDE)
     private Double mLatitude;
+    @ColumnInfo(name = LocationTbl.COLUMN_LONGITUDE)
     private Double mLongitude;
+    @ColumnInfo(name = LocationTbl.COLUMN_DESCRIPTION, collate = ColumnInfo.LOCALIZED)
     private String mDescription;
-    private ArrayList<Long> mPersonIds;
 
     public Location() {
-        mPersonIds = new ArrayList<>();
+
     }
 
+    @Ignore
     public Location(long id, long remoteId, boolean changed, boolean deleted, String name, Date date,
-            Double latitude, Double longitude, String description, ArrayList<Long> personIds) {
+            Double latitude, Double longitude, String description) {
         mId = id;
         mRemoteId = remoteId;
         mDeleted = deleted;
@@ -45,7 +60,6 @@ public class Location implements Parcelable {
         mLatitude = latitude;
         mLongitude = longitude;
         mDescription = description;
-        mPersonIds = personIds != null ? personIds : new ArrayList<Long>();
     }
 
     public long getId() {
@@ -120,17 +134,9 @@ public class Location implements Parcelable {
         mDescription = description;
     }
 
-    public ArrayList<Long> getPersonIds() {
-        return mPersonIds;
-    }
-
-    public void setPersonIds(ArrayList<Long> personIds) {
-        mPersonIds = personIds != null ? personIds : new ArrayList<Long>();
-    }
-
     // --- Parcelable methods ---
 
-    public Location(Parcel source) {
+    public Location(@NonNull Parcel source) {
         mId = source.readLong();
         mRemoteId = source.readLong();
         mChanged = source.readInt() > 0;
@@ -141,14 +147,10 @@ public class Location implements Parcelable {
         mLatitude = source.readDouble();
         mLongitude = source.readDouble();
         mDescription = source.readString();
-        int personIdsLength = source.readInt();
-        long[] personIds = new long[personIdsLength];
-        source.readLongArray(personIds);
-        mPersonIds = TypeUtils.toLongList(personIds);
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mId);
         dest.writeLong(mRemoteId);
         dest.writeInt(mChanged ? 1 : 0);
@@ -158,15 +160,25 @@ public class Location implements Parcelable {
         dest.writeDouble(mLatitude);
         dest.writeDouble(mLongitude);
         dest.writeString(mDescription);
-        int personIdsLength = mPersonIds.size();
-        dest.writeInt(personIdsLength);
-        long[] personIds = TypeUtils.toLongArray(mPersonIds);
-        dest.writeLongArray(personIds);
     }
 
     @Override
     public int describeContents() {
         return hashCode();
+    }
+
+    public Location copy() {
+        Location location = new Location();
+        location.mId = mId;
+        location.mRemoteId = mRemoteId;
+        location.mChanged = mChanged;
+        location.mDeleted = mDeleted;
+        location.mName = mName;
+        location.mDate = mDate;
+        location.mLatitude = mLatitude;
+        location.mLongitude = mLongitude;
+        location.mDescription = mDescription;
+        return location;
     }
 
 }

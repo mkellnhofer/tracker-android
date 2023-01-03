@@ -1,18 +1,17 @@
 package com.kellnhofer.tracker.view;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.shape.MaterialShapeDrawable;
+import com.google.android.material.snackbar.Snackbar;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.presenter.LocationsContract;
@@ -21,7 +20,7 @@ import com.kellnhofer.tracker.service.KmlExportError;
 import com.kellnhofer.tracker.service.LocationSyncError;
 import com.kellnhofer.tracker.util.ExportUtils;
 
-public class LocationsActivity extends AppCompatActivity implements LocationsContract.Observer,
+public class LocationsActivity extends BaseActivity implements LocationsContract.Observer,
         ProgressBarDialogFragment.Listener, ErrorDialogFragment.Listener,
         InfoDialogFragment.Listener {
 
@@ -37,44 +36,40 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
 
     private LocationsContract.Presenter mPresenter;
 
-    private LocationsFragment mFragment;
     private ErrorDialogFragment mSyncErrorDialogFragment;
     private ProgressBarDialogFragment mKmlExportDialogFragment;
     private ErrorDialogFragment mKmlExportErrorDialogFragment;
-
-    private CoordinatorLayout mCoordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPresenter = new LocationsPresenter(this, Injector.getLocationRepository(this),
+        mPresenter = new LocationsPresenter(this, Injector.getLocationDao(this),
                 Injector.getLocationService(this), Injector.getExportService(this));
 
         setContentView(R.layout.activity_locations);
 
-        mCoordinatorLayout = findViewById(R.id.container_coordinator);
+        AppBarLayout appBarLayout = findViewById(R.id.container_app_bar);
+        appBarLayout.setStatusBarForeground(MaterialShapeDrawable.createWithElevationOverlay(this));
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        MaterialToolbar topAppBar = findViewById(R.id.top_app_bar);
+        topAppBar.setOnMenuItemClickListener(this::onTopAppBarMenuItemClicked);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.startCreateActivity();
-            }
-        });
+        fab.setOnClickListener(v -> mPresenter.startCreateActivity());
 
-        if (savedInstanceState == null) {
-            mFragment = new LocationsFragment();
-
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container_content, mFragment, FRAGMENT_TAG_LOCATIONS)
+        LocationsFragment fragment = (LocationsFragment) getSupportFragmentManager()
+                .findFragmentByTag(FRAGMENT_TAG_LOCATIONS);
+        if (fragment == null) {
+            fragment = new LocationsFragment();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container_content, fragment, FRAGMENT_TAG_LOCATIONS)
                     .commit();
-        } else {
-            mFragment = (LocationsFragment) getSupportFragmentManager().findFragmentByTag(
-                    FRAGMENT_TAG_LOCATIONS);
+        }
+        fragment.setPresenter(mPresenter);
+
+        if (savedInstanceState != null) {
             mSyncErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
                     .findFragmentByTag(DIALOG_FRAGMENT_TAG_SYNC_ERROR);
             mKmlExportDialogFragment = (ProgressBarDialogFragment) getSupportFragmentManager()
@@ -82,8 +77,6 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
             mKmlExportErrorDialogFragment = (ErrorDialogFragment) getSupportFragmentManager()
                     .findFragmentByTag(DIALOG_FRAGMENT_TAG_KML_EXPORT_ERROR);
         }
-
-        mFragment.setPresenter(mPresenter);
 
         if (savedInstanceState == null && isApiKeyMissing()) {
             showApiKeyErrorDialog();
@@ -106,24 +99,7 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
         mPresenter.removeObserver(this);
     }
 
-    // --- Action bar callback methods ---
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_locations_action, menu);
-
-        // Disable export for API < 19
-        // (Storage Access Framework is only available for API >= 19)
-        MenuItem kmlExportItem = menu.findItem(R.id.action_kml_export);
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT) {
-            kmlExportItem.setVisible(false);
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    private boolean onTopAppBarMenuItemClicked(@NonNull MenuItem item) {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_search:
@@ -139,26 +115,16 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
                 showHelpDialog();
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return false;
         }
-    }
-
-    @SuppressLint("NewApi")
-    private void createKmlExportFile() {
-        String fileName = ExportUtils.generateKmlExportFileName();
-        String fileMimeType = ExportUtils.getKmlExportMimeType();
-
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.putExtra(Intent.EXTRA_TITLE, fileName);
-        intent.setType(fileMimeType);
-        startActivityForResult(intent, REQUEST_CODE_CREATE_KML_EXPORT_FILE);
     }
 
     // --- Activity result callback methods ---
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent returnIntent) {
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent returnIntent) {
+        super.onActivityResult(requestCode, resultCode, returnIntent);
+
         if (resultCode != RESULT_OK) {
             return;
         }
@@ -173,11 +139,6 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     }
 
     // --- Presenter callback methods ---
-
-    @Override
-    public void onLocationsChanged() {
-
-    }
 
     @Override
     public void onSyncStarted() {
@@ -327,14 +288,8 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     // --- SnackBar methods ---
 
     private void showSyncErrorSnackBar(LocationSyncError error) {
-        Snackbar snackbar = Snackbar.make(mCoordinatorLayout, error.getTextResId(),
-                Snackbar.LENGTH_LONG);
-        snackbar.setAction(R.string.action_retry, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.executeLocationSync();
-            }
-        });
+        Snackbar snackbar = Snackbar.make(mRootView, error.getTextResId(), Snackbar.LENGTH_LONG);
+        snackbar.setAction(R.string.action_retry, v -> mPresenter.executeLocationSync());
         snackbar.show();
     }
 
@@ -343,6 +298,17 @@ public class LocationsActivity extends AppCompatActivity implements LocationsCon
     private boolean isApiKeyMissing() {
         String key = getString(R.string.google_maps_api_key);
         return key == null || key.isEmpty();
+    }
+
+    private void createKmlExportFile() {
+        String fileName = ExportUtils.generateKmlExportFileName();
+        String fileMimeType = ExportUtils.getKmlExportMimeType();
+
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_TITLE, fileName);
+        intent.setType(fileMimeType);
+        startActivityForResult(intent, REQUEST_CODE_CREATE_KML_EXPORT_FILE);
     }
 
 }

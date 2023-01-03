@@ -1,13 +1,37 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+ext {
+    appId = 'com.kellnhofer.tracker'
+    appVersionCode = 3
+    appVersionName = '1.1.1'
+
+    buildToolsVersion = '31.0.0'
+
+    compileSdkVersion = 31
+    minSdkVersion = 24
+    targetSdkVersion = 31
+
+    javaVersion = JavaVersion.VERSION_1_8
+
+    depVersions = [
+            androidxAppcompat: '1.4.2',
+            androidxLifecycle: '2.2.0',
+            androidxPreference: '1.2.0',
+            androidxRoom: '2.4.3',
+            facebookFlipper: '0.96.1',
+            facebookSoloader: '0.10.1',
+            googleMaps: '18.1.0',
+            googleMaterial: '1.6.1',
+            squareRetrofit: '2.9.0']
+}
+
 buildscript {
-    
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.0'
+        classpath 'com.android.tools.build:gradle:7.3.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -17,7 +41,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 

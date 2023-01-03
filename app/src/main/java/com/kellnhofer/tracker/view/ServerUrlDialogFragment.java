@@ -3,9 +3,6 @@ package com.kellnhofer.tracker.view;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -14,20 +11,24 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.util.ValidationUtils;
 
 public class ServerUrlDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_URL = "url";
+    private static final String BUNDLE_KEY_URL = "url";
 
     public interface Listener {
         void onServerUrlDialogOk(String url);
         void onServerUrlDialogCancel();
     }
 
-    private TextWatcher mUrlTextWatcher = new ValidationWatcher() {
+    private final TextWatcher mUrlTextWatcher = new ValidationWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
             validateUrl();
@@ -49,8 +50,8 @@ public class ServerUrlDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement " + Listener.class.getName() + "!");
+            throw new ClassCastException(getActivity() + " must implement " +
+                    Listener.class.getName() + "!");
         }
 
         Bundle arguments = getArguments();
@@ -74,21 +75,13 @@ public class ServerUrlDialogFragment extends DialogFragment {
 
         mUrlView.addTextChangedListener(mUrlTextWatcher);
 
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
+        AlertDialog dialog = new MaterialAlertDialogBuilder(getContext())
                 .setTitle(R.string.dialog_title_server_url)
                 .setView(view)
-                .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onServerUrlDialogOk(mUrlView.getText().toString());
-                    }
-                })
-                .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        ServerUrlDialogFragment.this.getDialog().cancel();
-                    }
-                }).create();
+                .setPositiveButton(R.string.action_ok, (d, id) ->
+                        mListener.onServerUrlDialogOk(mUrlView.getText().toString()))
+                .setNegativeButton(R.string.action_cancel, (d, id) -> {})
+                .create();
 
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
@@ -115,7 +108,7 @@ public class ServerUrlDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
+    public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
 
         mListener.onServerUrlDialogCancel();

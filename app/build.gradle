@@ -1,12 +1,22 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
+
+def rootExt = rootProject.ext
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootExt.compileSdkVersion
+    buildToolsVersion rootExt.buildToolsVersion
     defaultConfig {
-        minSdkVersion 17
-        targetSdkVersion 28
-        versionCode 2
-        versionName "1.1.0"
+        minSdkVersion rootExt.minSdkVersion
+        targetSdkVersion rootExt.targetSdkVersion
+        versionCode rootExt.appVersionCode
+        versionName rootExt.appVersionName
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ['room.schemaLocation': getProjectDir().toString() + '/schemas']
+            }
+        }
     }
     buildTypes {
         release {
@@ -18,23 +28,36 @@ android {
     productFlavors {
         production {
             dimension "env"
-            applicationId "com.kellnhofer.tracker"
+            applicationId rootExt.appId
         }
         development {
             dimension "env"
-            applicationId "com.kellnhofer.develop.tracker"
+            applicationId rootExt.appId + '.develop'
         }
+    }
+    compileOptions {
+        sourceCompatibility rootExt.javaVersion
+        targetCompatibility rootExt.javaVersion
     }
 }
 
+def depVersions = rootExt.depVersions
+
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
-    implementation 'com.android.support:support-v4:28.0.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
-    implementation 'com.google.android.gms:play-services-maps:16.0.0'
-    implementation 'com.facebook.stetho:stetho:1.5.0'
-    implementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation "androidx.appcompat:appcompat:$depVersions.androidxAppcompat"
+    implementation "androidx.lifecycle:lifecycle-extensions:$depVersions.androidxLifecycle"
+    implementation "androidx.preference:preference:$depVersions.androidxPreference"
+    implementation "androidx.room:room-runtime:$depVersions.androidxRoom"
+    implementation "com.google.android.gms:play-services-maps:$depVersions.googleMaps"
+    implementation "com.google.android.material:material:$depVersions.googleMaterial"
+    implementation "com.squareup.retrofit2:retrofit:$depVersions.squareRetrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$depVersions.squareRetrofit"
+
+    developmentImplementation "com.facebook.flipper:flipper:$depVersions.facebookFlipper"
+    developmentImplementation "com.facebook.flipper:flipper-network-plugin:$depVersions.facebookFlipper"
+    developmentImplementation "com.facebook.soloader:soloader:$depVersions.facebookSoloader"
+
+    annotationProcessor "androidx.room:room-compiler:$depVersions.androidxRoom"
 }

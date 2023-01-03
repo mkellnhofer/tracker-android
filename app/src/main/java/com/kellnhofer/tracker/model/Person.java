@@ -2,7 +2,15 @@ package com.kellnhofer.tracker.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
+import com.kellnhofer.tracker.data.DbContract.PersonTbl;
+
+@Entity(tableName = PersonTbl.NAME)
 public class Person implements Parcelable {
 
     public static final Parcelable.Creator<Person> CREATOR = new Parcelable.Creator<Person>() {
@@ -14,14 +22,19 @@ public class Person implements Parcelable {
         }
     };
 
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = PersonTbl._ID)
     private long mId;
+    @ColumnInfo(name = PersonTbl.COLUMN_FIRST_NAME, collate = ColumnInfo.LOCALIZED)
     private String mFirstName;
+    @ColumnInfo(name = PersonTbl.COLUMN_LAST_NAME, collate = ColumnInfo.LOCALIZED)
     private String mLastName;
 
     public Person() {
 
     }
 
+    @Ignore
     public Person(long id, String firstName, String lastName) {
         mId = id;
         mFirstName = firstName;
@@ -54,14 +67,14 @@ public class Person implements Parcelable {
 
     // --- Parcelable methods ---
 
-    public Person(Parcel source) {
+    public Person(@NonNull Parcel source) {
         mId = source.readLong();
         mFirstName = source.readString();
         mLastName = source.readString();
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mId);
         dest.writeString(mFirstName);
         dest.writeString(mLastName);

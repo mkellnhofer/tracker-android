@@ -1,13 +1,14 @@
 package com.kellnhofer.tracker.service;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import android.app.Service;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
-
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import androidx.annotation.NonNull;
 
 import com.kellnhofer.tracker.BuildConfig;
 import com.kellnhofer.tracker.TrackerApplication;
@@ -41,7 +42,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
     private Callback mCallback;
 
     private KmlExportThread mKmlExportThread = null;
-    private Queue<KmlExportState> mLastKmlExportStates = new ConcurrentLinkedQueue<>();
+    private final Queue<KmlExportState> mLastKmlExportStates = new ConcurrentLinkedQueue<>();
 
     @Override
     public void onCreate() {
@@ -64,7 +65,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(@NonNull Intent intent, int flags, int startId) {
         String action = intent.getAction();
         if (action == null) {
             return START_NOT_STICKY;
@@ -73,10 +74,10 @@ public class ExportService extends Service implements KmlExportThread.Callback {
         switch(action) {
             case ACTION_START_KML_EXPORT:
                 Uri fileUri = intent.getData();
-                startSync(fileUri);
+                startExport(fileUri);
                 break;
             case ACTION_STOP_KML_EXPORT:
-                stopSync();
+                stopExport();
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported action '" + action + "'!");
@@ -85,7 +86,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
         return START_NOT_STICKY;
     }
 
-    private void startSync(Uri fileUri) {
+    private void startExport(Uri fileUri) {
         if (mKmlExportThread != null) {
             Log.d(LOG_TAG, "KML export is already running.");
             return;
@@ -98,7 +99,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
         mKmlExportThread.start();
     }
 
-    private void stopSync() {
+    private void stopExport() {
         if (mKmlExportThread == null) {
             return;
         }
@@ -112,8 +113,7 @@ public class ExportService extends Service implements KmlExportThread.Callback {
         mKmlExportThread = null;
     }
 
-    // --- Sync callbacks ---
-
+    // --- Export callbacks ---
 
     @Override
     public void onKmlExportStarted() {

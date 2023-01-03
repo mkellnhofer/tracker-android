@@ -1,24 +1,24 @@
 package com.kellnhofer.tracker.view;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.EditText;
+import androidx.annotation.NonNull;
 
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.presenter.SearchContract;
 import com.kellnhofer.tracker.presenter.SearchPresenter;
 
-public class SearchActivity extends AppCompatActivity implements SearchContract.Observer {
+public class SearchActivity extends BaseActivity {
 
     private static final String FRAGMENT_TAG_VIEW = "search_fragment";
-
-    private SearchContract.Presenter mPresenter;
 
     private SearchFragment mFragment;
 
@@ -28,54 +28,49 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPresenter = new SearchPresenter(this, Injector.getLocationRepository(this),
-                Injector.getPersonRepository(this));
+        SearchContract.Presenter presenter = new SearchPresenter(this, Injector.getLocationDao(this),
+                Injector.getPersonDao(this));
 
         setContentView(R.layout.activity_search);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        AppBarLayout appBarLayout = findViewById(R.id.container_app_bar);
+        appBarLayout.setStatusBarForeground(MaterialShapeDrawable.createWithElevationOverlay(this));
 
-        setSupportActionBar(toolbar);
+        MaterialToolbar topAppBar = findViewById(R.id.top_app_bar);
+        topAppBar.setNavigationOnClickListener(v -> finish());
+        topAppBar.setOnMenuItemClickListener(this::onTopAppBarMenuItemClicked);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        mEditText = topAppBar.findViewById(R.id.view_search_string);
+        mEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-        if (toolbar != null) {
-            mEditText = toolbar.findViewById(R.id.view_search_string);
-            mEditText.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (mFragment == null) {
+                    return;
                 }
 
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                }
+                mFragment.onSearchUpdate(s.toString());
+            }
+        });
 
-                @Override
-                public void afterTextChanged(Editable s) {
-                    if (mFragment == null) {
-                        return;
-                    }
-
-                    mFragment.onSearchUpdate(s.toString());
-                }
-            });
-        }
-
-        if (savedInstanceState == null) {
+        mFragment = (SearchFragment) getSupportFragmentManager().findFragmentByTag(
+                FRAGMENT_TAG_VIEW);
+        if (mFragment == null) {
             mFragment = new SearchFragment();
-
-            getSupportFragmentManager().beginTransaction()
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_VIEW)
                     .commit();
-        } else {
-            mFragment = (SearchFragment) getSupportFragmentManager().findFragmentByTag(
-                    FRAGMENT_TAG_VIEW);
         }
 
-        mFragment.setPresenter(mPresenter);
+        mFragment.setPresenter(presenter);
     }
 
     @Override
@@ -86,11 +81,14 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
-    // --- Presenter callback methods ---
-
-    @Override
-    public void onLocationsChanged() {
-
+    private boolean onTopAppBarMenuItemClicked(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_cancel:
+                mEditText.setText("");
+            default:
+                return false;
+        }
     }
 
 }

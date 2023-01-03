@@ -10,7 +10,7 @@ import java.util.TimeZone;
 
 import com.kellnhofer.tracker.Constants;
 
-public class DateUtils {
+public final class DateUtils {
 
     private DateUtils() {
 
@@ -32,22 +32,6 @@ public class DateUtils {
             return df.parse(date);
         } catch (ParseException e) {
             throw new RuntimeException("Invalid UI date string!", e);
-        }
-    }
-
-    public static String toDbFormat(Date date) {
-        DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_DB, Locale.getDefault());
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return df.format(date);
-    }
-
-    public static Date fromDbFormat(String date) {
-        try {
-            DateFormat df = new SimpleDateFormat(Constants.DATE_FORMAT_DB, Locale.getDefault());
-            df.setTimeZone(TimeZone.getTimeZone("UTC"));
-            return df.parse(date);
-        } catch (ParseException e) {
-            throw new RuntimeException("Invalid DB date string!", e);
         }
     }
 

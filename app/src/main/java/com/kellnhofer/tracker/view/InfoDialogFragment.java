@@ -3,18 +3,19 @@ package com.kellnhofer.tracker.view;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 
 public class InfoDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_TITLE = "title";
-    public static final String BUNDLE_KEY_MESSAGE = "message";
+    private static final String BUNDLE_KEY_TITLE = "title";
+    private static final String BUNDLE_KEY_MESSAGE = "message";
 
     public interface Listener {
         void onInfoDialogOk(String tag);
@@ -28,7 +29,7 @@ public class InfoDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString() + " must implement " +
+            throw new ClassCastException(getActivity() + " must implement " +
                     Listener.class.getName() + "!");
         }
 
@@ -39,15 +40,11 @@ public class InfoDialogFragment extends DialogFragment {
         int titleResId = arguments.getInt(BUNDLE_KEY_TITLE, R.string.dialog_title_error);
         int messageResId = arguments.getInt(BUNDLE_KEY_MESSAGE, R.string.error_unknown);
 
-        return new AlertDialog.Builder(getContext())
+        return new MaterialAlertDialogBuilder(getContext())
                 .setTitle(titleResId)
                 .setMessage(messageResId)
-                .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onInfoDialogOk(getFragmentTag());
-                    }
-                }).create();
+                .setPositiveButton(R.string.action_ok, (d, id) -> mListener.onInfoDialogOk(getFragmentTag()))
+                .create();
     }
 
     @Override
@@ -62,7 +59,7 @@ public class InfoDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
+    public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
 
         mListener.onInfoDialogOk(getFragmentTag());

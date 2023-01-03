@@ -8,7 +8,7 @@
     android:paddingTop="16dp"
     android:paddingBottom="8dp">
 
-    <EditText
+    <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/view_name"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

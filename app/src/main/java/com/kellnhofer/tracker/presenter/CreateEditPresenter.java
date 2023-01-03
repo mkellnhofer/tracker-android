@@ -1,48 +1,44 @@
 package com.kellnhofer.tracker.presenter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.kellnhofer.tracker.TrackerApplication;
-import com.kellnhofer.tracker.data.LocationRepository;
-import com.kellnhofer.tracker.data.PersonRepository;
+import com.kellnhofer.tracker.PermissionsHelper;
+import com.kellnhofer.tracker.data.AsyncResult;
+import com.kellnhofer.tracker.data.dao.LocationDao;
+import com.kellnhofer.tracker.data.dao.PersonDao;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.service.LocationSyncError;
 
-public class CreateEditPresenter implements CreateEditContract.Presenter,
+public class CreateEditPresenter extends BasePresenter implements CreateEditContract.Presenter,
         LocationServiceAdapter.Listener, LocationListener {
 
     private static final String LOG_TAG = CreateEditPresenter.class.getSimpleName();
 
-    private Context mContext;
-    private TrackerApplication mApplication;
+    private final List<CreateEditContract.Observer> mObservers = new ArrayList<>();
 
-    private List<CreateEditContract.Observer> mObservers = new ArrayList<>();
+    private final LocationDao mLocationDao;
+    private final PersonDao mPersonDao;
+    private final LocationServiceAdapter mService;
 
-    private LocationRepository mLocationRepository;
-    private PersonRepository mPersonRepository;
-    private LocationServiceAdapter mService;
-
-    private LocationManager mLocationManager;
+    private final LocationManager mLocationManager;
     private android.location.Location mGpsLocation;
 
-    public CreateEditPresenter(Context context, LocationRepository locationRepository,
-            PersonRepository personRepository, LocationServiceAdapter locationService) {
-        mContext = context;
-        mApplication = (TrackerApplication) context.getApplicationContext();
+    public CreateEditPresenter(Context context, LocationDao locationDao, PersonDao personDao,
+            LocationServiceAdapter locationService) {
+        super(context);
 
-        mLocationRepository = locationRepository;
-        mPersonRepository = personRepository;
+        mLocationDao = locationDao;
+        mPersonDao = personDao;
         mService = locationService;
 
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -57,9 +53,7 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
 
     @Override
     public void removeObserver(CreateEditContract.Observer observer) {
-        if (mObservers.contains(observer)) {
-            mObservers.remove(observer);
-        }
+        mObservers.remove(observer);
     }
 
     @Override
@@ -75,34 +69,34 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
     }
 
     @Override
-    public Location getLocation(long locationId) {
-        return mLocationRepository.getLocation(locationId);
+    public AsyncResult<Location> getLocation(long locationId) {
+        return mLocationDao.getLocationAsync(locationId);
     }
 
     @Override
-    public ArrayList<Person> getLocationPersons(long locationId) {
-        return mPersonRepository.getPersonsByLocationId(locationId);
+    public AsyncResult<List<Person>> getLocationPersons(long locationId) {
+        return mPersonDao.getPersonsByLocationIdAsync(locationId);
     }
 
     @Override
-    public void createLocation(Location location, ArrayList<Person> persons) {
+    public AsyncResult<List<Person>> getPersons() {
+        return mPersonDao.getPersonsAsync();
+    }
+
+    @Override
+    public void createLocation(Location location, List<Person> persons) {
         mService.createLocation(location, persons);
     }
 
     @Override
-    public void updateLocation(Location location, ArrayList<Person> persons) {
+    public void updateLocation(Location location, List<Person> persons) {
         mService.updateLocation(location, persons);
-    }
-
-    @Override
-    public ArrayList<Person> getPersons() {
-        return mPersonRepository.getPersons();
     }
 
     @SuppressLint("MissingPermission")
     @Override
     public void requestGpsLocationUpdates() {
-        if (mApplication.hasGpsPermissions()) {
+        if (PermissionsHelper.hasGpsPermissions(mContext)) {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
         }
@@ -119,35 +113,6 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
     }
 
     // --- Service callback methods ---
-
-    @Override
-    public void onLocationCreated(long locationId) {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (CreateEditContract.Observer observer : mObservers) {
-                    observer.onLocationCreated();
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onLocationUpdated(long locationId) {
-        executeOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (CreateEditContract.Observer observer : mObservers) {
-                    observer.onLocationUpdated();
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onLocationDeleted(long locationId) {
-
-    }
 
     @Override
     public void onSyncStarted() {
@@ -190,13 +155,6 @@ public class CreateEditPresenter implements CreateEditContract.Presenter,
     @Override
     public void onProviderDisabled(String provider) {
         Log.d(LOG_TAG, "Provider disabled.");
-    }
-
-    // --- Helper methods ---
-
-    private void executeOnMainThread(Runnable runnable) {
-        Handler mainHandler = new Handler(mContext.getMainLooper());
-        mainHandler.post(runnable);
     }
 
 }

@@ -1,19 +1,17 @@
 package com.kellnhofer.tracker.view;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
+import androidx.annotation.NonNull;
 
-import java.util.ArrayList;
-import java.util.Date;
-
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.model.Location;
@@ -22,34 +20,33 @@ import com.kellnhofer.tracker.presenter.ViewContract;
 import com.kellnhofer.tracker.presenter.ViewPresenter;
 import com.kellnhofer.tracker.util.DateUtils;
 
-public class ViewActivity extends AppCompatActivity implements ViewContract.Observer,
+public class ViewActivity extends BaseActivity implements ViewContract.Observer,
         DecisionDialogFragment.Listener {
 
     private static final String FRAGMENT_TAG_VIEW = "view_fragment";
     private static final String DIALOG_FRAGMENT_TAG_VIEW = "view_dialog_fragment";
     private static final String DIALOG_FRAGMENT_TAG_DELETE = "delete_dialog_fragment";
 
+    private static final String STATE_LOCATION = "location";
+    private static final String STATE_LOCATION_PERSONS = "location_persons";
+
     public static final String EXTRA_LOCATION_ID = "location_id";
 
     private ViewContract.Presenter mPresenter;
 
-    private TextView mNameTextView;
-    private TextView mDateTextView;
-    private FloatingActionButton mFab;
+    private MaterialToolbar mTopAppBar;
     private ViewFragment mFragment;
 
     private long mLocationId;
-    private String mLocationName;
-    private Date mLocationDate;
-    private String mLocationDescription;
-    private ArrayList<String> mLocationPersons;
+    private Location mLocation;
+    private List<Person> mLocationPersons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPresenter = new ViewPresenter(this, Injector.getLocationRepository(this),
-                Injector.getPersonRepository(this), Injector.getLocationService(this));
+        mPresenter = new ViewPresenter(this, Injector.getLocationDao(this),
+                Injector.getPersonDao(this), Injector.getLocationService(this));
 
         Intent intent = getIntent();
         if (!intent.hasExtra(EXTRA_LOCATION_ID)) {
@@ -59,67 +56,49 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
 
         setContentView(R.layout.activity_view);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        AppBarLayout appBarLayout = findViewById(R.id.container_app_bar);
+        appBarLayout.setStatusBarForeground(MaterialShapeDrawable.createWithElevationOverlay(this));
 
-        mNameTextView = toolbar.findViewById(R.id.view_location_name);
-        mDateTextView = toolbar.findViewById(R.id.view_location_date);
+        mTopAppBar = findViewById(R.id.top_app_bar);
+        mTopAppBar.setNavigationOnClickListener(v -> finish());
+        mTopAppBar.setOnMenuItemClickListener(this::onTopAppBarMenuItemClicked);
 
-        setSupportActionBar(toolbar);
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(v -> onFabClicked());
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
-        mFab = findViewById(R.id.fab);
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onFabClicked();
-            }
-        });
-
-        if (savedInstanceState == null) {
-            Bundle args = new Bundle();
-            args.putLong(ViewFragment.BUNDLE_KEY_LOCATION_ID, mLocationId);
-
+        mFragment = (ViewFragment) getSupportFragmentManager().findFragmentByTag(
+                FRAGMENT_TAG_VIEW);
+        if (mFragment == null) {
             mFragment = new ViewFragment();
-            mFragment.setArguments(args);
 
-            getSupportFragmentManager().beginTransaction()
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .replace(R.id.container_content, mFragment, FRAGMENT_TAG_VIEW)
                     .commit();
-        } else {
-            mFragment = (ViewFragment) getSupportFragmentManager().findFragmentByTag(
-                    FRAGMENT_TAG_VIEW);
         }
+    }
 
-        mFragment.setPresenter(mPresenter);
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mLocation = savedInstanceState.getParcelable(STATE_LOCATION);
+        mLocationPersons = savedInstanceState.getParcelableArrayList(STATE_LOCATION_PERSONS);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        Location location = mPresenter.getLocation(mLocationId);
-        ArrayList<Person> locationPersons = mPresenter.getLocationPersons(mLocationId);
-
-        mLocationName = location.getName();
-        mLocationDate = location.getDate();
-        mLocationDescription = location.getDescription();
-        mLocationPersons = new ArrayList<>();
-        for (Person locationPerson : locationPersons) {
-            String name;
-            if (!locationPerson.getFirstName().isEmpty() &&
-                    !locationPerson.getLastName().isEmpty()) {
-                name = locationPerson.getFirstName() + " " + locationPerson.getLastName();
-            } else {
-                name = locationPerson.getFirstName() + locationPerson.getLastName();
+        mPresenter.getLocation(mLocationId).observe(this, (location) -> {
+            mLocation = location;
+            if (location != null) {
+                mPresenter.getLocationPersons(mLocationId).observe(this, (locationPersons) ->
+                        mLocationPersons = locationPersons);
+                updateTopAppBarTitle();
+                updateFragment();
             }
-            mLocationPersons.add(name);
-        }
-
-        updateToolbar(mLocationName, mLocationDate);
+        });
 
         mPresenter.addObserver(this);
         mPresenter.onResume();
@@ -133,30 +112,17 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         mPresenter.removeObserver(this);
     }
 
-    private void updateToolbar(String name, Date date) {
-        mNameTextView.setText(name);
-        mDateTextView.setText(DateUtils.toUiFormat(date));
-    }
-
-    private void onFabClicked() {
-        showViewDialog();
-    }
-
-    // --- Action bar callback methods ---
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_view_action, menu);
-        return true;
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(STATE_LOCATION, mLocation);
+        outState.putParcelableArrayList(STATE_LOCATION_PERSONS, new ArrayList<>(mLocationPersons));
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    private boolean onTopAppBarMenuItemClicked(@NonNull MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case android.R.id.home:
-                finish();
-                return true;
             case R.id.action_edit:
                 mPresenter.startEditActivity(mLocationId);
                 return true;
@@ -168,11 +134,27 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
         }
     }
 
+    private void updateTopAppBarTitle() {
+        mTopAppBar.setTitle(mLocation.getName());
+        mTopAppBar.setSubtitle(DateUtils.toUiFormat(mLocation.getDate()));
+    }
+
+    private void updateFragment() {
+        mFragment.setLatLng(mLocation.getLatitude(), mLocation.getLongitude());
+    }
+
+    private void onFabClicked() {
+        showViewDialog();
+    }
+
     // --- Dialog methods ---
 
     private void showViewDialog() {
-        ViewDialogFragment fragment = ViewDialogFragment.newInstance(mLocationName, mLocationDate,
-                mLocationDescription, mLocationPersons);
+        if (mLocation == null || mLocationPersons == null) {
+            return;
+        }
+        ViewDialogFragment fragment = ViewDialogFragment.newInstance(mLocation.getName(),
+                mLocation.getDate(), mLocation.getDescription(), toPersonNameList(mLocationPersons));
         fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_VIEW);
     }
 
@@ -196,6 +178,22 @@ public class ViewActivity extends AppCompatActivity implements ViewContract.Obse
     @Override
     public void onDecisionDialogCancel(String tag) {
 
+    }
+
+    // --- Helper methods ---
+
+    private static List<String> toPersonNameList(List<Person> persons) {
+        ArrayList<String> personNames = new ArrayList<>();
+        for (Person person : persons) {
+            String personName;
+            if (!person.getFirstName().isEmpty() && !person.getLastName().isEmpty()) {
+                personName = person.getFirstName() + " " + person.getLastName();
+            } else {
+                personName = person.getFirstName() + person.getLastName();
+            }
+            personNames.add(personName);
+        }
+        return personNames;
     }
 
 }

@@ -10,7 +10,7 @@ public enum LocationSyncError {
     LOCATION_NOT_FOUND(R.string.error_server_internal),
     SERVER_ERROR(R.string.error_server_internal);
 
-    private int mTextResId;
+    private final int mTextResId;
 
     LocationSyncError(int textResId) {
         mTextResId = textResId;

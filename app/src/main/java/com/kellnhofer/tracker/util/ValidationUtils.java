@@ -1,6 +1,6 @@
 package com.kellnhofer.tracker.util;
 
-public class ValidationUtils {
+public final class ValidationUtils {
 
     private static final String REGEX_SCHEME = "^(http|https)$";
     private static final String REGEX_DOMAIN = "^([a-z0-9\\-\\_\\~]+\\.)+[a-z]+$";

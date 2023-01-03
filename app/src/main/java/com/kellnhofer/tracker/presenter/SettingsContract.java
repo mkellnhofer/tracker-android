@@ -4,17 +4,14 @@ import com.kellnhofer.tracker.service.LocationSyncError;
 
 public interface SettingsContract {
 
-    interface Presenter {
+    interface Presenter extends BaseContract.Presenter {
         void addObserver(Observer observer);
         void removeObserver(Observer observer);
-
-        void onResume();
-        void onPause();
 
         void executeLocationSync();
     }
 
-    interface Observer {
+    interface Observer extends BaseContract.Observer {
         void onSyncStarted();
         void onSyncFinished();
         void onSyncFailed(LocationSyncError error);

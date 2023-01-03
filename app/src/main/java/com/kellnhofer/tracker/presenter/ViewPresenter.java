@@ -1,37 +1,33 @@
 package com.kellnhofer.tracker.presenter;
 
-import android.content.Context;
-import android.content.Intent;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import com.kellnhofer.tracker.TrackerApplication;
-import com.kellnhofer.tracker.data.LocationRepository;
-import com.kellnhofer.tracker.data.PersonRepository;
+import android.content.Context;
+import android.content.Intent;
+
+import com.kellnhofer.tracker.data.AsyncResult;
+import com.kellnhofer.tracker.data.dao.LocationDao;
+import com.kellnhofer.tracker.data.dao.PersonDao;
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.service.LocationServiceAdapter;
 import com.kellnhofer.tracker.view.CreateEditActivity;
 
-public class ViewPresenter implements ViewContract.Presenter {
+public class ViewPresenter extends BasePresenter implements ViewContract.Presenter {
 
-    private Context mContext;
-    private TrackerApplication mApplication;
+    private final List<ViewContract.Observer> mObservers = new ArrayList<>();
 
-    private List<ViewContract.Observer> mObservers = new ArrayList<>();
+    private final LocationDao mLocationDao;
+    private final PersonDao mPersonDao;
+    private final LocationServiceAdapter mService;
 
-    private LocationRepository mLocationRepository;
-    private PersonRepository mPersonRepository;
-    private LocationServiceAdapter mService;
+    public ViewPresenter(Context context, LocationDao locationDao, PersonDao personDao,
+            LocationServiceAdapter locationService) {
+        super(context);
 
-    public ViewPresenter(Context context, LocationRepository locationRepository,
-            PersonRepository personRepository, LocationServiceAdapter locationService) {
-        mContext = context;
-        mApplication = (TrackerApplication) context.getApplicationContext();
-
-        mLocationRepository = locationRepository;
-        mPersonRepository = personRepository;
+        mLocationDao = locationDao;
+        mPersonDao = personDao;
         mService = locationService;
     }
 
@@ -44,29 +40,17 @@ public class ViewPresenter implements ViewContract.Presenter {
 
     @Override
     public void removeObserver(ViewContract.Observer observer) {
-        if (mObservers.contains(observer)) {
-            mObservers.remove(observer);
-        }
+        mObservers.remove(observer);
     }
 
     @Override
-    public void onResume() {
-
+    public AsyncResult<Location> getLocation(long locationId) {
+        return mLocationDao.getLocationAsync(locationId);
     }
 
     @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public Location getLocation(long locationId) {
-        return mLocationRepository.getLocation(locationId);
-    }
-
-    @Override
-    public ArrayList<Person> getLocationPersons(long locationId) {
-        return mPersonRepository.getPersonsByLocationId(locationId);
+    public AsyncResult<List<Person>> getLocationPersons(long locationId) {
+        return mPersonDao.getPersonsByLocationIdAsync(locationId);
     }
 
     @Override

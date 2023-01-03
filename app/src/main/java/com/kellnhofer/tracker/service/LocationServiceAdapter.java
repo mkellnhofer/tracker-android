@@ -1,5 +1,8 @@
 package com.kellnhofer.tracker.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -7,44 +10,23 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import java.util.ArrayList;
-
 import com.kellnhofer.tracker.model.Location;
 import com.kellnhofer.tracker.model.Person;
 
 public class LocationServiceAdapter {
 
     public interface Listener {
-        void onLocationCreated(long locationId);
-        void onLocationUpdated(long locationId);
-        void onLocationDeleted(long locationId);
-
         void onSyncStarted();
         void onSyncFinished();
         void onSyncFailed(LocationSyncError error);
     }
 
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LocationService.Binder binder = (LocationService.Binder) service;
             mService = binder.getService();
             mService.setCallback(new LocationService.Callback() {
-                @Override
-                public void onLocationCreated(long locationId) {
-                    mListener.onLocationCreated(locationId);
-                }
-
-                @Override
-                public void onLocationUpdated(long locationId) {
-                    mListener.onLocationUpdated(locationId);
-                }
-
-                @Override
-                public void onLocationDeleted(long locationId) {
-                    mListener.onLocationDeleted(locationId);
-                }
-
                 @Override
                 public void onSyncStarted() {
                     mListener.onSyncStarted();
@@ -68,7 +50,7 @@ public class LocationServiceAdapter {
         }
     };
 
-    private Context mContext;
+    private final Context mContext;
 
     private LocationService mService;
 
@@ -98,19 +80,19 @@ public class LocationServiceAdapter {
         mListener = null;
     }
 
-    public void createLocation(Location location, ArrayList<Person> persons) {
+    public void createLocation(Location location, List<Person> persons) {
         Intent intent = new Intent(mContext, LocationService.class);
         intent.setAction(LocationService.ACTION_CREATE);
         intent.putExtra(LocationService.EXTRA_LOCATION, location);
-        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, persons);
+        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, new ArrayList<>(persons));
         mContext.startService(intent);
     }
 
-    public void updateLocation(Location location, ArrayList<Person> persons) {
+    public void updateLocation(Location location, List<Person> persons) {
         Intent intent = new Intent(mContext, LocationService.class);
         intent.setAction(LocationService.ACTION_UPDATE);
         intent.putExtra(LocationService.EXTRA_LOCATION, location);
-        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, persons);
+        intent.putParcelableArrayListExtra(LocationService.EXTRA_PERSONS, new ArrayList<>(persons));
         mContext.startService(intent);
     }
 

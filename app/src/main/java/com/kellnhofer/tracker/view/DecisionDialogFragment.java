@@ -3,17 +3,17 @@ package com.kellnhofer.tracker.view;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 
 public class DecisionDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_TITLE_TEXT_ID = "title_text_id";
-    public static final String BUNDLE_KEY_MESSAGE_TEXT_ID = "message_text_id";
-    public static final String BUNDLE_KEY_ACTION_TEXT_ID = "action_text_id";
+    private static final String BUNDLE_KEY_TITLE_TEXT_ID = "title_text_id";
+    private static final String BUNDLE_KEY_MESSAGE_TEXT_ID = "message_text_id";
+    private static final String BUNDLE_KEY_ACTION_TEXT_ID = "action_text_id";
 
     public interface Listener {
         void onDecisionDialogOk(String tag);
@@ -28,8 +28,8 @@ public class DecisionDialogFragment extends DialogFragment {
         try {
             mListener = (Listener) getActivity();
         } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement " + Listener.class.getName() + "!");
+            throw new ClassCastException(getActivity() + " must implement " +
+                    Listener.class.getName() + "!");
         }
 
         Bundle arguments = getArguments();
@@ -40,23 +40,18 @@ public class DecisionDialogFragment extends DialogFragment {
         int messageTextId = arguments.getInt(BUNDLE_KEY_MESSAGE_TEXT_ID, 0);
         int actionTextId = arguments.getInt(BUNDLE_KEY_ACTION_TEXT_ID, 0);
 
-        return new AlertDialog.Builder(getContext())
+        return new MaterialAlertDialogBuilder(getContext())
                 .setTitle(titleTextId)
                 .setMessage(messageTextId)
-                .setPositiveButton(actionTextId, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onDecisionDialogOk(getFragmentTag());
-                    }
-                })
-                .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onDecisionDialogCancel(getFragmentTag());
-                    }
-                }).create();
+                .setPositiveButton(actionTextId, (d, id) ->
+                        mListener.onDecisionDialogOk(getFragmentTag()))
+                .setNegativeButton(R.string.action_cancel, (d, id) ->
+                        mListener.onDecisionDialogCancel(getFragmentTag()))
+                .create();
     }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
+    public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
 
         mListener.onDecisionDialogCancel(getFragmentTag());

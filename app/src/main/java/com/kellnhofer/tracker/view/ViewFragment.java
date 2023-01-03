@@ -1,12 +1,11 @@
 package com.kellnhofer.tracker.view;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,49 +14,17 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.kellnhofer.tracker.R;
-import com.kellnhofer.tracker.model.Location;
-import com.kellnhofer.tracker.presenter.ViewContract;
 
-public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewContract.Observer {
+public class ViewFragment extends Fragment implements OnMapReadyCallback {
 
+    private static final String STATE_POS = "pos";
     private static final String STATE_MAP_VIEW = "map_view";
 
-    public static final String BUNDLE_KEY_LOCATION_ID = "location_id";
-
-    private ViewActivity mActivity;
-    private ViewContract.Presenter mPresenter;
-
     private MapView mMapView;
+    private GoogleMap mMap;
+    private boolean mMapInitialized = false;
 
-    private long mLocationId;
-
-    public void setPresenter(@NonNull ViewContract.Presenter presenter) {
-        mPresenter = presenter;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        try {
-            mActivity = (ViewActivity) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement " + ViewActivity.class.getName());
-        }
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        Bundle arguments = getArguments();
-        if (arguments == null || !arguments.containsKey(BUNDLE_KEY_LOCATION_ID)) {
-            throw new IllegalStateException("Extras '" + BUNDLE_KEY_LOCATION_ID
-                    + "' must be provided!");
-        }
-        mLocationId = arguments.getLong(BUNDLE_KEY_LOCATION_ID);
-    }
+    private LatLng mPos;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -66,6 +33,7 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
 
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
+            mPos = savedInstanceState.getParcelable(STATE_POS);
             mapViewBundle = savedInstanceState.getBundle(STATE_MAP_VIEW);
         }
 
@@ -88,15 +56,11 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
 
         mMapView.onResume();
         mMapView.getMapAsync(this);
-
-        mPresenter.addObserver(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        mPresenter.removeObserver(this);
 
         mMapView.onPause();
     }
@@ -112,6 +76,7 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
 
         mMapView.onSaveInstanceState(mapViewBundle);
 
+        outState.putParcelable(STATE_POS, mPos);
         outState.putBundle(STATE_MAP_VIEW, mapViewBundle);
     }
 
@@ -136,17 +101,36 @@ public class ViewFragment extends Fragment implements OnMapReadyCallback, ViewCo
         super.onLowMemory();
     }
 
-    // --- Map callback methods ---
+    // --- Activity methods ---
+
+    public void setLatLng(double latitude, double longitude) {
+        mPos = new LatLng(latitude, longitude);
+        if (mMap != null) {
+            initializeMap();
+        }
+    }
+
+    // --- Map methods ---
 
     @Override
-    public void onMapReady(GoogleMap map) {
-        Location location = mPresenter.getLocation(mLocationId);
+    public void onMapReady(@NonNull GoogleMap map) {
+        mMap = map;
 
-        LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
+        if (mPos != null) {
+            initializeMap();
+        }
+    }
 
-        map.clear();
-        map.addMarker(new MarkerOptions().position(pos));
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14));
+    private void initializeMap() {
+        if (mMapInitialized) {
+            return;
+        }
+
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(mPos));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mPos, 14));
+
+        mMapInitialized = true;
     }
 
 }

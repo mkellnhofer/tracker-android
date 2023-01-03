@@ -1,29 +1,28 @@
 package com.kellnhofer.tracker.view;
 
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import android.app.Dialog;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kellnhofer.tracker.R;
 import com.kellnhofer.tracker.util.DateUtils;
 
 public class ViewDialogFragment extends DialogFragment {
 
-    public static final String BUNDLE_KEY_NAME = "name";
-    public static final String BUNDLE_KEY_DATE = "date";
-    public static final String BUNDLE_KEY_DESCRIPTION = "description";
-    public static final String BUNDLE_KEY_PERSONS = "persons";
+    private static final String BUNDLE_KEY_NAME = "name";
+    private static final String BUNDLE_KEY_DATE = "date";
+    private static final String BUNDLE_KEY_DESCRIPTION = "description";
+    private static final String BUNDLE_KEY_PERSONS = "persons";
 
     public ViewDialogFragment() {
         super();
@@ -67,15 +66,11 @@ public class ViewDialogFragment extends DialogFragment {
             personsContainer.setVisibility(View.GONE);
         }
 
-        return new AlertDialog.Builder(getContext())
+        return new MaterialAlertDialogBuilder(getContext())
                 .setTitle(R.string.dialog_title_view)
                 .setView(view)
-                .setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dismiss();
-                    }
-                }).create();
+                .setPositiveButton(R.string.action_ok, (d, id) -> {})
+                .create();
     }
 
     private void addPersonView(LinearLayout personsContainer, String name) {
@@ -92,12 +87,12 @@ public class ViewDialogFragment extends DialogFragment {
     // --- Factory methods ---
 
     public static ViewDialogFragment newInstance(String name, Date date, String description,
-            ArrayList<String> persons) {
+            List<String> persons) {
         Bundle args = new Bundle();
         args.putString(BUNDLE_KEY_NAME, name);
         args.putLong(BUNDLE_KEY_DATE, date.getTime());
         args.putString(BUNDLE_KEY_DESCRIPTION, description);
-        args.putStringArrayList(BUNDLE_KEY_PERSONS, persons);
+        args.putStringArrayList(BUNDLE_KEY_PERSONS, new ArrayList<>(persons));
 
         ViewDialogFragment fragment = new ViewDialogFragment();
         fragment.setArguments(args);

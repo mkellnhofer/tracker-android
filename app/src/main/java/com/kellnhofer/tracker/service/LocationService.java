@@ -1,19 +1,21 @@
 package com.kellnhofer.tracker.service;
 
+import java.util.ArrayList;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
-
-import java.util.ArrayList;
+import androidx.annotation.NonNull;
 
 import com.kellnhofer.tracker.BuildConfig;
 import com.kellnhofer.tracker.Injector;
 import com.kellnhofer.tracker.TrackerApplication;
 import com.kellnhofer.tracker.TrackerSettings;
-import com.kellnhofer.tracker.data.LocationRepository;
-import com.kellnhofer.tracker.data.PersonRepository;
+import com.kellnhofer.tracker.data.dao.LocationDao;
+import com.kellnhofer.tracker.data.dao.PersonDao;
 import com.kellnhofer.tracker.model.Location;
+import com.kellnhofer.tracker.model.LocationWithPersonRefs;
 import com.kellnhofer.tracker.model.Person;
 
 public class LocationService extends Service implements LocationSyncThread.Callback {
@@ -39,10 +41,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     }
 
     public interface Callback {
-        void onLocationCreated(long locationId);
-        void onLocationUpdated(long locationId);
-        void onLocationDeleted(long locationId);
-
         void onSyncStarted();
         void onSyncFinished();
         void onSyncFailed(LocationSyncError error);
@@ -53,8 +51,8 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     private TrackerApplication mApplication;
     private TrackerSettings mSettings;
 
-    private LocationRepository mLocationRepository;
-    private PersonRepository mPersonRepository;
+    private LocationDao mLocationDao;
+    private PersonDao mPersonDao;
 
     private Callback mCallback;
 
@@ -68,8 +66,8 @@ public class LocationService extends Service implements LocationSyncThread.Callb
         mApplication = (TrackerApplication) this.getApplication();
         mSettings = mApplication.getSettings();
 
-        mLocationRepository = Injector.getLocationRepository(this);
-        mPersonRepository = Injector.getPersonRepository(this);
+        mLocationDao = Injector.getLocationDao(this);
+        mPersonDao = Injector.getPersonDao(this);
     }
 
     @Override
@@ -86,7 +84,7 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(@NonNull Intent intent, int flags, int startId) {
         String action = intent.getAction();
         if (action == null) {
             return START_NOT_STICKY;
@@ -117,73 +115,52 @@ public class LocationService extends Service implements LocationSyncThread.Callb
     }
 
     private void createLocation(final Location location, final ArrayList<Person> persons) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                location.setChanged(true);
-
-                ArrayList<Long> pIds = getPersonIds(persons);
-                location.setPersonIds(pIds);
-
-                long locationId = mLocationRepository.saveLocation(location);
-
-                notifyLocationCreated(locationId);
-            }
-        };
-
-        new Thread(r).start();
+        executeInThread(() -> {
+            location.setChanged(true);
+            saveLocationAndPersons(location, persons);
+        });
     }
 
     private void updateLocation(final Location location, final ArrayList<Person> persons) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                Location existingLocation = mLocationRepository.getLocation(location.getId());
-                if (existingLocation != null) {
-                    location.setRemoteId(existingLocation.getRemoteId());
-                }
-
-                location.setChanged(true);
-
-                ArrayList<Long> pIds = getPersonIds(persons);
-                location.setPersonIds(pIds);
-
-                long locationId = mLocationRepository.saveLocation(location);
-                mPersonRepository.deleteUnusedPersons();
-
-                notifyLocationUpdated(locationId);
+        executeInThread(() -> {
+            Location existingLocation = mLocationDao.getLocation(location.getId());
+            if (existingLocation != null) {
+                location.setRemoteId(existingLocation.getRemoteId());
             }
-        };
 
-        new Thread(r).start();
+            location.setChanged(true);
+            saveLocationAndPersons(location, persons);
+            deleteUnusedPersons();
+        });
     }
 
-    private ArrayList<Long> getPersonIds(ArrayList<Person> persons) {
+    private void saveLocationAndPersons(Location location, ArrayList<Person> persons) {
+        ArrayList<Long> personIds = savePersons(persons);
+        mLocationDao.saveLocationWithPersonRefs(new LocationWithPersonRefs(location,
+                personIds));
+    }
+
+    private ArrayList<Long> savePersons(ArrayList<Person> persons) {
         ArrayList<Long> personIds = new ArrayList<>();
         for (Person person : persons) {
-            Person existingPerson = mPersonRepository.getPersonByFirstNameAndLastName(
+            Person existingPerson = mPersonDao.getPersonByFirstNameAndLastName(
                     person.getFirstName(), person.getLastName());
             if (existingPerson != null) {
                 personIds.add(existingPerson.getId());
             } else {
-                long newPersonId = mPersonRepository.savePerson(person);
+                long newPersonId = mPersonDao.savePerson(person);
                 personIds.add(newPersonId);
             }
         }
         return personIds;
     }
 
+    private void deleteUnusedPersons() {
+        mPersonDao.deleteUnusedPersons();
+    }
+
     private void deleteLocation(final long locationId) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                mLocationRepository.setLocationDeleted(locationId);
-
-                notifyLocationDeleted(locationId);
-            }
-        };
-
-        new Thread(r).start();
+        executeInThread(() -> mLocationDao.setLocationDeleted(locationId));
     }
 
     private void startSync(boolean restart) {
@@ -269,24 +246,6 @@ public class LocationService extends Service implements LocationSyncThread.Callb
         return intent.getParcelableArrayListExtra(EXTRA_PERSONS);
     }
 
-    private void notifyLocationCreated(long locationId) {
-        if (mCallback != null) {
-            mCallback.onLocationCreated(locationId);
-        }
-    }
-
-    private void notifyLocationUpdated(long locationId) {
-        if (mCallback != null) {
-            mCallback.onLocationUpdated(locationId);
-        }
-    }
-
-    private void notifyLocationDeleted(long locationId) {
-        if (mCallback != null) {
-            mCallback.onLocationDeleted(locationId);
-        }
-    }
-
     private void notifySyncStarted() {
         if (mCallback != null) {
             mCallback.onSyncStarted();
@@ -324,6 +283,10 @@ public class LocationService extends Service implements LocationSyncThread.Callb
             default:
         }
         mLastSyncState = null;
+    }
+
+    private static void executeInThread(Runnable r) {
+        new Thread(r).start();
     }
 
 }
