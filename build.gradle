@@ -3,7 +3,7 @@
 ext {
     appId = 'com.kellnhofer.tracker'
     appVersionCode = 3
-    appVersionName = '1.1.1-SNAPSHOT'
+    appVersionName = '1.1.1'
 
     buildToolsVersion = '31.0.0'
 
