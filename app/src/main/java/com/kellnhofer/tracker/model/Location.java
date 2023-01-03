@@ -167,4 +167,18 @@ public class Location implements Parcelable {
         return hashCode();
     }
 
+    public Location copy() {
+        Location location = new Location();
+        location.mId = mId;
+        location.mRemoteId = mRemoteId;
+        location.mChanged = mChanged;
+        location.mDeleted = mDeleted;
+        location.mName = mName;
+        location.mDate = mDate;
+        location.mLatitude = mLatitude;
+        location.mLongitude = mLongitude;
+        location.mDescription = mDescription;
+        return location;
+    }
+
 }

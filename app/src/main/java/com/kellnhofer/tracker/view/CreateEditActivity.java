@@ -22,6 +22,7 @@ import com.kellnhofer.tracker.model.Person;
 import com.kellnhofer.tracker.presenter.CreateEditContract;
 import com.kellnhofer.tracker.presenter.CreateEditPresenter;
 import com.kellnhofer.tracker.presenter.LatLng;
+import com.kellnhofer.tracker.util.DateUtils;
 
 public class CreateEditActivity extends BaseActivity implements CreateEditContract.Observer,
         CreateEditDialogFragment.Listener {
@@ -30,6 +31,11 @@ public class CreateEditActivity extends BaseActivity implements CreateEditContra
     private static final String DIALOG_FRAGMENT_TAG_CREATE_EDIT = "create_edit_dialog_fragment";
 
     private static final String STATE_LOCATION = "location";
+    private static final String STATE_LOCATION_NAME = "location_name";
+    private static final String STATE_LOCATION_DATE = "location_date";
+    private static final String STATE_LOCATION_LAT = "location_lat";
+    private static final String STATE_LOCATION_LNG = "location_lng";
+    private static final String STATE_LOCATION_DESCRIPTION = "location_description";
     private static final String STATE_LOCATION_PERSONS = "location_persons";
     private static final String STATE_USE_GPS_LOCATION = "use_gps_location";
     private static final String STATE_REQUESTED_PERMISSIONS = "requested_permissions";
@@ -46,7 +52,13 @@ public class CreateEditActivity extends BaseActivity implements CreateEditContra
 
     private long mLocationId;
     private Location mLocation;
-    private List<Person> mLocationPersons;
+
+    private String mLocationName;
+    private String mLocationDate;
+    private double mLocationLat;
+    private double mLocationLng;
+    private String mLocationDescription;
+    private ArrayList<String> mLocationPersonNames;
 
     private boolean mUseGpsLocation = false;
     private boolean mRequestedPermissions = false;
@@ -63,7 +75,10 @@ public class CreateEditActivity extends BaseActivity implements CreateEditContra
 
         if (savedInstanceState == null && mLocationId == 0L) {
             mLocation = new Location(0L, 0L, false, false, "", new Date(), 0.0, 0.0, "");
-            mLocationPersons = new ArrayList<>();
+            mLocationName = "";
+            mLocationDate = DateUtils.toUiFormat(new Date());
+            mLocationDescription = "";
+            mLocationPersonNames = new ArrayList<>();
         }
 
         if (savedInstanceState == null && mLocationId == 0L) {
@@ -114,7 +129,12 @@ public class CreateEditActivity extends BaseActivity implements CreateEditContra
         super.onRestoreInstanceState(savedInstanceState);
 
         mLocation = savedInstanceState.getParcelable(STATE_LOCATION);
-        mLocationPersons = savedInstanceState.getParcelableArrayList(STATE_LOCATION_PERSONS);
+        mLocationName = savedInstanceState.getString(STATE_LOCATION_NAME, "");
+        mLocationDate = savedInstanceState.getString(STATE_LOCATION_DATE, "");
+        mLocationLat = savedInstanceState.getDouble(STATE_LOCATION_LAT, 0.0);
+        mLocationLng = savedInstanceState.getDouble(STATE_LOCATION_LNG, 0.0);
+        mLocationDescription = savedInstanceState.getString(STATE_LOCATION_DESCRIPTION, "");
+        mLocationPersonNames = savedInstanceState.getStringArrayList(STATE_LOCATION_PERSONS);
         mUseGpsLocation = savedInstanceState.getBoolean(STATE_USE_GPS_LOCATION);
         mRequestedPermissions = savedInstanceState.getBoolean(STATE_REQUESTED_PERMISSIONS);
     }
@@ -127,8 +147,13 @@ public class CreateEditActivity extends BaseActivity implements CreateEditContra
             mPresenter.getLocation(mLocationId).observe(this, (location) -> {
                 mLocation = location;
                 if (location != null) {
+                    mLocationName = location.getName();
+                    mLocationDate = DateUtils.toUiFormat(location.getDate());
+                    mLocationLat = location.getLatitude();
+                    mLocationLng = location.getLongitude();
+                    mLocationDescription = location.getDescription();
                     mPresenter.getLocationPersons(mLocationId).observe(this, (locationPersons) ->
-                            mLocationPersons = locationPersons);
+                            mLocationPersonNames = toPersonNameList(locationPersons));
                     updateFragment();
                 }
             });
@@ -160,7 +185,12 @@ public class CreateEditActivity extends BaseActivity implements CreateEditContra
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(STATE_LOCATION, mLocation);
-        outState.putParcelableArrayList(STATE_LOCATION_PERSONS, new ArrayList<>(mLocationPersons));
+        outState.putString(STATE_LOCATION_NAME, mLocationName);
+        outState.putString(STATE_LOCATION_DATE, mLocationDate);
+        outState.putDouble(STATE_LOCATION_LAT, mLocationLat);
+        outState.putDouble(STATE_LOCATION_LNG, mLocationLng);
+        outState.putString(STATE_LOCATION_DESCRIPTION, mLocationDescription);
+        outState.putStringArrayList(STATE_LOCATION_PERSONS, mLocationPersonNames);
         outState.putBoolean(STATE_USE_GPS_LOCATION, mUseGpsLocation);
         outState.putBoolean(STATE_REQUESTED_PERMISSIONS, mRequestedPermissions);
     }
@@ -215,40 +245,46 @@ public class CreateEditActivity extends BaseActivity implements CreateEditContra
 
     private void showCreateEditDialog() {
         mPresenter.getPersons().observe(this, (persons -> {
-            List<String> locationPersonNames = toPersonNameList(mLocationPersons);
             List<String> personNames = toPersonNameList(persons);
 
             CreateEditDialogFragment fragment;
             if (mLocationId == 0L) {
-                fragment = CreateEditDialogFragment.newCreateInstance(mLocation.getName(),
-                        mLocation.getDate(), mLocation.getDescription(), locationPersonNames,
-                        personNames);
+                fragment = CreateEditDialogFragment.newCreateInstance(mLocationName, mLocationDate,
+                        mLocationDescription, mLocationPersonNames, personNames);
             } else {
-                fragment = CreateEditDialogFragment.newEditInstance(mLocation.getName(),
-                        mLocation.getDate(), mLocation.getDescription(), locationPersonNames,
-                        personNames);
+                fragment = CreateEditDialogFragment.newEditInstance(mLocationName, mLocationDate,
+                        mLocationDescription, mLocationPersonNames, personNames);
             }
             fragment.show(getSupportFragmentManager(), DIALOG_FRAGMENT_TAG_CREATE_EDIT);
         }));
     }
 
     @Override
-    public void onCreateEditDialogOk(String name, Date date, String description,
+    public void onCreateEditDialogOk(String name, String date, String description,
             ArrayList<String> personNames) {
-        saveLocationChanges(name, date, description, toPersonList(personNames));
+        saveLocationChanges(name, date, description, personNames);
+
+        Location location = mLocation.copy();
+        location.setName(mLocationName);
+        location.setDate(DateUtils.fromUiFormat(mLocationDate));
+        location.setLatitude(mLocationLat);
+        location.setLongitude(mLocationLng);
+        location.setDescription(mLocationDescription);
+        ArrayList<Person> locationPersons = toPersonList(mLocationPersonNames);
+
         if (mLocationId == 0L) {
-            mPresenter.createLocation(mLocation, mLocationPersons);
+            mPresenter.createLocation(location, locationPersons);
             finish();
         } else {
-            mPresenter.updateLocation(mLocation, mLocationPersons);
+            mPresenter.updateLocation(location, locationPersons);
             finish();
         }
     }
 
     @Override
-    public void onCreateEditDialogCancel(String name, Date date, String description,
+    public void onCreateEditDialogCancel(String name, String date, String description,
             ArrayList<String> personNames) {
-        saveLocationChanges(name, date, description, toPersonList(personNames));
+        saveLocationChanges(name, date, description, personNames);
     }
 
     // --- GPS permission methods ---
@@ -284,20 +320,20 @@ public class CreateEditActivity extends BaseActivity implements CreateEditContra
 
     // --- Helper methods ---
 
-    private void saveLocationChanges(String name, Date date, String description,
-            List<Person> persons) {
-        mLocation.setName(name);
-        mLocation.setDate(date);
-        mLocation.setDescription(description);
-        mLocationPersons = persons;
+    private void saveLocationChanges(String name, String date, String description,
+            ArrayList<String> personNames) {
+        mLocationName = name;
+        mLocationDate = date;
+        mLocationDescription = description;
+        mLocationPersonNames = personNames;
     }
 
     private void saveLocationLatLngChanges(double lat, double lng) {
-        mLocation.setLatitude(lat);
-        mLocation.setLongitude(lng);
+        mLocationLat = lat;
+        mLocationLng = lng;
     }
 
-    private static List<String> toPersonNameList(List<Person> persons) {
+    private static ArrayList<String> toPersonNameList(List<Person> persons) {
         ArrayList<String> personNames = new ArrayList<>();
         for (Person person : persons) {
             String personName;
@@ -311,7 +347,7 @@ public class CreateEditActivity extends BaseActivity implements CreateEditContra
         return personNames;
     }
 
-    private static List<Person> toPersonList(List<String> personNames) {
+    private static ArrayList<Person> toPersonList(List<String> personNames) {
         if (personNames == null) {
             return null;
         }

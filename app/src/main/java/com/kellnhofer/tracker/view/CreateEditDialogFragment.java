@@ -1,7 +1,6 @@
 package com.kellnhofer.tracker.view;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import android.app.Dialog;
@@ -50,10 +49,10 @@ public class CreateEditDialogFragment extends DialogFragment {
     private static final String BUNDLE_KEY_PERSON_NAMES = "person_names";
 
     public interface Listener {
-        void onCreateEditDialogOk(String locationName, Date locationDate, String locationDescription,
-                ArrayList<String> locationPersonNames);
+        void onCreateEditDialogOk(String locationName, String locationDate,
+                String locationDescription, ArrayList<String> locationPersonNames);
 
-        void onCreateEditDialogCancel(String locationName, Date locationDate,
+        void onCreateEditDialogCancel(String locationName, String locationDate,
                 String locationDescription, ArrayList<String> locationPersonNames);
     }
 
@@ -124,7 +123,7 @@ public class CreateEditDialogFragment extends DialogFragment {
         }
         int mode = arguments.getInt(BUNDLE_KEY_MODE);
         String locationName = arguments.getString(BUNDLE_KEY_LOCATION_NAME, "");
-        Date locationDate = new Date(arguments.getLong(BUNDLE_KEY_LOCATION_DATE));
+        String locationDate = arguments.getString(BUNDLE_KEY_LOCATION_DATE, "");
         String locationDescription = arguments.getString(BUNDLE_KEY_LOCATION_DESCRIPTION, "");
         ArrayList<String> locationPersonNames = arguments.getStringArrayList(
                 BUNDLE_KEY_LOCATION_PERSON_NAMES);
@@ -146,7 +145,7 @@ public class CreateEditDialogFragment extends DialogFragment {
         if (savedInstanceState == null) {
             mNameView.setText(locationName);
             mNameView.setSelection(locationName.length());
-            mDateView.setText(DateUtils.toUiFormat(locationDate));
+            mDateView.setText(locationDate);
             mDescriptionView.setText(locationDescription);
         }
 
@@ -283,7 +282,7 @@ public class CreateEditDialogFragment extends DialogFragment {
 
     private void notifyOk() {
         String locationName = mNameView.getText().toString().trim();
-        Date locationDate = DateUtils.fromUiFormat(mDateView.getText().toString());
+        String locationDate = mDateView.getText().toString().trim();
         String locationDescription = mDescriptionView.getText().toString().trim();
         ArrayList<String> locationPersonNames = getPersonNames();
 
@@ -293,7 +292,7 @@ public class CreateEditDialogFragment extends DialogFragment {
 
     private void notifyCancel() {
         String locationName = mNameView.getText().toString().trim();
-        Date locationDate = DateUtils.fromUiFormat(mDateView.getText().toString());
+        String locationDate = mDateView.getText().toString();
         String locationDescription = mDescriptionView.getText().toString().trim();
         ArrayList<String> locationPersonNames = getPersonNames();
 
@@ -303,25 +302,25 @@ public class CreateEditDialogFragment extends DialogFragment {
 
     // --- Factory methods ---
 
-    public static CreateEditDialogFragment newCreateInstance(String locationName, Date locationDate,
+    public static CreateEditDialogFragment newCreateInstance(String locationName, String locationDate,
             String locationDescription, List<String> locationPersonNames, List<String> personNames) {
         return newInstance(MODE_CREATE, locationName, locationDate, locationDescription,
                 locationPersonNames, personNames);
     }
 
-    public static CreateEditDialogFragment newEditInstance(String locationName, Date locationDate,
+    public static CreateEditDialogFragment newEditInstance(String locationName, String locationDate,
             String locationDescription, List<String> locationPersonNames, List<String> personNames) {
         return newInstance(MODE_EDIT, locationName, locationDate, locationDescription,
                 locationPersonNames, personNames);
     }
 
     private static CreateEditDialogFragment newInstance(int mode, String locationName,
-            Date locationDate, String locationDescription, List<String> locationPersonNames,
+            String locationDate, String locationDescription, List<String> locationPersonNames,
             List<String> personNames) {
         Bundle args = new Bundle();
         args.putInt(BUNDLE_KEY_MODE, mode);
         args.putString(BUNDLE_KEY_LOCATION_NAME, locationName);
-        args.putLong(BUNDLE_KEY_LOCATION_DATE, locationDate.getTime());
+        args.putString(BUNDLE_KEY_LOCATION_DATE, locationDate);
         args.putString(BUNDLE_KEY_LOCATION_DESCRIPTION, locationDescription);
         args.putStringArrayList(BUNDLE_KEY_LOCATION_PERSON_NAMES, new ArrayList<>(
                 locationPersonNames));
